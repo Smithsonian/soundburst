@@ -6,11 +6,16 @@
 #
 
 library(shiny)
+options(shiny.trace=TRUE)
+
+# fileInput max upload size is 30mb
+options(shiny.maxRequestSize=30*1024^2) 
 
 shinyServer(function(input, output) {
 
   output$distPlot <- renderPlot({
 
+    browser()
     # generate bins based on input$bins from ui.R
     x    <- faithful[, 2]
     bins <- seq(min(x), max(x), length.out = input$bins + 1)
