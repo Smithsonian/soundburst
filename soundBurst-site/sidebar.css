@@ -1,0 +1,13 @@
+.sidebar li {
+  list-style-type: none;
+}
+
+.form-group  {
+  padding-left: 0 !important;
+  margin-bottom: 0px !important;
+}
+
+#file_progress {
+  margin-top: 5px;
+  margin-bottom: 10px !important;
+}

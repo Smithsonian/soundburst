@@ -5,14 +5,18 @@ library(shinyjs)
 dashboardPage(
   dashboardHeader(title = "SoundBurst App"),
   dashboardSidebar(
-    # 
-    fileInput("file", "Upload file:", multiple = TRUE),
-    
-    menuItem('Menu Two', tabName = 'menuTwo', icon = icon('users'),
-      collapsible =
-        menuSubItem('Sub-Item Three', tabName = 'subItemThree'), icon = icon('users'),
-      menuSubItem('Sub-Item Four', tabName = 'subItemFour')
+    includeCSS("sidebar.css"),
+    column(12, 
+      fileInput("userData", "Upload file:", multiple = TRUE),
+      helpText("Default max. file size is 70MB"),
+      menuItem('Menu Two', tabName = 'menuTwo', icon = icon('folder'),
+        collapsible =
+          menuSubItem('Sub-Item Three', tabName = 'subItemThree', icon = icon('users')),
+          menuSubItem('Sub-Item Four', tabName = 'subItemFour')
       )
-    ),
-  dashboardBody()
+    )
+  ),
+  dashboardBody(
+    verbatimTextOutput("textDisplay")
+  )
 )
