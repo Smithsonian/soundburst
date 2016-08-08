@@ -11,3 +11,11 @@
   margin-top: 5px;
   margin-bottom: 10px !important;
 }
+
+#menu {
+	padding-left: 0 !important;
+}
+
+.treeview-menu {
+	padding-left: 15px !important;
+}
