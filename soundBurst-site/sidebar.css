@@ -19,3 +19,11 @@
 .treeview-menu {
 	padding-left: 15px !important;
 }
+
+#userData_progress {
+	margin-bottom: 0px !important;
+}
+
+#userData {
+	margin-bottom: 5px !important;
+}
