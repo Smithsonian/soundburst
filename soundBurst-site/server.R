@@ -1,10 +1,13 @@
+# install.packages("shiny")
+# install.packages("aws.s3", repos = c("cloudyr" = "http://cloudyr.github.io/drat"))
+# install.packages("devtools")
+# install_github("trestletech/shinyTree")
+
 # fileInput max upload size is 30mb
 library(shiny)
 library(tools)
 library("aws.s3")
 library(shinyTree)
-library(data.tree)
-library(shinyFiles)
 
 options(shiny.trace=TRUE)
 options(shiny.maxRequestSize=70*1024^2) 
