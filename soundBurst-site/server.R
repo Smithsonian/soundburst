@@ -21,20 +21,21 @@ shinyServer(function(input, output) {
       toUnZip <- paste0(dir, "/", input$userData$name)
       file.copy(input$userData$datapath, paste0(toUnZip), overwrite = TRUE)
       unzip(toUnZip, overwrite=TRUE, exdir=file_path_sans_ext(input$userData$name))
-      folders <- list.dirs(toUnZip, full.names = FALSE)
+      folders <- list.dirs(dir, full.names = F, recursive = TRUE)
+      folders
       files <- as.array(list.files(dir, full.names = FALSE, recursive = TRUE, include.dirs = TRUE, no.. = TRUE))
       
-      df <- data.frame(
-        filename = sapply(files, 
-                          function(fl) paste0("data.tree","/",fl)
-        ), 
-        file.info(paste(dir, files, sep = "/")),
-        stringsAsFactors = FALSE
-      )
+      # df <- data.frame(
+      #   filename = sapply(files,
+      #     function(fl) paste0("data.tree","/",fl)
+      #   ),
+      #   file.info(paste(dir, files, sep = "/")),
+      #   stringsAsFactors = FALSE
+      # )
       
       testtest = quote(list(
-        roo21 = "",
-        root2 = list(
+        rootFolder1 = "",
+        rootFolder2 = list(
           subfolder1 = list(file1 = "", file2 = "", file3=""),
           subfolder2 = list(
             subSubFolder1 = list(file1 = "", file2 = "", file3="")
@@ -56,7 +57,7 @@ shinyServer(function(input, output) {
       # }
       
       # test <- list.dirs(path = paste0(input$userData$datapath, "/", input$userData$name), full.names = TRUE, recursive = TRUE)
-      fileStructure <- as.Node(df, pathName = "filename")
+      # fileStructure <- as.Node(df, pathName = "filename")
       
       
   })
