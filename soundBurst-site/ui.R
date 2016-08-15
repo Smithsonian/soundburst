@@ -14,7 +14,8 @@ dashboardPage(
     column(12,
       fileInput("userData", "Upload file:", accept="application/x-compressed"),
       helpText("Default max. file size is 70MB"),
-      shinyTree("tree")
+      sidebarMenuOutput("menu")
+      # shinyTree("tree")
     )
   ),
   dashboardBody(
