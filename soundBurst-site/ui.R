@@ -6,6 +6,7 @@
 library(shinydashboard)
 library(shinyTree)
 library(shinyjs)
+library(shinyFiles)
 
 dashboardPage(
   dashboardHeader(title = "SoundBurst App"),
@@ -17,6 +18,6 @@ dashboardPage(
     )
   ),
   dashboardBody(
-    verbatimTextOutput("textDisplay")
+    verbatimTextOutput('directorypath')
   )
 )
