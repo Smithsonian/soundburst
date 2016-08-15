@@ -1,20 +1,26 @@
 # install.packages("shiny")
 # install.packages("devtools")
 # install.packages("aws.s3", repos = c("cloudyr" = "http://cloudyr.github.io/drat"))
+# install.packages('shinyFiles')
 # install_github("trestletech/shinyTree")
 
 # fileInput max upload size is 30mb
 library(shiny)
 library(tools)
 library(devtools)
+library(stringr)
+library(shinyFiles)
 # library("aws.s3")
 library(shinyTree)
 
 options(shiny.trace=TRUE)
 options(shiny.maxRequestSize=70*1024^2) 
+volumes <- getVolumes()
 
-
-shinyServer(function(input, output) {
+shinyServer(function(input, output, session) {
+  
+  shinyDirChoose(input, 'directory', updateFreq = 60000, roots=c(home='~'), session=session, restrictions=system.file(package='base'))
+  output$directorypath <- renderPrint({parseDirPath(volumes, input$directory)})
   output$textDisplay <- renderText({
     # false means file has been uploaded
     if (is.null(input$userData))
@@ -39,8 +45,8 @@ shinyServer(function(input, output) {
         }
       }
       folders <- list.dirs(dir, full.names = F, recursive = TRUE)
-      folders
       files <- as.array(list.files(dir, full.names = FALSE, recursive = TRUE, include.dirs = TRUE, no.. = TRUE))
+      # folders
       
       # df <- data.frame(
       #   filename = sapply(files,
@@ -50,10 +56,10 @@ shinyServer(function(input, output) {
       #   stringsAsFactors = FALSE
       # )
       
-      # testtest = quote(list(
-      #   list(file1 = "", file2 = "", file3=""),
-      #   rootFolder1 = "",
+      # testtest = list(
+      #   rootFolder1 = list(file1 = "", file2 = "", file3=""),
       #   rootFolder2 = list(
+      #     
       #     subfolder1 = list(file1 = "", file2 = "", file3=""),
       #     subfolder2 = list(
       #       subSubFolder1 = list(file1 = "", file2 = "", file3="")
@@ -62,7 +68,35 @@ shinyServer(function(input, output) {
       # ))
       
       # output$tree <- renderTree(testtest, quoted = TRUE)
+
+      #   
+      # ))
+      create_directory_tree(dir)
+      create_directory_tree = function(root) {
+        tree = list()
+        files = list.files(root, all.files=F, recursive=T, include.dirs=T)
+        print(root)
+      
+        walk_directory = function(tree, path) {
+          fp = file.path(root, path)
+          is_dir = file.info(fp)$isdir
+          folders = str_split(path, "/")[[1]]
+          if (is_dir) {
+            txt = paste("tree", paste("$'", folders, "'", sep="", collapse=""), " = numeric(0)", sep="")
+          } else {
+            txt = paste("tree", paste("$'", folders, "'", sep="", collapse=""), " = structure('', sticon='file')", sep="")
+          }
+          eval(parse(text = txt))
+          return(tree)
+        }
         
+        for (i in 1:length(files)) tree = walk_directory(tree, files[i])
+        save(tree, file="www/dir_tree.Rdata")
+      }
+      
+      
+      output$tree <- renderTree(create_directory_tree(dir), quoted = FALSE)
+
       # if(nchar(folders[1]) != 0)
       # {
 

@@ -12,13 +12,12 @@ dashboardPage(
   dashboardSidebar(
     includeCSS("sidebar.css"),
     column(12,
-      fileInput("userData", "Upload file:", accept="application/x-compressed"),
-      helpText("Default max. file size is 70MB"),
-      sidebarMenuOutput("menu")
-      # shinyTree("tree")
+      shinyDirButton('directory', 'Folder select', 'Please select a folder'),
+      sidebarMenuOutput("menu"),
+      shinyTree("tree")
     )
   ),
   dashboardBody(
-    verbatimTextOutput("textDisplay")
+    verbatimTextOutput("directorypath")
   )
 )
