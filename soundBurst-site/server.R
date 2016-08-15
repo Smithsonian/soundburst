@@ -1,3 +1,5 @@
+
+
 # install.packages("shiny")
 # install.packages("aws.s3", repos = c("cloudyr" = "http://cloudyr.github.io/drat"))
 # install.packages("devtools")
@@ -16,6 +18,8 @@ library(shinyTree)
 options(shiny.trace=TRUE)
 options(shiny.maxRequestSize=70*1024^2) 
 volumes <- getVolumes()
+
+
 
 create_directory_tree = function(root) {
   tree = list()
@@ -41,7 +45,7 @@ create_directory_tree = function(root) {
 
 shinyServer(function(input, output, session) {
   
-  shinyDirChoose(input, 'directory', updateFreq=60000, session=session, roots=c(home='~'), restrictions=system.file(package='base'))
+  shinyDirChoose(input, 'directory', updateFreq=60000, session=session, roots=c(home='~'), restrictions=system.file(package='base'), filetypes=c('', '.wav'))
   output$directorypath <- renderPrint({
     dir <- parseDirPath(roots=c(home='~'), input$directory)
     folders <- list.dirs(dir, full.names = F, recursive = TRUE)
