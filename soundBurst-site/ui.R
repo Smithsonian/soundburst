@@ -18,6 +18,7 @@ dashboardPage(
     )
   ),
   dashboardBody(
+    plotOutput("spectrogram", click = "plot_click"),
     verbatimTextOutput('directorypath')
   )
 )
