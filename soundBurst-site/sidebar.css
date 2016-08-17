@@ -20,3 +20,7 @@
 {
 	margin-top: 15px;
 }
+
+#remove {
+  cursor: pointer;
+}

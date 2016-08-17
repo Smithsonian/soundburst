@@ -1,5 +1,3 @@
-
-
 # install.packages("shiny")
 # install.packages("devtools")
 # install.packages("aws.s3", repos = c("cloudyr" = "http://cloudyr.github.io/drat"))
@@ -14,12 +12,14 @@ library(stringr)
 library(shinyFiles)
 # library("aws.s3")
 library(shinyTree)
+# install_github("trestletech/shinyStore")
+load_all('~/dev/emammal-soundburst/soundBurst/R')
+
+#play sound tags$audio(src = "audio.wav", type = "audio/wav", autoplay = NA, controls = NA)
 
 options(shiny.trace=TRUE)
 options(shiny.maxRequestSize=70*1024^2) 
 volumes <- getVolumes()
-
-
 
 create_directory_tree = function(root) {
   tree = list()
@@ -44,71 +44,33 @@ create_directory_tree = function(root) {
 }
 
 shinyServer(function(input, output, session) {
+  shinyjs::onclick("remove",shinyjs::hide(id = "tree", anim = TRUE))
   
-  shinyDirChoose(input, 'directory', updateFreq=60000, session=session, roots=c(home='~'), restrictions=system.file(package='base'), filetypes=c('', '.wav'))
+  test <- shinyDirChoose(input, 'directory', updateFreq=60000, session=session, roots=c(home='~'), restrictions=system.file(package='base'), filetypes=c('', '.wav'))
   output$directorypath <- renderPrint({
-    dir <- parseDirPath(roots=c(home='~'), input$directory)
-    folders <- list.dirs(dir, full.names = F, recursive = TRUE)
-
-    create_directory_tree(dir)
+    dirPath <- parseDirPath(roots=c(home='~'), input$directory)
+    folders <- list.dirs(dirPath, full.names = F, recursive = TRUE)
     
-    
-    load("www/dir_tree.Rdata")
-    tree
-    output$tree <- renderTree(tree, quoted = FALSE)
-    
+    if(!(is.null(dirPath))) {
+      create_directory_tree(dirPath)
+      load("www/dir_tree.Rdata")
+      output$tree <- renderTree(tree, quoted = FALSE)
+    }
   })
   
-  output$textDisplay <- renderText({
-    # false means file has been uploaded
-    if (is.null(input$userData))
+  observe({
+    # Plot main spectrogram
+    if (is.null(unlist(get_selected(input$tree))))
+    {
       return()
-    else
-      dir <- dirname(input$userData$datapath)
-      setwd(dir)
-      toUnZip <- paste0(dir, "/", input$userData$name)
-      file.copy(input$userData$datapath, paste0(toUnZip), overwrite = TRUE)
-      unzip(toUnZip, overwrite=TRUE, exdir=file_path_sans_ext(input$userData$name))
-      substrRight <- function(x, n){
-        substr(x, nchar(x)-n+1, nchar(x))
-      }
-      # fileLoop <- function(files){
-      #   for (i in 1:length(files)){
-      #     if (substrRight(files[i],4)==".wav") {
-      #       print(substrRight(files[i],4))
-      #       menuSubItem("files", tabName = 'file', icon = icon('users'))
-      #     } else {
-      #       menuSubItem("folders", tabName = 'folder')
-      #     }
-      #   }
-      # }
-      folders <- list.dirs(dir, full.names = F, recursive = TRUE)
-      files <- as.array(list.files(dir, full.names = FALSE, recursive = TRUE, include.dirs = TRUE, no.. = TRUE))
-      # folders
-      
-      # df <- data.frame(
-      #   filename = sapply(files,
-      #     function(fl) paste0("data.tree","/",fl)
-      #   ),
-      #   file.info(paste(dir, files, sep = "/")),
-      #   stringsAsFactors = FALSE
-      # )
-      
-      # testtest = list(
-      #   rootFolder1 = list(file1 = "", file2 = "", file3=""),
-      #   rootFolder2 = list(
-      #     
-      #     subfolder1 = list(file1 = "", file2 = "", file3=""),
-      #     subfolder2 = list(
-      #       subSubFolder1 = list(file1 = "", file2 = "", file3="")
-      #     )
-      #   )
-      # ))
-      
-      # output$tree <- renderTree(testtest, quoted = TRUE)
-
-      #   
-      # ))
-      
+    } else {
+      selectedFile <- unlist(get_selected(input$tree))
+      output$spectrogram <- renderPlot({
+        currDir <- paste0(directory, "/", unlist(get_selected(input$tree)))
+        sound <- readWave(currDir)
+        oscillo(sound)
+        # createSpectrogram(getwd(), unlist(get_selected(selectedFile)))
+      })
+    }
   })
 })

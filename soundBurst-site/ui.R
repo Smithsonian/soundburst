@@ -14,11 +14,14 @@ dashboardPage(
     includeCSS("sidebar.css"),
     column(12,
       shinyDirButton('directory', 'Folder select', 'Please select a folder'),
+      useShinyjs(),
+      div(id = "remove", "Remove Files"),
       sidebarMenuOutput("menu"),
       shinyTree("tree")
     )
   ),
   dashboardBody(
-    verbatimTextOutput("directorypath")
+    plotOutput("spectrogram", click = "plot_click"),
+    verbatimTextOutput('directorypath')
   )
 )
