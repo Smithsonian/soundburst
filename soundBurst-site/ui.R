@@ -18,7 +18,7 @@ dashboardPage(
     )
   ),
   dashboardBody(
-    plotOutput("spectrogram", click = "plot_click", brush = "plot_brush"),
+    plotOutput("spectrogram", brush = brushOpts(id = "plot_brush", direction = "x", resetOnNew = TRUE)),
     verbatimTextOutput('directorypath')
   )
 )
