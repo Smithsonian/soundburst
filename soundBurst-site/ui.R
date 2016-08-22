@@ -26,7 +26,7 @@ dashboardPage(
     ,
     column(width = 3, id = "species-sidebox",
            box(width = NULL, status = "warning",
-               fileInput('datafile', 'Choose CSV file',
+               fileInput('datafile', 'Upload Species CSV',
                          accept=c('text/csv', 'text/comma-separated-values,text/plain')),
                #These column selectors are dynamically created when the file is loaded
                uiOutput("toCol")

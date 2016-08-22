@@ -101,7 +101,7 @@ shinyServer(function(input, output, session) {
     
     # items=names(df)
     # names(items)=items
-    items <- as.character(df[[1]])
+    items <- c('Select Species',as.character(df[[1]]))
     selectInput("species-dropdown", "Species:",items)
   })
   
@@ -109,12 +109,5 @@ shinyServer(function(input, output, session) {
   output$filetable <- renderTable({
     filedata()
   })
-  
-  output$routeSelect <- renderUI({
-    routeNums <- c(1,2,3,4,5)
-    # Add names, so that we can add all=0
-    names(routeNums) <- routeNums
-    routeNums <- c(All = 0, routeNums)
-    selectInput("routeNum", "Select Species", choices = routeNums, selected = routeNums[2])
-  })
+
 })
