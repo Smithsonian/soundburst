@@ -27,4 +27,5 @@ createSpectrogram <- function(soundFileName, wd) {
   currDir <- paste0(wd, "/", soundFileName)
   sound <- readWave(currDir)
   test <- oscillo(sound, zoom=T)
+  actualSound <- listen(sound,f=4000)
 }

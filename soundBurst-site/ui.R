@@ -23,5 +23,17 @@ dashboardPage(
   dashboardBody(
     plotOutput("spectrogram", brush = brushOpts(id = "plot_brush", direction = "x", resetOnNew = TRUE)),
     verbatimTextOutput('directorypath')
+    ,
+    column(width = 3, id = "species-sidebox",
+           box(width = NULL, status = "warning",
+               fileInput('datafile', 'Choose CSV file',
+                         accept=c('text/csv', 'text/comma-separated-values,text/plain')),
+               #These column selectors are dynamically created when the file is loaded
+               uiOutput("toCol")
+               # ,
+               # tableOutput("filetable")
+               # uiOutput("routeSelect")
+           )
+    )
   )
 )
