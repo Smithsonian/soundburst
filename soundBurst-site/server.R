@@ -21,6 +21,14 @@ options(shiny.trace=TRUE)
 options(shiny.maxRequestSize=70*1024^2) 
 volumes <- getVolumes()
 
+getPath = function(folderList) {
+  # names <- get_selected(input$tree, "names")
+  one <- attr(folderList[[1L]], "ancestry", TRUE)
+  path <- paste(one, collapse = "/")
+  path <- paste0(path, "/")
+  return(path)
+}
+
 create_directory_tree = function(root) {
   tree = list()
   files = list.files(root, all.files=F, recursive=T, include.dirs=T)
@@ -44,11 +52,11 @@ create_directory_tree = function(root) {
 }
 
 shinyServer(function(input, output, session) {
-  shinyjs::onclick("remove",shinyjs::hide(id = "tree", anim = TRUE))
+  shinyjs::onclick("remove",shinyjs::toggle(id = "tree", anim = TRUE))
   
   test <- shinyDirChoose(input, 'directory', updateFreq=60000, session=session, roots=c(home='~'), restrictions=system.file(package='base'), filetypes=c('', '.wav'))
   output$directorypath <- renderPrint({
-    dirPath <- parseDirPath(roots=c(home='~'), input$directory)
+    dirPath <<- parseDirPath(roots=c(home='~'), input$directory)
     folders <- list.dirs(dirPath, full.names = F, recursive = TRUE)
     
     if(!(is.null(dirPath))) {
@@ -63,10 +71,11 @@ shinyServer(function(input, output, session) {
     if (is.null(unlist(get_selected(input$tree))))
     {
       return()
-    } else {
-      selectedFile <- unlist(get_selected(input$tree))
+    } 
+    else {
       output$spectrogram <- renderPlot({
-        currDir <- paste0(directory, "/", unlist(get_selected(input$tree)))
+        path <- getPath(get_selected(input$tree, "names"))
+        currDir <- paste0(dirPath, "/", path, unlist(get_selected(input$tree)))
         sound <- readWave(currDir)
         oscillo(sound)
         # createSpectrogram(getwd(), unlist(get_selected(selectedFile)))
