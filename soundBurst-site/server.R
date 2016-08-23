@@ -125,7 +125,13 @@ shinyServer(function(input, output, session) {
   })
   # 
   output$speciesName <- renderText({
-    formulaText()
+    if (length(formulaText())==0) {
+      ''
+    } else if (formulaText()=='Select Species'){
+      ''
+    } else {
+      formulaText() 
+    }
   })
   
   #This previews the CSV data file
