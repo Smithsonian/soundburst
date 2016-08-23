@@ -22,8 +22,8 @@ dashboardPage(
   ),
   dashboardBody(
     plotOutput("spectrogram", brush = brushOpts(id = "plot_brush", direction = "x", resetOnNew = TRUE)),
-    verbatimTextOutput('directorypath')
-    ,
+    verbatimTextOutput('directorypath'),
+    textOutput('speciesName'),
     column(width = 3, id = "species-sidebox",
            box(width = NULL, status = "warning",
                shinyFilesButton('csvFile', 'File select', 'Please select a file', FALSE),

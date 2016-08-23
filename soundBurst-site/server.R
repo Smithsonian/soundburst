@@ -117,7 +117,15 @@ shinyServer(function(input, output, session) {
     # items=names(df)
     # names(items)=items
     items <- c('Select Species',as.character(df[[1]]))
-    selectInput("species-dropdown", "Species:",items)
+    selectInput("speciesDropdown", "Species:",items)
+  })
+  
+  formulaText <- reactive({
+    paste(input$speciesDropdown)
+  })
+  # 
+  output$speciesName <- renderText({
+    formulaText()
   })
   
   #This previews the CSV data file
