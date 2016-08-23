@@ -26,8 +26,9 @@ dashboardPage(
     ,
     column(width = 3, id = "species-sidebox",
            box(width = NULL, status = "warning",
-               fileInput('datafile', 'Upload Species CSV',
-                         accept=c('text/csv', 'text/comma-separated-values,text/plain')),
+               shinyFilesButton('csvFile', 'File select', 'Please select a file', FALSE),
+               # fileInput('datafile', 'Upload Species CSV',
+               #           accept=c('text/csv', 'text/comma-separated-values,text/plain')),
                #These column selectors are dynamically created when the file is loaded
                uiOutput("toCol")
                # ,

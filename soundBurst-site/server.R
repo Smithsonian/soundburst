@@ -14,7 +14,6 @@ library(shinyFiles)
 library(shinyTree)
 # install_github("trestletech/shinyStore")
 load_all('~/dev/emammal-soundburst/soundBurst/R')
-speciesList = read.csv("~/Desktop/SpeciesList.csv", header = TRUE)
 
 #play sound tags$audio(src = "audio.wav", type = "audio/wav", autoplay = NA, controls = NA)
 
@@ -89,14 +88,30 @@ shinyServer(function(input, output, session) {
   
   
   # TESTING OUT SPECIES DROPDOWN
+  
+  shinyFileChoose(input, 'csvFile', updateFreq=60000, session=session, roots=c(home='~'), restrictions=system.file(package='base'))
   filedata <- reactive({
-    infile <- input$datafile
-    req(infile) 
-    read.csv(infile$datapath, header = TRUE)
+    print('read')
+    req(input$csvFile)
+    print('req')
+    infile <- parseFilePaths(roots=c(home='~'),input$csvFile)
+    correctPath <- file.path(infile$datapath)
+    print(correctPath)
+    read.csv(correctPath, header = TRUE)
   })
   
+  # filedata <- reactive({
+  #   infile <- input$datafile
+  #   req(infile)
+  # print(infile$datapath)
+  #   read.csv(infile$datapath, header = TRUE)
+  # })
+  
   output$toCol <- renderUI({
+    print('hello')
     df <-filedata()
+    print(df)
+    
     if (is.null(df)) return(NULL)
     
     # items=names(df)
