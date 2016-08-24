@@ -87,7 +87,7 @@ shinyServer(function(input, output, session) {
   })
   
   
-  # TESTING OUT SPECIES DROPDOWN
+  # LOAD IN SPECIES DROPDOWN
   
   shinyFileChoose(input, 'csvFile', updateFreq=60000, session=session, roots=c(home='~'), restrictions=system.file(package='base'))
   filedata <- reactive({
@@ -137,6 +137,25 @@ shinyServer(function(input, output, session) {
   #This previews the CSV data file
   output$filetable <- renderTable({
     filedata()
+  })
+  
+  output$plot_brushinfo <- renderPrint({
+    cat("Brush (debounced):\n")
+    str(input$plot_brush)
+  })
+  
+  output$spectroClip <- renderPlot({
+    path <- getPath(get_selected(input$tree, "names"))
+    currDir <- paste0(dirPath, "/", path, unlist(get_selected(input$tree)))
+    sound <- readWave(currDir)
+    oscillo(sound, from=input$plot_brush$xmin, to=input$plot_brush$xmax) 
+  })
+  
+  output$plot_brushedpoints <- renderTable({
+    res <- brushedPoints(data(), input$plot_brush, "speed", "dist")
+    if (nrow(res) == 0)
+      return()
+    res
   })
 
 })

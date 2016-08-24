@@ -35,6 +35,9 @@ dashboardPage(
                # tableOutput("filetable")
                # uiOutput("routeSelect")
            )
+    ),
+    column(width = 4,
+           plotOutput("spectroClip")
     )
   )
 )
