@@ -31,3 +31,7 @@
   padding: 0;
   top: 100px;
 }
+
+.close-spectro {
+  content: 'X';
+}

@@ -36,6 +36,8 @@ dashboardPage(
                # uiOutput("routeSelect")
            )
     ),
+    useShinyjs(),
+    div(id = "next-one", "Move to next clip"),
     column(width = 4,
            plotOutput("spectroClip")
     )
