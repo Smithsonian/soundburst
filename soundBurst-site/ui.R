@@ -23,6 +23,7 @@ dashboardPage(
   dashboardBody(
     # tags$audio(src = "sample.wav", type = "audio/wav", autoplay = FALSE, controls = NA),
     # uiOutput("playSound"),
+    div(id = "playButton", "Play"),
     plotOutput("spectrogram", brush = brushOpts(id = "plot_brush", direction = "x", resetOnNew = TRUE)),
     verbatimTextOutput('directorypath'),
     textOutput('speciesName'),
@@ -39,7 +40,6 @@ dashboardPage(
            )
     ),
     useShinyjs(),
-    div(id = "next-one", "Move to next clip"),
     column(width = 4,
            plotOutput("spectroClip")
     )

@@ -83,7 +83,7 @@ shinyServer(function(input, output, session) {
         currDir <- paste0(dirPath, "/", path, unlist(get_selected(input$tree)))
         sound <- readWave(currDir)
         oscillo(sound)
-        playSound()
+        shinyjs::onclick("playButton",playSound())
       })
     }
   })
@@ -92,9 +92,7 @@ shinyServer(function(input, output, session) {
     path <- getPath(get_selected(input$tree, "names"))
     currDir <- paste0(dirPath, "/", path, unlist(get_selected(input$tree)))
     sound <- readWave(currDir)
-    print(getWavPlayer())
     print(sound)
-    print(listen(sound))
     listen(sound)
   }
   
