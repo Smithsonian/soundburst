@@ -1,0 +1,18 @@
+.close-spectro {
+  content: 'X';
+}
+
+#playButton {
+  background-image: url('play.png');
+  height: 20px;
+  width: 20px;
+  background-size: cover;
+}
+
+#pauseButton {
+  background-image: url('pause.png');
+  height: 20px;
+  width: 20px;
+  background-size: cover;
+  z-index: 1001;
+}

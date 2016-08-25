@@ -58,6 +58,7 @@ create_directory_tree = function(root) {
 
 shinyServer(function(input, output, session) {
   shinyjs::onclick("remove",shinyjs::toggle(id = "tree", anim = TRUE))
+  shinyjs::hide("pauseButton")
   
   test <- shinyDirChoose(input, 'directory', updateFreq=60000, session=session, roots=c(home='~'), restrictions=system.file(package='base'), filetypes=c('', '.wav'))
   output$directorypath <- renderPrint({
@@ -93,6 +94,8 @@ shinyServer(function(input, output, session) {
     currDir <- paste0(dirPath, "/", path, unlist(get_selected(input$tree)))
     sound <- readWave(currDir)
     print(sound)
+    shinyjs::show(id = "pauseButton",anim = TRUE)
+    shinyjs::hide(id = "playButton",anim = FALSE)
     listen(sound)
   }
   
