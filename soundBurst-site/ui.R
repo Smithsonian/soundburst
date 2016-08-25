@@ -21,6 +21,8 @@ dashboardPage(
     )
   ),
   dashboardBody(
+    # tags$audio(src = "sample.wav", type = "audio/wav", autoplay = FALSE, controls = NA),
+    # uiOutput("playSound"),
     plotOutput("spectrogram", brush = brushOpts(id = "plot_brush", direction = "x", resetOnNew = TRUE)),
     verbatimTextOutput('directorypath'),
     textOutput('speciesName'),

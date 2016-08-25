@@ -3,6 +3,7 @@
 # install.packages("aws.s3", repos = c("cloudyr" = "http://cloudyr.github.io/drat"))
 # install.packages('shinyFiles')
 # install_github("trestletech/shinyTree")
+# install.packages("sound")
 
 # fileInput max upload size is 30mb
 library(shiny)
@@ -14,8 +15,12 @@ library(shinyFiles)
 library(shinyTree)
 # install_github("trestletech/shinyStore")
 load_all('~/dev/emammal-soundburst/soundBurst/R')
+# setWavPlayer('"/Applications/QuickTime\ Player"')
+setWavPlayer("afplay")
+library(sound)
 
-#play sound tags$audio(src = "audio.wav", type = "audio/wav", autoplay = NA, controls = NA)
+
+# play sound tags$audio(src = "audio.wav", type = "audio/wav", autoplay = NA, controls = NA)
 
 options(shiny.trace=TRUE)
 options(shiny.maxRequestSize=70*1024^2) 
@@ -78,14 +83,20 @@ shinyServer(function(input, output, session) {
         currDir <- paste0(dirPath, "/", path, unlist(get_selected(input$tree)))
         sound <- readWave(currDir)
         oscillo(sound)
-        # setWavPlayer("~/Applications/iTunes")
-        # getWavPlayer()
-        # listen(sound, f=8000)
-        # createSpectrogram(getwd(), unlist(get_selected(selectedFile)))
+        playSound()
       })
     }
   })
   
+  playSound = function (){
+    path <- getPath(get_selected(input$tree, "names"))
+    currDir <- paste0(dirPath, "/", path, unlist(get_selected(input$tree)))
+    sound <- readWave(currDir)
+    print(getWavPlayer())
+    print(sound)
+    print(listen(sound))
+    listen(sound)
+  }
   
   # LOAD IN SPECIES DROPDOWN
   
@@ -147,6 +158,7 @@ shinyServer(function(input, output, session) {
     oscillo(sound, from=input$plot_brush$xmin, to=input$plot_brush$xmax) 
     # shinyjs::html('remove',tags$div(class = "close-clip", "hello There"))
   })
-  shinyjs::onclick("next-one",shinyjs::logjs('clicked'))
+  # shinyjs::onclick("next-one",shinyjs::logjs('clicked'))
 
 })
+
