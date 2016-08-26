@@ -86,6 +86,12 @@ shinyServer(function(input, output, session) {
         oscillo(sound)
         shinyjs::onclick("playButton",playSound())
       })
+      # output$audiotag<-renderUI({
+      #   path <- getPath(get_selected(input$tree, "names"))
+      #   currDir <- paste0(dirPath, path, unlist(get_selected(input$tree)))
+      #   print(currDir)
+      #   get_audio_tag(currDir)
+      # })
     }
   })
   
@@ -98,6 +104,12 @@ shinyServer(function(input, output, session) {
     shinyjs::hide(id = "playButton",anim = FALSE)
     listen(sound)
   }
+  
+  # get_audio_tag<-function(filename){
+  #   tags$audio(src = filename, type ="audio/wav", controls = NA)
+  # }
+  # 
+  # output$audiotag<-renderUI(get_audio_tag("tempwav.wav")) #starting wave file
   
   # LOAD IN SPECIES DROPDOWN
   
@@ -112,22 +124,13 @@ shinyServer(function(input, output, session) {
     read.csv(correctPath, header = TRUE)
   })
   
-  # filedata <- reactive({
-  #   infile <- input$datafile
-  #   req(infile)
-  # print(infile$datapath)
-  #   read.csv(infile$datapath, header = TRUE)
-  # })
-  
   output$toCol <- renderUI({
     print('hello')
     df <-filedata()
     print(df)
     
     if (is.null(df)) return(NULL)
-    
-    # items=names(df)
-    # names(items)=items
+
     items <- c('Select Species',as.character(df[[1]]))
     selectInput("speciesDropdown", "Species:",items)
   })
@@ -159,7 +162,6 @@ shinyServer(function(input, output, session) {
     oscillo(sound, from=input$plot_brush$xmin, to=input$plot_brush$xmax) 
     # shinyjs::html('remove',tags$div(class = "close-clip", "hello There"))
   })
-  # shinyjs::onclick("next-one",shinyjs::logjs('clicked'))
 
 })
 

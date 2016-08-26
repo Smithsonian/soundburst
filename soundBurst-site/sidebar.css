@@ -31,3 +31,11 @@
   padding: 0;
   top: 100px;
 }
+
+.jstree-node {
+  overflow: hidden;
+}
+
+.jstree-node:hover {
+  overflow: visible;
+}
