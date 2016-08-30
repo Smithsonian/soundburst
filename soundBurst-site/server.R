@@ -4,6 +4,7 @@
 # install.packages('shinyFiles')
 # install_github("trestletech/shinyTree")
 # install.packages("sound")
+# install.packages("audio")
 
 # fileInput max upload size is 30mb
 library(shiny)
@@ -15,6 +16,7 @@ library(shinyFiles)
 library(shinyTree)
 # install_github("trestletech/shinyStore")
 load_all('~/dev/emammal-soundburst/soundBurst/R')
+library(audio)
 # setWavPlayer('"/Applications/QuickTime\ Player"')
 setWavPlayer("afplay")
 library(sound)
@@ -102,7 +104,10 @@ shinyServer(function(input, output, session) {
     print(sound)
     shinyjs::show(id = "pauseButton",anim = TRUE)
     shinyjs::hide(id = "playButton",anim = FALSE)
-    listen(sound)
+    a <- play(currDir)
+    a
+    pause(a)
+    # shinyjs::onclick("pauseButton",pause(a))
   }
   
   # get_audio_tag<-function(filename){
@@ -124,7 +129,7 @@ shinyServer(function(input, output, session) {
     read.csv(correctPath, header = TRUE)
   })
   
-  output$toCol <- renderUI({
+  output$commonName <- renderUI({
     print('hello')
     df <-filedata()
     print(df)
@@ -133,6 +138,17 @@ shinyServer(function(input, output, session) {
 
     items <- c('Select Species',as.character(df[[1]]))
     selectInput("speciesDropdown", "Species:",items)
+  })
+  
+  output$speciesType <- renderUI({
+    print('hello')
+    df <-filedata()
+    print(df)
+    
+    if (is.null(df)) return(NULL)
+    
+    items <- c('Select Type',as.character(df[[3]]))
+    selectInput("speciesDropdown", "Type:",items)
   })
   
   formulaText <- reactive({
@@ -159,8 +175,35 @@ shinyServer(function(input, output, session) {
     path <- getPath(get_selected(input$tree, "names"))
     currDir <- paste0(dirPath, "/", path, unlist(get_selected(input$tree)))
     sound <- readWave(currDir)
-    oscillo(sound, from=input$plot_brush$xmin, to=input$plot_brush$xmax) 
+    oscillo(sound, from=input$plot_brush$xmin, to=input$plot_brush$xmax)
+    xmin <- input$plot_brush$xmin
+    xmax <- input$plot_brush$xmax
     # shinyjs::html('remove',tags$div(class = "close-clip", "hello There"))
+    shinyjs::onclick("spectroClip",showSpeciesDropdown(xmin, xmax))
+  })
+  
+  showSpeciesDropdown = function (xmin, xmax){
+    shinyjs::show("clip-species-dropdown")
+    if(xmax) {
+      shinyjs::html("time-min",round(xmin,digits=1))
+      shinyjs::html("time-max",round(xmax,digits=1)) 
+    }
+  }
+  
+  shinyjs::onclick("close-species-drop",shinyjs::hide("clip-species-dropdown"))
+  shinyjs::hide("clip-species-dropdown")
+  
+  fields <- c("name", "lat", "lon", "recId")
+  
+  formData <- reactive({
+    data <- sapply(fields, function(x) input[[x]])
+    data
+  })
+  
+  observeEvent(input$submit, {
+    data <- formData()
+    print(data)
+    write.csv(data, 'test.csv', row.names = FALSE)
   })
 
 })

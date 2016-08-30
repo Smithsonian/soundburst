@@ -25,13 +25,6 @@
   cursor: pointer;
 }
 
-#species-sidebox {
-  position: absolute;
-  right: 0px;
-  padding: 0;
-  top: 100px;
-}
-
 .jstree-node {
   overflow: hidden;
 }

@@ -1,18 +1,66 @@
-.close-spectro {
-  content: 'X';
+.content {
+  width: 80%;
+  margin-left: 0;
+}
+
+#species-sidebox {
+  position: absolute;
+  right: 0px;
+  padding: 1%;
+  height: 100%;
+  background: white;
+}
+
+#playButton, #pauseButton {
+  position: absolute;
+  height: 20px;
+  width: 20px;
+  background-size: cover;
 }
 
 #playButton {
   background-image: url('play.png');
-  height: 20px;
-  width: 20px;
-  background-size: cover;
 }
 
 #pauseButton {
   background-image: url('pause.png');
-  height: 20px;
-  width: 20px;
-  background-size: cover;
   z-index: 1001;
+}
+
+#spectrogram {
+  width: 80%;
+}
+
+#spectrogram img {
+  width: 100%;
+}
+
+#close-species-drop {
+  position: absolute;
+  right: 0.5em;
+  top: 0;
+  cursor: pointer;
+}
+
+#spectro-clip-container {
+  position: relative;
+}
+
+#spectroClip {
+  position: absolute;
+}
+
+#clip-species-dropdown {
+  position: absolute;
+  padding: 0;
+  right: 0;
+  margin-top: 5%;
+}
+
+.box.box-warning {
+  border: 0px;
+}
+
+#species-dropdown-box {
+  border: solid 1px #f39c12;
 }
