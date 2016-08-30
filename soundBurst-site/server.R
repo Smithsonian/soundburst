@@ -203,7 +203,7 @@ shinyServer(function(input, output, session) {
   observeEvent(input$submit, {
     data <- formData()
     print(data)
-    write.csv(data, 'test.csv', row.names = FALSE)
+    write.csv(data, 'test.csv')
   })
 
 })
