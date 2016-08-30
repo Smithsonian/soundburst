@@ -61,6 +61,8 @@ create_directory_tree = function(root) {
 shinyServer(function(input, output, session) {
   shinyjs::onclick("remove",shinyjs::toggle(id = "tree", anim = TRUE))
   shinyjs::hide("pauseButton")
+  shinyjs::hide("project-info-container")
+  shinyjs::hide("site-info-container")
   
   test <- shinyDirChoose(input, 'directory', updateFreq=60000, session=session, roots=c(home='~'), restrictions=system.file(package='base'), filetypes=c('', '.wav'))
   output$directorypath <- renderPrint({
@@ -71,6 +73,8 @@ shinyServer(function(input, output, session) {
       create_directory_tree(dirPath)
       load("www/dir_tree.Rdata")
       output$tree <- renderTree(tree, quoted = FALSE)
+      shinyjs::show("project-info-container")
+      shinyjs::show("site-info-container")
     }
   })
   
@@ -106,7 +110,7 @@ shinyServer(function(input, output, session) {
     shinyjs::hide(id = "playButton",anim = FALSE)
     a <- play(currDir)
     a
-    pause(a)
+    # pause(a)
     # shinyjs::onclick("pauseButton",pause(a))
   }
   
@@ -193,7 +197,7 @@ shinyServer(function(input, output, session) {
   shinyjs::onclick("close-species-drop",shinyjs::hide("clip-species-dropdown"))
   shinyjs::hide("clip-species-dropdown")
   
-  siteFields <- c("name", "lat", "lon", "recId", "notes")
+  siteFields <- c("name", "lat", "lon", "recId", "siteNotes")
   
   formDataSite <- reactive({
     data <- sapply(siteFields, function(x) input[[x]])
