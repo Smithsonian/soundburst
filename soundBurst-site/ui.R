@@ -16,6 +16,9 @@ dashboardPage(
       shinyDirButton('directory', 'Folder select', 'Please select a folder'),
       useShinyjs(),
       div(id = "remove", "Remove Files"),
+      textInput("projectName", "Project Name:", "Project Name"),
+      textInput("projectNotes", "Project Notes:", "Project Notes"),
+      actionButton("projectInfo", "Submit"),
       sidebarMenuOutput("menu"),
       shinyTree("tree")
     )
@@ -31,7 +34,8 @@ dashboardPage(
            textInput("lat", "Lat:", "Latitude"),
            textInput("lon", "Lon:", "Longitude"),
            textInput("recId", "RecId:", "RecId"),
-           actionButton("submit", "Submit"),
+           textInput("notes", "Site Notes:", "Notes"),
+           actionButton("siteInfo", "Submit"),
            div(id = "right-column-title", "Upload Species File"),
            box(width = NULL, status = "warning",
                shinyFilesButton('csvFile', 'File select', 'Please select a file', FALSE)

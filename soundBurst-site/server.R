@@ -193,17 +193,32 @@ shinyServer(function(input, output, session) {
   shinyjs::onclick("close-species-drop",shinyjs::hide("clip-species-dropdown"))
   shinyjs::hide("clip-species-dropdown")
   
-  fields <- c("name", "lat", "lon", "recId")
+  siteFields <- c("name", "lat", "lon", "recId", "notes")
   
-  formData <- reactive({
-    data <- sapply(fields, function(x) input[[x]])
+  formDataSite <- reactive({
+    data <- sapply(siteFields, function(x) input[[x]])
     data
   })
   
-  observeEvent(input$submit, {
-    data <- formData()
+  observeEvent(input$siteInfo, {
+    print(paste0(dirPath,"/",'test.csv'))
+    data <- formDataSite()
     print(data)
-    write.csv(data, 'test.csv')
+    write.csv(data, paste0(dirPath,"/",'test.csv'))
+  })
+  
+  projectFields <- c("projectName", "projectNotes")
+  
+  formDataProject <- reactive({
+    data <- sapply(projectFields, function(x) input[[x]])
+    data
+  })
+  
+  observeEvent(input$projectInfo, {
+    print(paste0(dirPath,"/",'projectInfo.csv'))
+    data <- formDataProject()
+    print(data)
+    write.csv(data, paste0(dirPath,"/",'projectInfo.csv'))
   })
 
 })
