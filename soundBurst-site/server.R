@@ -188,9 +188,12 @@ shinyServer(function(input, output, session) {
   
   showSpeciesDropdown = function (xmin, xmax){
     shinyjs::show("clip-species-dropdown")
-    if(xmax) {
+    if(!is.null(xmax)) {
       shinyjs::html("time-min",round(xmin,digits=1))
       shinyjs::html("time-max",round(xmax,digits=1)) 
+    } else {
+      shinyjs::html("time-min",0)
+      shinyjs::html("time-max",0) 
     }
   }
   
