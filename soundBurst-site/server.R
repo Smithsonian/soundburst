@@ -124,9 +124,7 @@ shinyServer(function(input, output, session) {
   
   shinyFileChoose(input, 'csvFile', updateFreq=60000, session=session, roots=c(home='~'), restrictions=system.file(package='base'))
   filedata <- reactive({
-    print('read')
     req(input$csvFile)
-    print('req')
     infile <- parseFilePaths(roots=c(home='~'),input$csvFile)
     correctPath <- file.path(infile$datapath)
     print(correctPath)
@@ -134,10 +132,8 @@ shinyServer(function(input, output, session) {
   })
   
   output$commonName <- renderUI({
-    print('hello')
     df <-filedata()
-    print(df)
-    
+
     if (is.null(df)) return(NULL)
 
     items <- c('Select Species',as.character(df[[1]]))
@@ -145,14 +141,12 @@ shinyServer(function(input, output, session) {
   })
   
   output$speciesType <- renderUI({
-    print('hello')
     df <-filedata()
-    print(df)
-    
+
     if (is.null(df)) return(NULL)
     
     items <- c('Select Type',as.character(df[[3]]))
-    selectInput("speciesDropdown", "Type:",items)
+    selectInput("typeDropdown", "Type:",items)
   })
   
   formulaText <- reactive({
@@ -189,11 +183,15 @@ shinyServer(function(input, output, session) {
   showSpeciesDropdown = function (xmin, xmax){
     shinyjs::show("clip-species-dropdown")
     if(!is.null(xmax)) {
-      shinyjs::html("time-min",round(xmin,digits=1))
-      shinyjs::html("time-max",round(xmax,digits=1)) 
+      updateTextInput(session, "timeMin",label = paste("Time Start: "), value = paste(round(xmin,digits=1)))
+      updateTextInput(session, "timeMax",label = paste("Time End: "), value = paste(round(xmax,digits=1)))
+      shinyjs::disable("timeMin")
+      shinyjs::disable("timeMax")
     } else {
-      shinyjs::html("time-min",0)
-      shinyjs::html("time-max",0) 
+      updateTextInput(session, "timeMin",label = paste("Time Start: "), value = paste(0))
+      updateTextInput(session, "timeMax",label = paste("Time End: "), value = paste(0))
+      shinyjs::disable("timeMin")
+      shinyjs::disable("timeMax")
     }
   }
   
@@ -212,6 +210,7 @@ shinyServer(function(input, output, session) {
     data <- formDataSite()
     print(data)
     write.csv(data, paste0(dirPath,"/",'test.csv'))
+    siteDF <<- read.csv(paste0(dirPath,"/",'test.csv'), header = TRUE)
   })
   
   projectFields <- c("projectName", "projectNotes")
@@ -226,6 +225,22 @@ shinyServer(function(input, output, session) {
     data <- formDataProject()
     print(data)
     write.csv(data, paste0(dirPath,"/",'projectInfo.csv'))
+  })
+  
+  speciesFields <- c("timeMin", "timeMax", "speciesDropdown", "typeDropdown")
+  
+  formDataSpecies <- reactive({
+    data <- sapply(speciesFields, function(x) input[[x]])
+    data
+  })
+  
+  observeEvent(input$speciesDropSubmit, {
+    dataSet <- formDataSpecies()
+    print(siteDF)
+    formattedData <- data.frame(dataSet)
+    # existingDF = rbind(siteDF,formattedData)
+    # print(existingDF)
+    # write.csv(existingDF, paste0(dirPath,"/",'test.csv'))
   })
 
 })

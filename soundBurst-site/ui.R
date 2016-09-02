@@ -58,11 +58,14 @@ dashboardPage(
            column(width = 10, id = "clip-species-dropdown",
                   box(width = NULL, id = "species-dropdown-box",status = "warning",
                       div(id = "close-species-drop", "X"),
-                      div(id = "time-min-container", "Time Start: ",span(id = "time-min")),
-                      div(id = "time-max-container", "Time End:",span(id = "time-max")),
+                      # div(id = "time-min-container", "Time Start: ",span(id = "timeMin", 1)),
+                      # div(id = "time-max-container", "Time End:",span(id = "timeMax", 2)),
+                      textInput("timeMin", "Time Start:", 1),
+                      textInput("timeMax", "Time End:", 2),
                       #These column selectors are dynamically created when the file is loaded
                       uiOutput("commonName"),
-                      uiOutput("speciesType")
+                      uiOutput("speciesType"),
+                      actionButton("speciesDropSubmit", "Submit")
                   )
            )
     )
