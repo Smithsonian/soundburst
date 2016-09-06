@@ -205,13 +205,21 @@ shinyServer(function(input, output, session) {
     data
   })
   
+  createCSVFilePath = function(){
+    fileFullName <- unlist(get_selected(input$tree))
+    fileName <- sub(".wav", "", fileFullName)
+    fileName
+  }
+  
   observeEvent(input$siteInfo, {
-    print(paste0(dirPath,"/",'test.csv'))
+    # fileFullName <- unlist(get_selected(input$tree))
+    # fileName <- sub(".wav", "", fileFullName)
+    print(paste0(dirPath,"/",paste0(createCSVFilePath(),'.csv')))
     data <- formDataSite()
     print(data)
     siteDF <<- data
     clipCount <<- 0
-    write.csv(data, paste0(dirPath,"/",'test.csv'))
+    write.csv(data, paste0(dirPath,"/",paste0(createCSVFilePath(),'.csv')))
   })
   
   projectFields <- c("projectName", "projectNotes")
@@ -245,7 +253,7 @@ shinyServer(function(input, output, session) {
     formattedData <- c(siteDF, dataSet)
     siteDF <<- formattedData
     # print(formattedData)
-    write.csv(siteDF, paste0(dirPath,"/",'test.csv'))
+    write.csv(siteDF, paste0(dirPath,"/",paste0(createCSVFilePath(),'.csv')))
   })
 
 })
