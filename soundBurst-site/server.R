@@ -209,8 +209,9 @@ shinyServer(function(input, output, session) {
     print(paste0(dirPath,"/",'test.csv'))
     data <- formDataSite()
     print(data)
+    siteDF <<- data
+    clipCount <<- 0
     write.csv(data, paste0(dirPath,"/",'test.csv'))
-    siteDF <<- read.csv(paste0(dirPath,"/",'test.csv'), header = TRUE)
   })
   
   projectFields <- c("projectName", "projectNotes")
@@ -235,12 +236,16 @@ shinyServer(function(input, output, session) {
   })
   
   observeEvent(input$speciesDropSubmit, {
+    clipCount <<- clipCount + 1
     dataSet <- formDataSpecies()
-    print(siteDF)
-    formattedData <- data.frame(dataSet)
-    # existingDF = rbind(siteDF,formattedData)
-    # print(existingDF)
-    # write.csv(existingDF, paste0(dirPath,"/",'test.csv'))
+    names(dataSet)[1] <- paste0(names(dataSet)[1],clipCount)
+    names(dataSet)[2] <- paste0(names(dataSet)[2],clipCount)
+    names(dataSet)[3] <- paste0(names(dataSet)[3],clipCount)
+    names(dataSet)[4] <- paste0(names(dataSet)[4],clipCount)
+    formattedData <- c(siteDF, dataSet)
+    siteDF <<- formattedData
+    # print(formattedData)
+    write.csv(siteDF, paste0(dirPath,"/",'test.csv'))
   })
 
 })
