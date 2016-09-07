@@ -103,11 +103,13 @@ shinyServer(function(input, output, session) {
   })
   
   shinyjs::hide("species-sidebox-container")
+  shinyjs::addClass("content-id", "content-all-open")
   shinyjs::onclick("show-species-sidebar", toggleRightColumn())
   
   toggleRightColumn = function (){
-    shinyjs::toggleClass("show-species-sidebar", "move-marker-right")
-    shinyjs::toggleClass("show-species-sidebar", "position-marker-left")
+    shinyjs::toggleClass("show-species-sidebar-container", "move-marker-right")
+    shinyjs::toggleClass("show-species-sidebar-container", "position-marker-left")
+    shinyjs::toggleClass("content-id", "content-all-open")
     shinyjs::toggle("species-sidebox-container")
   }
   

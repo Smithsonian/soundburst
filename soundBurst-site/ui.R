@@ -13,10 +13,12 @@ dashboardPage(
   dashboardSidebar(
     includeCSS("sidebar.css"),
     column(12,
+      div(id = "left-column-title", "Select a Project"),
       shinyDirButton('directory', 'Folder select', 'Please select a folder'),
       useShinyjs(),
       div(id = "remove", "Remove Files"),
       div(id = "project-info-container", 
+          div(id = "left-column-title", "Enter Project Info:"),
           textInput("projectName", "Project Name:", "Project Name"),
           HTML('<label>Project Notes:</label>'),
           HTML('<textarea id="projectNotes" rows="3" cols="40">Project Notes</textarea>'),
@@ -27,14 +29,15 @@ dashboardPage(
       shinyTree("tree")
     )
   ),
-  dashboardBody(
+  dashboardBody(id = "content-id",
     includeCSS("main.css"),
     # uiOutput("audiotag"),
     div(id = "right-column-container",
-    div(id = "show-species-sidebar", class = "move-marker-right",""),
+    div(id = "show-species-sidebar-container", class = "move-marker-right", 
+    div(id = "show-species-sidebar","")),
     div(id = "species-sidebox-container",
     column(width = 2, id = "species-sidebox",
-           div(id = "right-column-title", "Please Select a Site"),
+           div(id = "right-column-title", "Select a Site"),
            div(id = "site-info-container", 
                textInput("name", "Name:", "Name"),
                textInput("lat", "Lat:", "Latitude"),
