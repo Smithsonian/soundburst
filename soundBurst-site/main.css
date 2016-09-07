@@ -3,14 +3,6 @@
   margin-left: 0;
 }
 
-#species-sidebox {
-  position: absolute;
-  right: 0px;
-  padding: 1%;
-  height: 100%;
-  background: white;
-}
-
 #playButton, #pauseButton {
   position: absolute;
   height: 20px;
@@ -67,4 +59,55 @@
 
 #timeMin, #timeMax {
   width: 25%;
+}
+
+#species-sidebox-container {
+  position: absolute;
+  right: 0px;
+  padding-top: 1em;
+  height: 100%;
+  width: 100%;
+  background: white;
+}
+
+#species-sidebox  {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+#species-select-file-container {
+  margin-top: 2em;
+}
+
+#right-column-title {
+  font-size: 1.5em;
+}
+
+#right-column-container {
+  position: absolute;
+  right: 0;
+  width: 16.7%;
+  height: 100%;
+}
+
+#show-species-sidebar {
+  cursor: pointer;
+  position: absolute;
+  z-index: 100;
+  height: 1.5em;
+  /*font-size: 2em; */
+  width: 1.5em;
+}
+
+.position-marker-left {
+  right: 101%;
+  background-image: url('minus.png');
+  background-size: cover;
+}
+
+.move-marker-right {
+  right: 2px;
+  background-image: url('add.png');
+  background-size: cover;
 }

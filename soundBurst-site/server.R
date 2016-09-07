@@ -74,7 +74,6 @@ shinyServer(function(input, output, session) {
       load("www/dir_tree.Rdata")
       output$tree <- renderTree(tree, quoted = FALSE)
       shinyjs::show("project-info-container")
-      shinyjs::show("site-info-container")
     }
   })
   
@@ -89,7 +88,9 @@ shinyServer(function(input, output, session) {
         path <- getPath(get_selected(input$tree, "names"))
         currDir <- paste0(dirPath, "/", path, unlist(get_selected(input$tree)))
         sound <- readWave(currDir)
+        shinyjs::html("right-column-title",createCSVFilePath())
         oscillo(sound)
+        shinyjs::show("site-info-container")
         shinyjs::onclick("playButton",playSound())
       })
       # output$audiotag<-renderUI({
@@ -100,6 +101,15 @@ shinyServer(function(input, output, session) {
       # })
     }
   })
+  
+  shinyjs::hide("species-sidebox-container")
+  shinyjs::onclick("show-species-sidebar", toggleRightColumn())
+  
+  toggleRightColumn = function (){
+    shinyjs::toggleClass("show-species-sidebar", "move-marker-right")
+    shinyjs::toggleClass("show-species-sidebar", "position-marker-left")
+    shinyjs::toggle("species-sidebox-container")
+  }
   
   playSound = function (){
     path <- getPath(get_selected(input$tree, "names"))

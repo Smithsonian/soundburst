@@ -30,10 +30,11 @@ dashboardPage(
   dashboardBody(
     includeCSS("main.css"),
     # uiOutput("audiotag"),
-    div(id = "playButton"),
-    div(id = "pauseButton"),
+    div(id = "right-column-container",
+    div(id = "show-species-sidebar", class = "move-marker-right",""),
+    div(id = "species-sidebox-container",
     column(width = 2, id = "species-sidebox",
-           div(id = "right-column-title", "Site Information"),
+           div(id = "right-column-title", "Please Select a Site"),
            div(id = "site-info-container", 
                textInput("name", "Name:", "Name"),
                textInput("lat", "Lat:", "Latitude"),
@@ -44,11 +45,14 @@ dashboardPage(
                # textInput("siteNotes", "Site Notes:", "Notes"),
                actionButton("siteInfo", "Submit")
                ),
-           div(id = "right-column-title", "Upload Species File"),
+           div(id = "species-select-file-container",
+           div(id = "right-column-upload", "Upload Species File"),
            box(width = NULL, status = "warning",
                shinyFilesButton('csvFile', 'File select', 'Please select a file', FALSE)
-           )
-    ),
+           ))
+    ))),
+    div(id = "playButton"),
+    div(id = "pauseButton"),
     plotOutput("spectrogram", brush = brushOpts(id = "plot_brush", direction = "x", resetOnNew = TRUE)),
     verbatimTextOutput('directorypath'),
     # textOutput('speciesName'),
