@@ -37,24 +37,26 @@ getPath = function(folderList) {
 }
 
 create_directory_tree = function(root) {
-  tree = list()
-  files = list.files(root, all.files=F, recursive=T, include.dirs=T)
+  tree <- list()
+  files <- list.files(root, all.files=F, recursive=T, include.dirs=T)
   print(root)
-  
+
   walk_directory = function(tree, path) {
-    fp = file.path(root, path)
-    is_dir = file.info(fp)$isdir
-    folders = str_split(path, "/")[[1]]
+    fp <- file.path(root, path)
+    is_dir <- file.info(fp)$isdir
+    folders <- str_split(path, "/")[[1]]
     if (is_dir) {
-      txt = paste("tree", paste("$'", folders, "'", sep="", collapse=""), " = numeric(0)", sep="")
+      txt <- paste("tree", paste("$'", folders, "'", sep="", collapse=""), " = numeric(0)", sep="")
     } else {
-      txt = paste("tree", paste("$'", folders, "'", sep="", collapse=""), " = structure('', sticon='file')", sep="")
+      txt <- paste("tree", paste("$'", folders, "'", sep="", collapse=""), " = structure('', sticon='file')", sep="")
     }
     eval(parse(text = txt))
     return(tree)
   }
   
-  for (i in 1:length(files)) tree = walk_directory(tree, files[i])
+  for (i in 1:length(files)) {
+    tree = walk_directory(tree, files[i])
+  }
   save(tree, file="www/dir_tree.Rdata")
 }
 
@@ -63,6 +65,7 @@ shinyServer(function(input, output, session) {
   shinyjs::hide("pauseButton")
   shinyjs::hide("project-info-container")
   shinyjs::hide("site-info-container")
+  shinyjs::hide("submit-site-complete-container")
   
   test <- shinyDirChoose(input, 'directory', updateFreq=60000, session=session, roots=c(home='~'), restrictions=system.file(package='base'), filetypes=c('', '.wav'))
   output$directorypath <- renderPrint({
@@ -74,6 +77,7 @@ shinyServer(function(input, output, session) {
       load("www/dir_tree.Rdata")
       output$tree <- renderTree(tree, quoted = FALSE)
       shinyjs::show("project-info-container")
+      findFileCount()
     }
   })
   
@@ -91,7 +95,9 @@ shinyServer(function(input, output, session) {
         shinyjs::html("right-column-title",createCSVFilePath())
         oscillo(sound)
         shinyjs::show("site-info-container")
+        shinyjs::show("submit-site-complete-container")
         shinyjs::onclick("playButton",playSound())
+        shinyjs::onclick("submit-site-complete-container", increaseStatusBar())
       })
       # output$audiotag<-renderUI({
       #   path <- getPath(get_selected(input$tree, "names"))
@@ -267,6 +273,28 @@ shinyServer(function(input, output, session) {
     # print(formattedData)
     write.csv(siteDF, paste0(dirPath,"/",paste0(createCSVFilePath(),'.csv')))
   })
+  
+  substrRight <- function(x, n){
+    substr(x, nchar(x)-n+1, nchar(x))
+  }
 
+  findFileCount = function() {
+    projectFileCount <<- 0
+    projectStatusCount <<- 0
+    tree <- list()
+    files <- list.files(dirPath, all.files=F, recursive=T, include.dirs=T)
+    for (i in 1:length(files)) {
+      if (substrRight(files[i],4) == ".wav") {
+        projectFileCount <<- projectFileCount +1
+      } 
+    }
+    output$statusCount <- renderPrint({cat(projectStatusCount,"/",projectFileCount)})
+  }
+  
+  increaseStatusBar = function () {
+    projectStatusCount <<- projectStatusCount + 1
+    output$statusCount <- renderPrint({cat(projectStatusCount,"/",projectFileCount)})
+  }
+  
 })
 

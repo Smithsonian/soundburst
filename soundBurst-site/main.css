@@ -44,6 +44,7 @@ label {
 
 #spectroClip {
   position: absolute;
+  margin-top: 5%;
 }
 
 #clip-species-dropdown {
@@ -140,4 +141,8 @@ section.sidebar .shiny-input-container {
 
 .content-all-open {
   width: 99%;
+}
+
+#submit-site-complete {
+  cursor: pointer;
 }

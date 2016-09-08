@@ -13,6 +13,9 @@ dashboardPage(
   dashboardSidebar(
     includeCSS("sidebar.css"),
     column(12,
+      div(id = "status-bar-container",
+          div(id = "status-bar", "Status"),
+          textOutput("statusCount")),
       div(id = "left-column-title", "Select a Project"),
       shinyDirButton('directory', 'Folder select', 'Please select a folder'),
       useShinyjs(),
@@ -26,6 +29,7 @@ dashboardPage(
           actionButton("projectInfo", "Submit")
           ),
       sidebarMenuOutput("menu"),
+      verbatimTextOutput('directorypath'),
       shinyTree("tree")
     )
   ),
@@ -52,12 +56,14 @@ dashboardPage(
            div(id = "right-column-upload", "Upload Species File"),
            box(width = NULL, status = "warning",
                shinyFilesButton('csvFile', 'File select', 'Please select a file', FALSE)
-           ))
+           )),
+           div(id = "submit-site-complete-container", 
+               div(id = "submit-site-text", "When you have submited data for all clips on a given site, click below and move on to the next"),
+               div(id = "submit-site-complete", "Finish Site"))
     ))),
     div(id = "playButton"),
     div(id = "pauseButton"),
     plotOutput("spectrogram", brush = brushOpts(id = "plot_brush", direction = "x", resetOnNew = TRUE)),
-    verbatimTextOutput('directorypath'),
     # textOutput('speciesName'),
     useShinyjs(),
     column(width = 4, id = "spectro-clip-container",
