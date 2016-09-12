@@ -24,7 +24,7 @@ dashboardPage(
       div(id = "project-info-container", 
           div(id = "left-column-title", "Enter Project Info:"),
           textInput("projectName", " Name:", "Project Name"),
-          HTML('<label>Deployment Notes:</label>'),
+          HTML('<label>Project Notes:</label>'),
           HTML('<textarea id="projectNotes" rows="3" cols="40">Project Notes</textarea>'),
           # textInput("projectNotes", "Project Notes:", "Project Notes"),
           actionButton("projectInfo", class = "inactive-button", "Submit")

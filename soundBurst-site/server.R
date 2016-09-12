@@ -250,11 +250,13 @@ shinyServer(function(input, output, session) {
     print(data)
     siteDF <<- data
     clipCount <<- 0
-    newFileName <- paste0(projectName,"_",data[[1]],"_",data[[6]])
+    browser()
+    fileDate <- gsub(" ", "-",data[[6]], fixed = TRUE)
+    fileDate <- gsub(":", "-",fileDate, fixed = TRUE)
+    newFileName <- paste0(projectName,"_",data[[1]],"_",fileDate)
     newFullFilePath <- paste0(dirPath,"/",newFileName)
     file.rename(filePathFull, paste0(newFullFilePath,".wav"))
-    browser()
-    write.csv(data, paste0(dirPath,"/",paste0(createCSVFilePath(),'.csv')))
+    write.csv(data, paste0(dirPath,"/",paste0(newFileName,'.csv')))
     shinyjs::addClass("siteInfo", "active-button")
   })
   
