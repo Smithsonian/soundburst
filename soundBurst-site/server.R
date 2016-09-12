@@ -250,10 +250,10 @@ shinyServer(function(input, output, session) {
     print(data)
     siteDF <<- data
     clipCount <<- 0
-    browser()
     fileDate <- gsub(" ", "-",data[[6]], fixed = TRUE)
     fileDate <- gsub(":", "-",fileDate, fixed = TRUE)
     newFileName <- paste0(projectName,"_",data[[1]],"_",fileDate)
+    shinyjs::html("right-column-title",newFileName)
     newFullFilePath <- paste0(dirPath,"/",newFileName)
     file.rename(filePathFull, paste0(newFullFilePath,".wav"))
     write.csv(data, paste0(dirPath,"/",paste0(newFileName,'.csv')))
