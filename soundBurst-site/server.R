@@ -276,7 +276,7 @@ shinyServer(function(input, output, session) {
     shinyjs::addClass("projectInfo", "active-button")
   })
   
-  speciesFields <- c("timeMin", "timeMax", "speciesDropdown", "typeDropdown")
+  speciesFields <- c("timeMin", "timeMax", "speciesDropdown", "typeDropdown", "annotNotes")
   
   formDataSpecies <- reactive({
     data <- sapply(speciesFields, function(x) input[[x]])
@@ -290,6 +290,7 @@ shinyServer(function(input, output, session) {
     names(dataSet)[2] <- paste0(names(dataSet)[2],clipCount)
     names(dataSet)[3] <- paste0(names(dataSet)[3],clipCount)
     names(dataSet)[4] <- paste0(names(dataSet)[4],clipCount)
+    names(dataSet)[5] <- paste0(names(dataSet)[5],clipCount)
     formattedData <- c(siteDF, dataSet)
     siteDF <<- formattedData
     # print(formattedData)

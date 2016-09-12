@@ -82,6 +82,8 @@ dashboardPage(
                       #These column selectors are dynamically created when the file is loaded
                       uiOutput("commonName"),
                       uiOutput("speciesType"),
+                      HTML('<label>Site Notes:</label>'),
+                      HTML('<textarea id="annotNotes" rows="3" cols="40">Annotation Notes</textarea>'),
                       actionButton("speciesDropSubmit", "Submit")
                   )
            )

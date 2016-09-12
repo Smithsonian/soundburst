@@ -33,7 +33,7 @@
   overflow: visible;
 }
 
-#projectNotes, #siteNotes {
+#projectNotes, #siteNotes, #annotNotes {
   display: block;
   width: 100%;
   padding: 6px 12px;
