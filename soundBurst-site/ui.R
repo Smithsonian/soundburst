@@ -12,21 +12,22 @@ dashboardPage(
   dashboardHeader(title = "SoundBurst App"),
   dashboardSidebar(
     includeCSS("sidebar.css"),
+    includeCSS("main.css"),
     column(12,
       div(id = "status-bar-container",
           div(id = "status-bar", "Status"),
           textOutput("statusCount")),
       div(id = "left-column-title", "Select a Project"),
-      shinyDirButton('directory', 'Folder select', 'Please select a folder'),
+      shinyDirButton('directory', class = 'inactive-button', 'Folder select', 'Please select a folder'),
       useShinyjs(),
       div(id = "remove", "Remove Files"),
       div(id = "project-info-container", 
           div(id = "left-column-title", "Enter Project Info:"),
-          textInput("projectName", "Project Name:", "Project Name"),
-          HTML('<label>Project Notes:</label>'),
+          textInput("projectName", " Name:", "Project Name"),
+          HTML('<label>Deployment Notes:</label>'),
           HTML('<textarea id="projectNotes" rows="3" cols="40">Project Notes</textarea>'),
           # textInput("projectNotes", "Project Notes:", "Project Notes"),
-          actionButton("projectInfo", "Submit")
+          actionButton("projectInfo", class = "inactive-button", "Submit")
           ),
       sidebarMenuOutput("menu"),
       verbatimTextOutput('directorypath'),
@@ -49,14 +50,17 @@ dashboardPage(
                textInput("recId", "RecId:", "RecId"),
                HTML('<label>Site Notes:</label>'),
                HTML('<textarea id="siteNotes" rows="3" cols="40">Site Notes</textarea>'),
+               HTML('<label>Start date/time: </label>'),
+               textOutput("minTime"),
+               HTML('<label>End date/time: </label>'),
+               textOutput("maxTime"),
                # textInput("siteNotes", "Site Notes:", "Notes"),
-               actionButton("siteInfo", "Submit")
+               actionButton("siteInfo", class = "inactive-button", "Submit")
                ),
            div(id = "species-select-file-container",
            div(id = "right-column-upload", "Upload Species File"),
-           box(width = NULL, status = "warning",
-               shinyFilesButton('csvFile', 'File select', 'Please select a file', FALSE)
-           )),
+           shinyFilesButton('csvFile', class = "inactive-button", 'File select', 'Please select a file', FALSE)
+           ),
            div(id = "submit-site-complete-container", 
                div(id = "submit-site-text", "When you have submited data for all clips on a given site, click below and move on to the next"),
                div(id = "submit-site-complete", "Finish Site"))

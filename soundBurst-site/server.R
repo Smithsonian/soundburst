@@ -66,6 +66,9 @@ shinyServer(function(input, output, session) {
   shinyjs::hide("project-info-container")
   shinyjs::hide("site-info-container")
   shinyjs::hide("submit-site-complete-container")
+  shinyjs::hide("status-bar-container")
+  
+  projectName <<- NULL
   
   test <- shinyDirChoose(input, 'directory', updateFreq=60000, session=session, roots=c(home='~'), restrictions=system.file(package='base'), filetypes=c('', '.wav'))
   output$directorypath <- renderPrint({
@@ -76,7 +79,9 @@ shinyServer(function(input, output, session) {
       create_directory_tree(dirPath)
       load("www/dir_tree.Rdata")
       output$tree <- renderTree(tree, quoted = FALSE)
+      shinyjs::addClass("directory", "active-button")
       shinyjs::show("project-info-container")
+      shinyjs::show("status-bar-container")
       findFileCount()
     }
   })
@@ -95,6 +100,7 @@ shinyServer(function(input, output, session) {
         shinyjs::html("right-column-title",createCSVFilePath())
         oscillo(sound)
         shinyjs::show("site-info-container")
+        findFileInfo()
         shinyjs::show("submit-site-complete-container")
         shinyjs::onclick("playButton",playSound())
         shinyjs::onclick("submit-site-complete-container", increaseStatusBar())
@@ -141,6 +147,7 @@ shinyServer(function(input, output, session) {
   # LOAD IN SPECIES DROPDOWN
   
   shinyFileChoose(input, 'csvFile', updateFreq=60000, session=session, roots=c(home='~'), restrictions=system.file(package='base'))
+  shinyjs::onclick("csvFile",shinyjs::addClass("csvFile", "active-button"))
   filedata <- reactive({
     req(input$csvFile)
     infile <- parseFilePaths(roots=c(home='~'),input$csvFile)
@@ -232,12 +239,23 @@ shinyServer(function(input, output, session) {
   observeEvent(input$siteInfo, {
     # fileFullName <- unlist(get_selected(input$tree))
     # fileName <- sub(".wav", "", fileFullName)
+    fileFullName <- unlist(get_selected(input$tree))
+    filePathFull <- paste0(dirPath,"/",fileFullName)
     print(paste0(dirPath,"/",paste0(createCSVFilePath(),'.csv')))
     data <- formDataSite()
+    data <- c(data, as.character(minTimeVar))
+    names(data)[6] <- "start_time_date"
+    data <- c(data, as.character(maxTimeVar))
+    names(data)[7] <- "end_time_date"
     print(data)
     siteDF <<- data
     clipCount <<- 0
+    newFileName <- paste0(projectName,"_",data[[1]],"_",data[[6]])
+    newFullFilePath <- paste0(dirPath,"/",newFileName)
+    file.rename(filePathFull, paste0(newFullFilePath,".wav"))
+    browser()
     write.csv(data, paste0(dirPath,"/",paste0(createCSVFilePath(),'.csv')))
+    shinyjs::addClass("siteInfo", "active-button")
   })
   
   projectFields <- c("projectName", "projectNotes")
@@ -251,7 +269,9 @@ shinyServer(function(input, output, session) {
     print(paste0(dirPath,"/",'projectInfo.csv'))
     data <- formDataProject()
     print(data)
+    projectName <<- data[[1]]
     write.csv(data, paste0(dirPath,"/",'projectInfo.csv'))
+    shinyjs::addClass("projectInfo", "active-button")
   })
   
   speciesFields <- c("timeMin", "timeMax", "speciesDropdown", "typeDropdown")
@@ -281,7 +301,6 @@ shinyServer(function(input, output, session) {
   findFileCount = function() {
     projectFileCount <<- 0
     projectStatusCount <<- 0
-    tree <- list()
     files <- list.files(dirPath, all.files=F, recursive=T, include.dirs=T)
     for (i in 1:length(files)) {
       if (substrRight(files[i],4) == ".wav") {
@@ -294,6 +313,29 @@ shinyServer(function(input, output, session) {
   increaseStatusBar = function () {
     projectStatusCount <<- projectStatusCount + 1
     output$statusCount <- renderPrint({cat(projectStatusCount,"/",projectFileCount)})
+  }
+  
+  findFileInfo = function() {
+    files <- list.files(dirPath, all.files=F, recursive=T, include.dirs=T)
+    filesArray <<- 0
+    for (i in 1:length(files)) {
+      if (substrRight(files[i],4) == ".wav") {
+        fileName <- paste0(dirPath,"/",files[i])
+        filesArray <<- c(filesArray, fileName)
+      }
+    }
+    findMaxAndMinFileTimes(filesArray)
+  }
+  
+  findMaxAndMinFileTimes = function (filesArray){
+    timeArray <<- NULL
+    for (i in 2:length(filesArray)) {
+      timeArray <<- c(timeArray, file.info(filesArray[i])[[4]])
+    }
+    minTimeVar <<- as.POSIXct(min(timeArray), origin="1970-01-01")
+    maxTimeVar <<- as.POSIXct(max(timeArray), origin="1970-01-01")
+    output$minTime <- renderPrint({cat(as.character(minTimeVar))})
+    output$maxTime <- renderPrint({cat(as.character(maxTimeVar))})
   }
   
 })

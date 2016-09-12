@@ -143,6 +143,32 @@ section.sidebar .shiny-input-container {
   width: 99%;
 }
 
+#submit-site-complete-container {
+  margin-top: 2em;
+}
+
 #submit-site-complete {
   cursor: pointer;
+}
+
+#csvFile, #projectInfo, #directory, #siteInfo {
+  font-size: 1.15em;
+  border: none;
+  color: #e5e5e5;
+  padding: 0.5em;
+  margin: 0.5em auto;
+  text-decoration: none;
+  transition: background-color ease 0.33s;
+}
+
+.inactive-button {
+  background-color: #d62d34 !important;
+}
+
+.active-button {
+  background-color: #2CA02C !important;
+}
+
+.btn-default:hover {
+  background-color: #2CA02C !important;
 }
