@@ -6,7 +6,6 @@
 # install.packages("sound")
 # install.packages("audio")
 
-# fileInput max upload size is 30mb
 library(shiny)
 library(tools)
 library(devtools)
@@ -15,11 +14,15 @@ library(shinyFiles)
 # library("aws.s3")
 library(shinyTree)
 # install_github("trestletech/shinyStore")
-load_all('~/dev/emammal-soundburst/soundBurst/R')
+# load_all('~/dev/emammal-soundburst/soundBurst/R')
+load_all('~/Sites/zooniverse/soundBurst/R')
 library(audio)
 # setWavPlayer('"/Applications/QuickTime\ Player"')
 setWavPlayer("afplay")
 library(sound)
+source("createDirectoryTree.r")
+source("playSound.r")
+
 
 
 # play sound tags$audio(src = "audio.wav", type = "audio/wav", autoplay = NA, controls = NA)
@@ -27,38 +30,7 @@ library(sound)
 options(shiny.trace=TRUE)
 options(shiny.maxRequestSize=70*1024^2) 
 volumes <- getVolumes()
-
-getPath = function(folderList) {
-  # names <- get_selected(input$tree, "names")
-  one <- attr(folderList[[1L]], "ancestry", TRUE)
-  path <- paste(one, collapse = "/")
-  path <- paste0(path, "/")
-  return(path)
-}
-
-create_directory_tree = function(root) {
-  tree <- list()
-  files <- list.files(root, all.files=F, recursive=T, include.dirs=T)
-  print(root)
-
-  walk_directory = function(tree, path) {
-    fp <- file.path(root, path)
-    is_dir <- file.info(fp)$isdir
-    folders <- str_split(path, "/")[[1]]
-    if (is_dir) {
-      txt <- paste("tree", paste("$'", folders, "'", sep="", collapse=""), " = numeric(0)", sep="")
-    } else {
-      txt <- paste("tree", paste("$'", folders, "'", sep="", collapse=""), " = structure('', sticon='file')", sep="")
-    }
-    eval(parse(text = txt))
-    return(tree)
-  }
-  
-  for (i in 1:length(files)) {
-    tree = walk_directory(tree, files[i])
-  }
-  save(tree, file="www/dir_tree.Rdata")
-}
+paused <<- FALSE
 
 shinyServer(function(input, output, session) {
   shinyjs::onclick("remove",shinyjs::toggle(id = "tree", anim = TRUE))
@@ -87,6 +59,9 @@ shinyServer(function(input, output, session) {
     }
   })
   
+  shinyjs::onclick("playButton", playSound())
+  shinyjs::onclick("pauseButton", pauseSound())
+  
   observe({
     # Plot main spectrogram
     if (is.null(unlist(get_selected(input$tree))))
@@ -104,7 +79,6 @@ shinyServer(function(input, output, session) {
         shinyjs::show("site-info-container")
         findFileInfo()
         shinyjs::show("submit-site-complete-container")
-        shinyjs::onclick("playButton",playSound())
         shinyjs::onclick("submit-site-complete-container", increaseStatusBar())
       })
       # output$audiotag<-renderUI({
@@ -126,17 +100,37 @@ shinyServer(function(input, output, session) {
   }
   
   playSound = function (){
-    path <- getPath(get_selected(input$tree, "names"))
-    currDir <- paste0(dirPath, "/", path, unlist(get_selected(input$tree)))
-    sound <- readWave(currDir)
-    print(sound)
-    shinyjs::show(id = "pauseButton",anim = TRUE)
-    shinyjs::hide(id = "playButton",anim = FALSE)
-    a <- play(currDir)
-    a
-    # pause(a)
-    # shinyjs::onclick("pauseButton",pause(a))
+    if(paused)
+    {
+      resume(a)
+      shinyjs::show(id = "pauseButton",anim = TRUE)
+      shinyjs::hide(id = "playButton",anim = FALSE)
+    } 
+    else {
+      path <- getPath(get_selected(input$tree, "names"))
+      currDir <- paste0(dirPath, "/", path, unlist(get_selected(input$tree)))
+      # Use  from = 1, to = 5, units = "seconds" when playing from a certain time
+      wave <- readWave(currDir)
+      sound <- audioSample(wave@left, wave@samp.rate, wave@bit)
+      
+      shinyjs::show(id = "pauseButton",anim = TRUE)
+      shinyjs::hide(id = "playButton",anim = FALSE)
+      a <<- audio::play(sound)
+      a
+      # pause(a)
+      # shinyjs::onclick("pauseButton",pause(a))
+    }
   }
+
+  getPath = function(folderList) {
+    # names <- get_selected(input$tree, "names")
+    one <- attr(folderList[[1L]], "ancestry", TRUE)
+    path <- paste(one, collapse = "/")
+    path <- paste0(path, "/")
+    return(path)
+  }
+  
+
   
   # get_audio_tag<-function(filename){
   #   tags$audio(src = filename, type ="audio/wav", controls = NA)
