@@ -67,6 +67,7 @@ shinyServer(function(input, output, session) {
   shinyjs::hide("site-info-container")
   shinyjs::hide("submit-site-complete-container")
   shinyjs::hide("status-bar-container")
+  # shinyjs::hide("spectroClip")
   
   projectName <<- NULL
   
@@ -94,6 +95,7 @@ shinyServer(function(input, output, session) {
     } 
     else {
       output$spectrogram <- renderPlot({
+        anottationCount <<- 0
         path <- getPath(get_selected(input$tree, "names"))
         currDir <- paste0(dirPath, "/", path, unlist(get_selected(input$tree)))
         sound <- readWave(currDir)
@@ -114,8 +116,6 @@ shinyServer(function(input, output, session) {
     }
   })
   
-  shinyjs::hide("species-sidebox-container")
-  shinyjs::addClass("content-id", "content-all-open")
   shinyjs::onclick("show-species-sidebar", toggleRightColumn())
   
   toggleRightColumn = function (){
@@ -198,11 +198,14 @@ shinyServer(function(input, output, session) {
     path <- getPath(get_selected(input$tree, "names"))
     currDir <- paste0(dirPath, "/", path, unlist(get_selected(input$tree)))
     sound <- readWave(currDir)
-    oscillo(sound, from=input$plot_brush$xmin, to=input$plot_brush$xmax)
-    xmin <- input$plot_brush$xmin
-    xmax <- input$plot_brush$xmax
-    # shinyjs::html('remove',tags$div(class = "close-clip", "hello There"))
-    shinyjs::onclick("spectroClip",showSpeciesDropdown(xmin, xmax))
+    if(!is.null(input$plot_brush$xmax)) {
+      oscillo(sound, from=input$plot_brush$xmin, to=input$plot_brush$xmax)
+      # shinyjs::show("spectroClip")
+      xmin <- input$plot_brush$xmin
+      xmax <- input$plot_brush$xmax
+      # shinyjs::html('remove',tags$div(class = "close-clip", "hello There"))
+      shinyjs::onclick("spectroClip",showSpeciesDropdown(xmin, xmax)) 
+    }
   })
   
   showSpeciesDropdown = function (xmin, xmax){
@@ -311,6 +314,19 @@ shinyServer(function(input, output, session) {
       } 
     }
     output$statusCount <- renderPrint({cat(projectStatusCount,"/",projectFileCount)})
+    # output$statusCount <- renderUI({
+    #   for (i in 1:projectFileCount) {
+    #     tags$div(id = cat(i,"status"), "status")
+    #   }
+      # tags$div(id = cat(projectFileCount,"status"), createHTMLStatusDivs())
+    # })
+  }
+  
+  createHTMLStatusDivs = function() {
+    browser()
+    for (i in 1:projectFileCount) {
+      tags$div(id = cat(i,"status"), "status")
+    }
   }
   
   increaseStatusBar = function () {
