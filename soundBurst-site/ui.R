@@ -15,8 +15,8 @@ dashboardPage(
     includeCSS("main.css"),
     column(12,
       div(id = "status-bar-container",
-          div(id = "status-bar", "Status"),
-          uiOutput("statusCount")),
+              uiOutput(outputId = "progressOne")
+          ),
       div(id = "left-column-title", "Select a Project"),
       shinyDirButton('directory', class = 'inactive-button', 'Folder select', 'Please select a folder'),
       useShinyjs(),
