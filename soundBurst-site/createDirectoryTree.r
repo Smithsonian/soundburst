@@ -1,6 +1,6 @@
 create_directory_tree = function(root) {
   tree <- list()
-  files <- list.files(root, all.files=F, recursive=T, include.dirs=T)
+  files <- list.files(root, all.files=F, recursive=T, include.dirs=T, pattern = "\\.wav$")
   print(root)
   
   walk_directory = function(tree, path) {
