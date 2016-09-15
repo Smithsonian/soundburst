@@ -142,7 +142,7 @@ shinyServer(function(input, output, session) {
   playSound = function (){
     if(paused)
     {
-      resume(a)
+      resume(audioSound)
       shinyjs::show(id = "pauseButton",anim = TRUE)
       shinyjs::hide(id = "playButton",anim = FALSE)
     } 
@@ -155,11 +155,18 @@ shinyServer(function(input, output, session) {
       
       shinyjs::show(id = "pauseButton",anim = TRUE)
       shinyjs::hide(id = "playButton",anim = FALSE)
-      a <<- audio::play(sound)
-      a
+      audioSound <<- audio::play(sound)
+      audioSound
       # pause(a)
       # shinyjs::onclick("pauseButton",pause(a))
     }
+  }
+  
+  pauseSound = function () {
+    paused <<- TRUE
+    pause(audioSound)
+    shinyjs::hide(id = "pauseButton", anim = TRUE)
+    shinyjs::show(id = "playButton", anim = FALSE)
   }
 
   getPath = function(folderList) {
@@ -292,6 +299,20 @@ shinyServer(function(input, output, session) {
     newFileName <- paste0(projectName,"_",data[[1]],"_",fileDate)
     shinyjs::html("right-column-title",newFileName)
     newFullFilePath <- paste0(dirPath,"/",newFileName)
+    
+    # Update tree
+    load("www/dir_tree.Rdata")
+    count <- 0
+    for (name in names(tree)) {
+      count = count + 1
+      if(name == unlist(get_selected(input$tree)))
+      {
+        print(count)
+        names(tree)[count] <- paste0(newFileName, ".wav")
+      }
+    }
+    output$tree <- renderTree(tree, quoted = FALSE)
+    
     file.rename(filePathFull, paste0(newFullFilePath,".wav"))
     write.csv(data, paste0(dirPath,"/",paste0(newFileName,'.csv')))
     shinyjs::addClass("siteInfo", "active-button")
