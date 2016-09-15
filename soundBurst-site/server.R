@@ -15,7 +15,7 @@ library(shinyFiles)
 library(shinyTree)
 # install_github("trestletech/shinyStore")
 # load_all('~/dev/emammal-soundburst/soundBurst/R')
-load_all('~/Sites/zooniverse/soundBurst/R')
+load_all('~/dev/emammal-soundBurst/soundBurst/R')
 library(audio)
 # setWavPlayer('"/Applications/QuickTime\ Player"')
 setWavPlayer("afplay")
@@ -32,6 +32,46 @@ options(shiny.maxRequestSize=70*1024^2)
 volumes <- getVolumes()
 paused <<- FALSE
 
+progressBar <- function(value = 0, label = FALSE, color = "aqua", size = NULL,
+                        striped = FALSE, active = FALSE, vertical = FALSE) {
+  stopifnot(is.numeric(value))
+  if (value < 0 || value > 100)
+    stop("'value' should be in the range from 0 to 100.", call. = FALSE)
+  if (!(color %in% shinydashboard:::validColors || color %in% shinydashboard:::validStatuses))
+    stop("'color' should be a valid status or color.", call. = FALSE)
+  if (!is.null(size))
+    size <- match.arg(size, c("sm", "xs", "xxs"))
+  text_value <- paste0(value, "%")
+  style <- htmltools::css(width = text_value)
+  tags$div(
+    class = "progress",
+    class = if (!is.null(size)) paste0("progress-", size),
+    tags$div(
+      class = "progress-bar",
+      class = paste0("progress-bar-", color),
+      style = style,
+      role = "progressbar",
+      `aria-valuenow` = value,
+      `aria-valuemin` = 0,
+      `aria-valuemax` = 100,
+      tags$span(class = if (!label) "sr-only", text_value)
+    )
+  )
+}
+
+progressGroup <- function(text, value, min = 0, max = value, color = "aqua") {
+  stopifnot(is.character(text))
+  stopifnot(is.numeric(value))
+  if (value < min || value > max)
+    stop(sprintf("'value' should be in the range from %d to %d.", min, max), call. = FALSE)
+  tags$div(
+    class = "progress-group",
+    tags$span(class = "progress-text", text),
+    tags$span(class = "progress-number", sprintf("%d / %d", value, max)),
+    progressBar(round(value / max * 100), color = color, size = "sm")
+  )
+}
+
 shinyServer(function(input, output, session) {
   shinyjs::onclick("remove",shinyjs::toggle(id = "tree", anim = TRUE))
   shinyjs::hide("pauseButton")
@@ -39,6 +79,7 @@ shinyServer(function(input, output, session) {
   shinyjs::hide("site-info-container")
   shinyjs::hide("submit-site-complete-container")
   shinyjs::hide("status-bar-container")
+  # shinyjs::hide("spectroClip")
   
   projectName <<- NULL
   
@@ -69,6 +110,7 @@ shinyServer(function(input, output, session) {
     } 
     else {
       output$spectrogram <- renderPlot({
+        anottationCount <<- 0
         path <- getPath(get_selected(input$tree, "names"))
         currDir <- paste0(dirPath, "/", path, unlist(get_selected(input$tree)))
         sound <- readWave(currDir)
@@ -88,8 +130,6 @@ shinyServer(function(input, output, session) {
     }
   })
   
-  shinyjs::hide("species-sidebox-container")
-  shinyjs::addClass("content-id", "content-all-open")
   shinyjs::onclick("show-species-sidebar", toggleRightColumn())
   
   toggleRightColumn = function (){
@@ -199,11 +239,14 @@ shinyServer(function(input, output, session) {
     path <- getPath(get_selected(input$tree, "names"))
     currDir <- paste0(dirPath, "/", path, unlist(get_selected(input$tree)))
     sound <- readWave(currDir)
-    oscillo(sound, from=input$plot_brush$xmin, to=input$plot_brush$xmax)
-    xmin <- input$plot_brush$xmin
-    xmax <- input$plot_brush$xmax
-    # shinyjs::html('remove',tags$div(class = "close-clip", "hello There"))
-    shinyjs::onclick("spectroClip",showSpeciesDropdown(xmin, xmax))
+    if(!is.null(input$plot_brush$xmax)) {
+      oscillo(sound, from=input$plot_brush$xmin, to=input$plot_brush$xmax)
+      # shinyjs::show("spectroClip")
+      xmin <- input$plot_brush$xmin
+      xmax <- input$plot_brush$xmax
+      # shinyjs::html('remove',tags$div(class = "close-clip", "hello There"))
+      shinyjs::onclick("spectroClip",showSpeciesDropdown(xmin, xmax)) 
+    }
   })
   
   showSpeciesDropdown = function (xmin, xmax){
@@ -327,10 +370,9 @@ shinyServer(function(input, output, session) {
     }
     output$statusCount <- renderPrint({cat(projectStatusCount,"/",projectFileCount)})
   }
-  
+
   increaseStatusBar = function () {
-    projectStatusCount <<- projectStatusCount + 1
-    output$statusCount <- renderPrint({cat(projectStatusCount,"/",projectFileCount)})
+    progressValue$one <- progressValue$one + 1
   }
   
   findFileInfo = function() {
@@ -355,6 +397,20 @@ shinyServer(function(input, output, session) {
     output$minTime <- renderPrint({cat(as.character(minTimeVar))})
     output$maxTime <- renderPrint({cat(as.character(maxTimeVar))})
   }
+  
+  # Create some REACTIVE VALUES
+  progressValue <- reactiveValues()
+  progressValue$one <- 0
+  
+  # Render UI output
+  output$progressOne <- renderUI({
+    progressGroup(text = "Status",    value = progressValue$one,   min = 0, max = projectFileCount, color = "aqua")
+  })
+  
+  # Then on action button, allow bar to move up.
+  # observeEvent(input$goButton, {
+  #   progressValue$one <- progressValue$one + 1
+  # })
   
 })
 
