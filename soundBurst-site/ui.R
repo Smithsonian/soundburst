@@ -68,7 +68,14 @@ dashboardPage(
     div(id = "playButton"),
     div(id = "pauseButton"),
     plotOutput("spectrogram", brush = brushOpts(id = "plot_brush", direction = "x", resetOnNew = TRUE)),
-    # textOutput('speciesName'),
+    div(id = "time-box-container",
+        div(id = "secondary-time-box-container",
+          div(id = "close-time-box", "X"),
+          HTML('<label>Add Time to Increment Display (mins)</label>'),
+          textInput("spectroEndTime", "Mins to Increment", 1),
+          actionButton("spectroTimeSubmit", "Submit")
+      )
+    ),
     useShinyjs(),
     column(width = 4, id = "spectro-clip-container",
            plotOutput("spectroClip"),

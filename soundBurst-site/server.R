@@ -80,8 +80,10 @@ shinyServer(function(input, output, session) {
   shinyjs::hide("submit-site-complete-container")
   shinyjs::hide("status-bar-container")
   # shinyjs::hide("spectroClip")
+  shinyjs::hide("time-box-container")
   
   projectName <<- NULL
+  spectroFromTime <<- 0
   
   test <- shinyDirChoose(input, 'directory', updateFreq=60000, session=session, roots=c(home='~'), restrictions=system.file(package='base'), filetypes=c('', '.wav'))
   output$directorypath <- renderPrint({
@@ -109,27 +111,38 @@ shinyServer(function(input, output, session) {
       return()
     } 
     else {
-      output$spectrogram <- renderPlot({
-        anottationCount <<- 0
-        path <- getPath(get_selected(input$tree, "names"))
-        currDir <- paste0(dirPath, "/", path, unlist(get_selected(input$tree)))
-        sound <- readWave(currDir)
-        shinyjs::html("right-column-title",createCSVFilePath())
-        oscillo(sound)
-        shinyjs::show("site-info-container")
-        findFileInfo()
-        shinyjs::show("submit-site-complete-container")
-        shinyjs::onclick("submit-site-complete-container", increaseStatusBar())
-      })
-      # output$audiotag<-renderUI({
-      #   path <- getPath(get_selected(input$tree, "names"))
-      #   currDir <- paste0(dirPath, path, unlist(get_selected(input$tree)))
-      #   print(currDir)
-      #   get_audio_tag(currDir)
-      # })
+      path <- getPath(get_selected(input$tree, "names"))
+      currDir <- paste0(dirPath, "/", path, unlist(get_selected(input$tree)))
+      sound <- readWave(currDir)
+      l <- length(sound@left)
+      sr <- sound@samp.rate
+      soundDuration <- round(l/sr,2)
+      if (soundDuration > 59) {
+        shinyjs::show("time-box-container")
+        observeEvent(input$spectroTimeSubmit, {
+          spectroToTime <<- as.numeric(input$spectroEndTime) * 60
+          renderSpectro(sound)
+        }) 
+      } else {
+        spectroToTime <<- soundDuration
+        renderSpectro(sound)
+      }
     }
   })
   
+  renderSpectro = function (sound){
+    output$spectrogram <- renderPlot({
+      shinyjs::hide("time-box-container")
+      anottationCount <<- 0
+      shinyjs::html("right-column-title",createCSVFilePath())
+      oscillo(sound, from=spectroFromTime, to=spectroToTime)
+      shinyjs::show("site-info-container")
+      findFileInfo()
+      shinyjs::show("submit-site-complete-container")
+      shinyjs::onclick("submit-site-complete-container", increaseStatusBar())
+      # spectroFromTime <<- spectroToTime
+    })
+  }
   shinyjs::onclick("show-species-sidebar", toggleRightColumn())
   
   toggleRightColumn = function (){
@@ -265,6 +278,7 @@ shinyServer(function(input, output, session) {
   }
   
   shinyjs::onclick("close-species-drop",shinyjs::hide("clip-species-dropdown"))
+  shinyjs::onclick("close-time-box",shinyjs::hide("time-box-container"))
   shinyjs::hide("clip-species-dropdown")
   
   siteFields <- c("name", "lat", "lon", "recId", "siteNotes")

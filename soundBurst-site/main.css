@@ -31,7 +31,7 @@ label {
   width: 100%;
 }
 
-#close-species-drop {
+#close-species-drop, #close-time-box {
   position: absolute;
   right: 0.5em;
   top: 0;
@@ -171,4 +171,17 @@ section.sidebar .shiny-input-container {
 
 .btn-default:hover {
   background-color: #2CA02C !important;
+}
+
+#time-box-container {
+  width: 100%;
+}
+
+#secondary-time-box-container {
+  background: white;
+  padding: 1em;
+  width: 20em;
+  position: relative;
+  margin: 0 auto;
+  z-index: 1000;
 }
