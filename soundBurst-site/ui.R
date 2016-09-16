@@ -76,6 +76,10 @@ dashboardPage(
           actionButton("spectroTimeSubmit", "Submit")
       )
     ),
+    div(id = "spectro-increment-container",
+          div(id = "previous-spectro-increment", "Previous Increment"),
+          div(id = "next-spectro-increment", "Next Increment")
+        ),
     useShinyjs(),
     column(width = 4, id = "spectro-clip-container",
            plotOutput("spectroClip"),

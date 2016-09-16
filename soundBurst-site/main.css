@@ -185,3 +185,14 @@ section.sidebar .shiny-input-container {
   margin: 0 auto;
   z-index: 1000;
 }
+
+#spectro-increment-container {
+  margin: 0 auto;
+  position: relative;
+  width: 20em;
+}
+
+#previous-spectro-increment {
+  margin-right: 5em;
+  float: left;
+}
