@@ -20,7 +20,6 @@ dashboardPage(
       div(id = "left-column-title", "Select a Project"),
       shinyDirButton('directory', class = 'inactive-button', 'Folder select', 'Please select a folder'),
       useShinyjs(),
-      div(id = "remove", "Remove Files"),
       div(id = "project-info-container", 
           div(id = "left-column-title", "Enter Project Info:"),
           textInput("projectName", " Name:", "Project Name"),

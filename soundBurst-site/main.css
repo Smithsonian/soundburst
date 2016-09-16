@@ -193,6 +193,13 @@ section.sidebar .shiny-input-container {
 }
 
 #previous-spectro-increment {
-  margin-right: 5em;
-  float: left;
+  position: absolute;
+}
+
+#next-spectro-increment {
+  margin-left: 13em;
+}
+
+#previous-spectro-increment, #next-spectro-increment {
+  cursor: pointer;
 }

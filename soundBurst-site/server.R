@@ -73,7 +73,6 @@ progressGroup <- function(text, value, min = 0, max = value, color = "aqua") {
 }
 
 shinyServer(function(input, output, session) {
-  shinyjs::onclick("remove",shinyjs::toggle(id = "tree", anim = TRUE))
   shinyjs::hide("pauseButton")
   shinyjs::hide("project-info-container")
   shinyjs::hide("site-info-container")
@@ -81,6 +80,8 @@ shinyServer(function(input, output, session) {
   shinyjs::hide("status-bar-container")
   # shinyjs::hide("spectroClip")
   shinyjs::hide("time-box-container")
+  shinyjs::hide("spectro-increment-container")
+  shinyjs::hide("previous-spectro-increment")
   
   projectName <<- NULL
   spectroFromTime <<- 0
@@ -119,9 +120,13 @@ shinyServer(function(input, output, session) {
       soundDuration <- round(l/sr,2)
       if (soundDuration > 59) {
         shinyjs::show("time-box-container")
-        observeEvent(input$spectroTimeSubmit, {
-          spectroToTime <<- as.numeric(input$spectroEndTime) * 60
+          observeEvent(input$spectroTimeSubmit, {
+          incrementAmount <<- as.numeric(input$spectroEndTime) * 60
+          spectroToTime <<- incrementAmount
           renderSpectro(sound)
+          if (soundDuration > incrementAmount) {
+            shinyjs::show("spectro-increment-container")
+          }
         }) 
       } else {
         spectroToTime <<- soundDuration
@@ -143,6 +148,34 @@ shinyServer(function(input, output, session) {
       # spectroFromTime <<- spectroToTime
     })
   }
+  
+  shinyjs::onclick("previous-spectro-increment", showPreviousSpectroIncrement())
+  shinyjs::onclick("next-spectro-increment", showNextSpectroIncrement())
+  
+  showPreviousSpectroIncrement = function() {
+    path <- getPath(get_selected(input$tree, "names"))
+    currDir <- paste0(dirPath, "/", path, unlist(get_selected(input$tree)))
+    sound <- readWave(currDir)
+    spectroToTime <<- spectroToTime - incrementAmount
+    spectroFromTime <<- spectroFromTime - incrementAmount
+    renderSpectro(sound)
+    if (spectroFromTime == 0) {
+      shinyjs::hide("previous-spectro-increment")
+    }
+    print('clicked')
+  }
+  
+  showNextSpectroIncrement = function() {
+    path <- getPath(get_selected(input$tree, "names"))
+    currDir <- paste0(dirPath, "/", path, unlist(get_selected(input$tree)))
+    sound <- readWave(currDir)
+    shinyjs::show("previous-spectro-increment")
+    spectroToTime <<- spectroToTime + incrementAmount
+    spectroFromTime <<- spectroFromTime + incrementAmount
+    renderSpectro(sound)
+    print('clicked')
+  }
+  
   shinyjs::onclick("show-species-sidebar", toggleRightColumn())
   
   toggleRightColumn = function (){
@@ -211,7 +244,8 @@ shinyServer(function(input, output, session) {
   })
   
   output$commonName <- renderUI({
-    df <-filedata()
+    
+      df <<-filedata() 
 
     if (is.null(df)) return(NULL)
 
@@ -257,7 +291,6 @@ shinyServer(function(input, output, session) {
       # shinyjs::show("spectroClip")
       xmin <- input$plot_brush$xmin
       xmax <- input$plot_brush$xmax
-      # shinyjs::html('remove',tags$div(class = "close-clip", "hello There"))
       shinyjs::onclick("spectroClip",showSpeciesDropdown(xmin, xmax)) 
     }
   })
