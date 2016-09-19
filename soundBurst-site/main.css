@@ -2,11 +2,6 @@ label {
   margin-top: 5%;
 }
 
-.content {
-  width: 80%;
-  margin-left: 0;
-}
-
 #playButton, #pauseButton {
   position: absolute;
   height: 20px;
@@ -69,7 +64,6 @@ label {
 #species-sidebox-container {
   position: absolute;
   right: 0px;
-  padding-top: 65px;
   height: 100%;
   width: 100%;
   background: #222d32;
@@ -81,15 +75,11 @@ label {
   height: 100%;
 }
 
-#species-select-file-container {
-  margin-top: 2em;
+#left-column-title, #enter-project-info-label, #show-tree, #species-file-upload {
+  cursor: pointer;
 }
 
-#left-column-title {
-  font-size: 1.5em;
-}
-
-#right-column-title {
+#left-column-title, #species-file-upload, #right-column-title, #enter-project-info-label, #show-tree {
   font-size: 1.5em;
 }
 
@@ -137,10 +127,6 @@ label {
 
 section.sidebar .shiny-input-container {
   padding: 0;
-}
-
-.content-all-open {
-  width: 99%;
 }
 
 #submit-site-complete-container {
@@ -202,4 +188,11 @@ section.sidebar .shiny-input-container {
 
 #previous-spectro-increment, #next-spectro-increment {
   cursor: pointer;
+}
+
+#directorypath {
+  padding: 0px;
+  color: #222D32;
+  background-color: #222D32;
+  border: none;
 }

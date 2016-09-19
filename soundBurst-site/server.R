@@ -73,6 +73,12 @@ progressGroup <- function(text, value, min = 0, max = value, color = "aqua") {
 }
 
 shinyServer(function(input, output, session) {
+  shinyjs::onclick("left-column-title", shinyjs::toggle("directory", anim = TRUE))
+  shinyjs::onclick("species-file-upload", shinyjs::toggle("csvFile", anim = TRUE))
+  shinyjs::onclick("enter-project-info-label", shinyjs::toggle("project-info-container", anim = TRUE))
+  shinyjs::onclick("right-column-title", shinyjs::toggle("site-info-container", anim = TRUE))
+  shinyjs::hide("csvFile")
+  shinyjs::onclick("show-tree", toggleTree())
   shinyjs::hide("pauseButton")
   shinyjs::hide("project-info-container")
   shinyjs::hide("site-info-container")
@@ -82,6 +88,24 @@ shinyServer(function(input, output, session) {
   shinyjs::hide("time-box-container")
   shinyjs::hide("spectro-increment-container")
   shinyjs::hide("previous-spectro-increment")
+  shinyjs::hide("tree")
+  shinyjs::hide("directorypath")
+  shinyjs::hide(id = "playButton",anim = FALSE)
+  
+  shinyjs::onclick("sF-selectButton", toggleAfterProjectSelect())
+  
+  toggleAfterProjectSelect = function (){
+    shinyjs::hide("directory", anim = TRUE)
+    shinyjs::show("directorypath")
+    shinyjs::show("csvFile")
+    shinyjs::show("project-info-container")
+    dirPath <<- parseDirPath(roots=c(home='~'), input$directory)
+  }
+  
+  toggleTree = function() {
+    shinyjs::toggle("directorypath", anim = TRUE)
+    shinyjs::toggle("tree", anim = TRUE)
+  }
   
   projectName <<- NULL
   spectroFromTime <<- 0
@@ -92,14 +116,13 @@ shinyServer(function(input, output, session) {
     folders <- list.dirs(dirPath, full.names = F, recursive = TRUE)
     
     if(!(is.null(dirPath))) {
+      shinyjs::show("status-bar-container")
       create_directory_tree(dirPath)
       load("www/dir_tree.Rdata")
       output$tree <- renderTree(tree, quoted = FALSE)
       shinyjs::addClass("directory", "active-button")
-      shinyjs::show("project-info-container")
-      shinyjs::show("status-bar-container")
-      findFileCount()
     }
+    findFileCount()
   })
   
   shinyjs::onclick("playButton", playSound())
@@ -132,6 +155,8 @@ shinyServer(function(input, output, session) {
         spectroToTime <<- soundDuration
         renderSpectro(sound)
       }
+      shinyjs::show("playButton",anim = FALSE)
+      shinyjs::show("site-info-container")
     }
   })
   
@@ -139,7 +164,7 @@ shinyServer(function(input, output, session) {
     output$spectrogram <- renderPlot({
       shinyjs::hide("time-box-container")
       anottationCount <<- 0
-      shinyjs::html("right-column-title",createCSVFilePath())
+      # shinyjs::html("right-column-title",createCSVFilePath())
       oscillo(sound, from=spectroFromTime, to=spectroToTime)
       shinyjs::show("site-info-container")
       findFileInfo()
@@ -175,16 +200,7 @@ shinyServer(function(input, output, session) {
     renderSpectro(sound)
     print('clicked')
   }
-  
-  shinyjs::onclick("show-species-sidebar", toggleRightColumn())
-  
-  toggleRightColumn = function (){
-    shinyjs::toggleClass("show-species-sidebar-container", "move-marker-right")
-    shinyjs::toggleClass("show-species-sidebar-container", "position-marker-left")
-    shinyjs::toggleClass("content-id", "content-all-open")
-    shinyjs::toggle("species-sidebox-container")
-  }
-  
+
   playSound = function (){
     if(paused)
     {
@@ -344,7 +360,7 @@ shinyServer(function(input, output, session) {
     fileDate <- gsub(" ", "-",data[[6]], fixed = TRUE)
     fileDate <- gsub(":", "-",fileDate, fixed = TRUE)
     newFileName <- paste0(projectName,"_",data[[1]],"_",fileDate)
-    shinyjs::html("right-column-title",newFileName)
+    # shinyjs::html("right-column-title",newFileName)
     newFullFilePath <- paste0(dirPath,"/",newFileName)
     
     # Update tree
@@ -378,7 +394,11 @@ shinyServer(function(input, output, session) {
     print(data)
     projectName <<- data[[1]]
     write.csv(data, paste0(dirPath,"/",'projectInfo.csv'))
+    shinyjs::hide("csvFile", anim = TRUE)
+    shinyjs::hide("directory", anim = TRUE)
     shinyjs::addClass("projectInfo", "active-button")
+    shinyjs::hide("project-info-container")
+    shinyjs::show("tree")
   })
   
   speciesFields <- c("timeMin", "timeMax", "speciesDropdown", "typeDropdown", "annotNotes")
@@ -407,19 +427,25 @@ shinyServer(function(input, output, session) {
   }
 
   findFileCount = function() {
-    projectFileCount <<- 0
+    projectFileCount <- 0
     projectStatusCount <<- 0
     files <- list.files(dirPath, all.files=F, recursive=T, include.dirs=T)
     for (i in 1:length(files)) {
       if (substrRight(files[i],4) == ".wav") {
-        projectFileCount <<- projectFileCount +1
+        projectFileCount <- projectFileCount +1
       } 
     }
-    output$statusCount <- renderPrint({cat(projectStatusCount,"/",projectFileCount)})
+    # Create some REACTIVE VALUES
+    progressValue <<- reactiveValues()
+    progressValue$one <<- 0
+    # Render UI output
+    output$progressOne <- renderUI({
+      progressGroup(text = "Status",    value = progressValue$one,   min = 0, max = projectFileCount, color = "aqua")
+    })
   }
 
   increaseStatusBar = function () {
-    progressValue$one <- progressValue$one + 1
+    progressValue$one <<- progressValue$one + 1
   }
   
   findFileInfo = function() {
@@ -444,20 +470,6 @@ shinyServer(function(input, output, session) {
     output$minTime <- renderPrint({cat(as.character(minTimeVar))})
     output$maxTime <- renderPrint({cat(as.character(maxTimeVar))})
   }
-  
-  # Create some REACTIVE VALUES
-  progressValue <- reactiveValues()
-  progressValue$one <- 0
-  
-  # Render UI output
-  output$progressOne <- renderUI({
-    progressGroup(text = "Status",    value = progressValue$one,   min = 0, max = projectFileCount, color = "aqua")
-  })
-  
-  # Then on action button, allow bar to move up.
-  # observeEvent(input$goButton, {
-  #   progressValue$one <- progressValue$one + 1
-  # })
-  
+
 })
 
