@@ -17,14 +17,14 @@ dashboardPage(
       div(id = "status-bar-container",
               uiOutput(outputId = "progressOne")
           ),
-      div(id = "left-column-title", "Select a Project"),
+      div(id = "left-column-title", class = "open-accordian", "Select a Project"),
       shinyDirButton('directory', class = 'inactive-button', 'Folder select', 'Please select a folder'),
       div(id = "species-select-file-container",
-          div(id = "species-file-upload", "Upload Species File"),
+          div(id = "species-file-upload", class = "completed-step closed-accordian", "Load New Species CSV?"),
           shinyFilesButton('csvFile', class = "inactive-button", 'File select', 'Please select a file', FALSE)
       ),
       useShinyjs(),
-      div(id = "enter-project-info-label", "Enter Project Info"),
+      div(id = "enter-project-info-label", class = "closed-accordian", "Enter Project Info"),
       div(id = "project-info-container", 
           textInput("projectName", " Name:", "Project Name"),
           HTML('<label>Project Notes:</label>'),
@@ -32,9 +32,9 @@ dashboardPage(
           # textInput("projectNotes", "Project Notes:", "Project Notes"),
           actionButton("projectInfo", class = "inactive-button", "Submit")
           ),
-      div(id = "show-tree", "Select a Deployment"),
+      div(id = "show-tree", class = "closed-accordian", "Select a Deployment"),
       shinyTree("tree"),
-      div(id = "right-column-title", "Enter Deployment Info"),
+      div(id = "right-column-title", class = "closed-accordian", "Enter Deployment Info"),
       div(id = "species-sidebox-container",
           column(width = 2, id = "species-sidebox",
                  div(id = "site-info-container", 
@@ -51,9 +51,10 @@ dashboardPage(
                      # textInput("siteNotes", "Site Notes:", "Notes"),
                      actionButton("siteInfo", class = "inactive-button", "Submit")
                  ),
-                 div(id = "submit-site-complete-container", 
-                     div(id = "submit-site-text", "When you have submited data for all clips on a given site, click below and move on to the next"),
-                     div(id = "submit-site-complete", "Finish Site"))
+                 div(id = "complete-deployment", "Complete Deployment")
+                 # div(id = "submit-site-complete-container", 
+                 #     div(id = "submit-site-text", "When you have submited data for all clips on a given site, click below and move on to the next"),
+                 #     div(id = "submit-site-complete", "Finish Site"))
           )),
       verbatimTextOutput('directorypath')
     )

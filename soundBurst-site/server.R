@@ -73,16 +73,16 @@ progressGroup <- function(text, value, min = 0, max = value, color = "aqua") {
 }
 
 shinyServer(function(input, output, session) {
-  shinyjs::onclick("left-column-title", shinyjs::toggle("directory", anim = TRUE))
-  shinyjs::onclick("species-file-upload", shinyjs::toggle("csvFile", anim = TRUE))
-  shinyjs::onclick("enter-project-info-label", shinyjs::toggle("project-info-container", anim = TRUE))
-  shinyjs::onclick("right-column-title", shinyjs::toggle("site-info-container", anim = TRUE))
+  shinyjs::onclick("left-column-title", toggleProjectSelect())
+  shinyjs::onclick("species-file-upload", togglecsvFileUploadButton())
+  shinyjs::onclick("enter-project-info-label", toggleProjectInfoDisplay())
+  shinyjs::onclick("right-column-title", toggleSiteInfoContainer())
   shinyjs::hide("csvFile")
   shinyjs::onclick("show-tree", toggleTree())
   shinyjs::hide("pauseButton")
   shinyjs::hide("project-info-container")
   shinyjs::hide("site-info-container")
-  shinyjs::hide("submit-site-complete-container")
+  shinyjs::hide("complete-deployment")
   shinyjs::hide("status-bar-container")
   # shinyjs::hide("spectroClip")
   shinyjs::hide("time-box-container")
@@ -94,15 +94,45 @@ shinyServer(function(input, output, session) {
   
   shinyjs::onclick("sF-selectButton", toggleAfterProjectSelect())
   
+  toggleProjectSelect = function() {
+    shinyjs::toggle("directory", anim = TRUE)
+    shinyjs::toggleClass("left-column-title", "open-accordian")
+    shinyjs::toggleClass("left-column-title", "closed-accordian")
+  }
+  
+  toggleProjectInfoDisplay = function() {
+    shinyjs::toggle("project-info-container", anim = TRUE)
+    shinyjs::toggleClass("enter-project-info-label", "open-accordian")
+    shinyjs::toggleClass("enter-project-info-label", "closed-accordian")
+  }
+  
+  togglecsvFileUploadButton = function() {
+    shinyjs::toggle("csvFile", anim = TRUE)
+    shinyjs::toggleClass("species-file-upload", "open-accordian")
+    shinyjs::toggleClass("species-file-upload", "closed-accordian")
+  }
+  
+  toggleSiteInfoContainer = function() {
+    shinyjs::toggle("site-info-container", anim = TRUE)
+    shinyjs::toggleClass("right-column-title", "open-accordian")
+    shinyjs::toggleClass("right-column-title", "closed-accordian")
+  }
+  
   toggleAfterProjectSelect = function (){
     shinyjs::hide("directory", anim = TRUE)
+    shinyjs::addClass("left-column-title", "completed-step")
     shinyjs::show("directorypath")
-    shinyjs::show("csvFile")
     shinyjs::show("project-info-container")
+    shinyjs::toggleClass("left-column-title", "open-accordian")
+    shinyjs::toggleClass("left-column-title", "closed-accordian")
+    shinyjs::toggleClass("enter-project-info-label", "open-accordian")
+    shinyjs::toggleClass("enter-project-info-label", "closed-accordian")
     dirPath <<- parseDirPath(roots=c(home='~'), input$directory)
   }
   
   toggleTree = function() {
+    shinyjs::toggleClass("show-tree", "open-accordian")
+    shinyjs::toggleClass("show-tree", "closed-accordian")
     shinyjs::toggle("directorypath", anim = TRUE)
     shinyjs::toggle("tree", anim = TRUE)
   }
@@ -157,6 +187,8 @@ shinyServer(function(input, output, session) {
       }
       shinyjs::show("playButton",anim = FALSE)
       shinyjs::show("site-info-container")
+      shinyjs::toggleClass("right-column-title", "open-accordian")
+      shinyjs::toggleClass("right-column-title", "closed-accordian")
     }
   })
   
@@ -166,10 +198,11 @@ shinyServer(function(input, output, session) {
       anottationCount <<- 0
       # shinyjs::html("right-column-title",createCSVFilePath())
       oscillo(sound, from=spectroFromTime, to=spectroToTime)
+      shinyjs::removeClass("right-column-title", "completed-step")
       shinyjs::show("site-info-container")
       findFileInfo()
-      shinyjs::show("submit-site-complete-container")
-      shinyjs::onclick("submit-site-complete-container", increaseStatusBar())
+      shinyjs::show("complete-deployment")
+      shinyjs::onclick("complete-deployment", increaseStatusBar())
       # spectroFromTime <<- spectroToTime
     })
   }
@@ -379,6 +412,10 @@ shinyServer(function(input, output, session) {
     file.rename(filePathFull, paste0(newFullFilePath,".wav"))
     write.csv(data, paste0(dirPath,"/",paste0(newFileName,'.csv')))
     shinyjs::addClass("siteInfo", "active-button")
+    shinyjs::hide("site-info-container")
+    shinyjs::addClass("right-column-title", "completed-step")
+    shinyjs::toggleClass("right-column-title", "open-accordian")
+    shinyjs::toggleClass("right-column-title", "closed-accordian")
   })
   
   projectFields <- c("projectName", "projectNotes")
@@ -398,6 +435,11 @@ shinyServer(function(input, output, session) {
     shinyjs::hide("directory", anim = TRUE)
     shinyjs::addClass("projectInfo", "active-button")
     shinyjs::hide("project-info-container")
+    shinyjs::addClass("enter-project-info-label", "completed-step")
+    shinyjs::toggleClass("enter-project-info-label", "open-accordian")
+    shinyjs::toggleClass("enter-project-info-label", "closed-accordian")
+    shinyjs::toggleClass("show-tree", "open-accordian")
+    shinyjs::toggleClass("show-tree", "closed-accordian")
     shinyjs::show("tree")
   })
   

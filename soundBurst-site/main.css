@@ -1,3 +1,7 @@
+.content-wrapper {
+  margin-left: 20% !important;
+}
+
 label {
   margin-top: 5%;
 }
@@ -75,11 +79,11 @@ label {
   height: 100%;
 }
 
-#left-column-title, #enter-project-info-label, #show-tree, #species-file-upload {
+#left-column-title, #enter-project-info-label, #show-tree, #species-file-upload, #complete-deployment, #right-column-title {
   cursor: pointer;
 }
 
-#left-column-title, #species-file-upload, #right-column-title, #enter-project-info-label, #show-tree {
+#left-column-title, #species-file-upload, #right-column-title, #enter-project-info-label, #show-tree, #complete-deployment {
   font-size: 1.5em;
 }
 
@@ -195,4 +199,8 @@ section.sidebar .shiny-input-container {
   color: #222D32;
   background-color: #222D32;
   border: none;
+}
+
+.completed-step {
+  color: #3C8DBC;
 }
