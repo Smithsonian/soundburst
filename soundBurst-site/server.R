@@ -73,11 +73,15 @@ progressGroup <- function(text, value, min = 0, max = value, color = "aqua") {
 }
 
 shinyServer(function(input, output, session) {
+  
+  projectName <<- NULL
+  spectroFromTime <<- 0
+
   shinyjs::onclick("left-column-title", toggleProjectSelect())
-  shinyjs::onclick("species-file-upload", togglecsvFileUploadButton())
+  # shinyjs::onclick("species-file-upload", togglecsvFileUploadButton())
   shinyjs::onclick("enter-project-info-label", toggleProjectInfoDisplay())
   shinyjs::onclick("right-column-title", toggleSiteInfoContainer())
-  shinyjs::hide("csvFile")
+  # shinyjs::hide("csvFile")
   shinyjs::onclick("show-tree", toggleTree())
   shinyjs::hide("pauseButton")
   shinyjs::hide("project-info-container")
@@ -91,6 +95,7 @@ shinyServer(function(input, output, session) {
   shinyjs::hide("tree")
   shinyjs::hide("directorypath")
   shinyjs::hide(id = "playButton",anim = FALSE)
+  shinyjs::hide("file-name-warning-container")
   
   shinyjs::onclick("sF-selectButton", toggleAfterProjectSelect())
   
@@ -136,9 +141,6 @@ shinyServer(function(input, output, session) {
     shinyjs::toggle("directorypath", anim = TRUE)
     shinyjs::toggle("tree", anim = TRUE)
   }
-  
-  projectName <<- NULL
-  spectroFromTime <<- 0
   
   test <- shinyDirChoose(input, 'directory', updateFreq=60000, session=session, roots=c(home='~'), restrictions=system.file(package='base'), filetypes=c('', '.wav'))
   output$directorypath <- renderPrint({
@@ -187,8 +189,11 @@ shinyServer(function(input, output, session) {
       }
       shinyjs::show("playButton",anim = FALSE)
       shinyjs::show("site-info-container")
-      shinyjs::toggleClass("right-column-title", "open-accordian")
-      shinyjs::toggleClass("right-column-title", "closed-accordian")
+      shinyjs::hide("tree")
+      shinyjs::addClass("show-tree", "closed-accordian")
+      shinyjs::removeClass("show-tree", "open-accordian")
+      shinyjs::addClass("right-column-title", "open-accordian")
+      shinyjs::removeClass("right-column-title", "closed-accordian")
     }
   })
   
@@ -214,9 +219,13 @@ shinyServer(function(input, output, session) {
     path <- getPath(get_selected(input$tree, "names"))
     currDir <- paste0(dirPath, "/", path, unlist(get_selected(input$tree)))
     sound <- readWave(currDir)
+    l <- length(sound@left)
+    sr <- sound@samp.rate
+    soundDuration <- round(l/sr,2)
     spectroToTime <<- spectroToTime - incrementAmount
     spectroFromTime <<- spectroFromTime - incrementAmount
     renderSpectro(sound)
+    shinyjs::show("next-spectro-increment")
     if (spectroFromTime == 0) {
       shinyjs::hide("previous-spectro-increment")
     }
@@ -227,11 +236,18 @@ shinyServer(function(input, output, session) {
     path <- getPath(get_selected(input$tree, "names"))
     currDir <- paste0(dirPath, "/", path, unlist(get_selected(input$tree)))
     sound <- readWave(currDir)
+    l <- length(sound@left)
+    sr <- sound@samp.rate
+    soundDuration <- round(l/sr,2)
     shinyjs::show("previous-spectro-increment")
     spectroToTime <<- spectroToTime + incrementAmount
     spectroFromTime <<- spectroFromTime + incrementAmount
     renderSpectro(sound)
     print('clicked')
+    shinyjs::show("previous-spectro-increment")
+    if (spectroToTime >= soundDuration) {
+      shinyjs::hide("next-spectro-increment")
+    }
   }
 
   playSound = function (){
@@ -377,6 +393,7 @@ shinyServer(function(input, output, session) {
   }
   
   observeEvent(input$siteInfo, {
+    files <- list.files(dirPath, all.files=F, recursive=T, include.dirs=T)
     # fileFullName <- unlist(get_selected(input$tree))
     # fileName <- sub(".wav", "", fileFullName)
     fileFullName <- unlist(get_selected(input$tree))
@@ -396,26 +413,42 @@ shinyServer(function(input, output, session) {
     # shinyjs::html("right-column-title",newFileName)
     newFullFilePath <- paste0(dirPath,"/",newFileName)
     
-    # Update tree
-    load("www/dir_tree.Rdata")
-    count <- 0
-    for (name in names(tree)) {
-      count = count + 1
-      if(name == unlist(get_selected(input$tree)))
-      {
-        print(count)
-        names(tree)[count] <- paste0(newFileName, ".wav")
+    fileNameDuplicate <- 0
+    
+    for (i in 1:length(files)) {
+      if (files[i] == paste0(newFileName,".wav")) {
+        fileNameDuplicate <- as.numeric(fileNameDuplicate) + 1
       }
     }
-    output$tree <- renderTree(tree, quoted = FALSE)
     
-    file.rename(filePathFull, paste0(newFullFilePath,".wav"))
-    write.csv(data, paste0(dirPath,"/",paste0(newFileName,'.csv')))
-    shinyjs::addClass("siteInfo", "active-button")
-    shinyjs::hide("site-info-container")
-    shinyjs::addClass("right-column-title", "completed-step")
-    shinyjs::toggleClass("right-column-title", "open-accordian")
-    shinyjs::toggleClass("right-column-title", "closed-accordian")
+    if (fileNameDuplicate == 0) {
+      shinyjs::hide("file-name-warning-container")
+      # Update tree
+      load("www/dir_tree.Rdata")
+      count <- 0
+      for (name in names(tree)) {
+        count = count + 1
+        if(name == unlist(get_selected(input$tree)))
+        {
+          print(count)
+          names(tree)[count] <- paste0(newFileName, ".wav")
+        }
+      }
+      output$tree <- renderTree(tree, quoted = FALSE)
+      
+      file.rename(filePathFull, paste0(newFullFilePath,".wav"))
+      write.csv(data, paste0(dirPath,"/",paste0(newFileName,'.csv')))
+      shinyjs::addClass("siteInfo", "active-button")
+      shinyjs::hide("site-info-container")
+      shinyjs::addClass("right-column-title", "completed-step")
+      shinyjs::toggleClass("right-column-title", "open-accordian")
+      shinyjs::toggleClass("right-column-title", "closed-accordian")
+    }
+    else {
+      shinyjs::show("file-name-warning-container")
+      # browser()
+    }
+
   })
   
   projectFields <- c("projectName", "projectNotes")
@@ -431,7 +464,7 @@ shinyServer(function(input, output, session) {
     print(data)
     projectName <<- data[[1]]
     write.csv(data, paste0(dirPath,"/",'projectInfo.csv'))
-    shinyjs::hide("csvFile", anim = TRUE)
+    # shinyjs::hide("csvFile", anim = TRUE)
     shinyjs::hide("directory", anim = TRUE)
     shinyjs::addClass("projectInfo", "active-button")
     shinyjs::hide("project-info-container")

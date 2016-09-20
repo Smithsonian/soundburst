@@ -19,13 +19,13 @@ dashboardPage(
           ),
       div(id = "left-column-title", class = "open-accordian", "Select a Project"),
       shinyDirButton('directory', class = 'inactive-button', 'Folder select', 'Please select a folder'),
-      div(id = "species-select-file-container",
-          div(id = "species-file-upload", class = "completed-step closed-accordian", "Load New Species CSV?"),
-          shinyFilesButton('csvFile', class = "inactive-button", 'File select', 'Please select a file', FALSE)
-      ),
       useShinyjs(),
       div(id = "enter-project-info-label", class = "closed-accordian", "Enter Project Info"),
-      div(id = "project-info-container", 
+      div(id = "project-info-container",
+          div(id = "species-select-file-container",
+              div(id = "species-file-upload", "Load New Species CSV?"),
+              shinyFilesButton('csvFile', class = "inactive-button", 'File select', 'Please select a file', FALSE)
+          ), 
           textInput("projectName", " Name:", "Project Name"),
           HTML('<label>Project Notes:</label>'),
           HTML('<textarea id="projectNotes" rows="3" cols="40">Project Notes</textarea>'),
@@ -35,6 +35,9 @@ dashboardPage(
       div(id = "show-tree", class = "closed-accordian", "Select a Deployment"),
       shinyTree("tree"),
       div(id = "right-column-title", class = "closed-accordian", "Enter Deployment Info"),
+      div(id = "file-name-warning-container",
+          div(id = "file-name-warning", "Attention: A file with the same name already exists. Please enter a new Deployment Name and resubmit.")
+      ),
       div(id = "species-sidebox-container",
           column(width = 2, id = "species-sidebox",
                  div(id = "site-info-container", 
