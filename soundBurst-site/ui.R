@@ -8,6 +8,9 @@ library(shinyTree)
 library(shinyjs)
 library(shinyFiles)
 
+species <- read.csv("data/species-short.csv", header = TRUE)
+itemsSpecies <<- c('Select Type',as.character(species$CommonName))
+
 dashboardPage(
   dashboardHeader(title = "SoundBurst App"),
   dashboardSidebar(
@@ -36,57 +39,41 @@ dashboardPage(
   ),
   dashboardBody(id = "content-id",
     includeCSS("main.css"),
-    # uiOutput("audiotag"),
-    div(id = "right-column-container",
-    div(id = "show-species-sidebar-container", class = "position-marker-left", 
-    div(id = "show-species-sidebar","")),
-    div(id = "species-sidebox-container",
-    column(width = 2, id = "species-sidebox",
-           div(id = "right-column-title", "Select a Site"),
-           div(id = "site-info-container", 
-               textInput("name", "Name:", "Name"),
-               textInput("lat", "Lat:", "Latitude"),
-               textInput("lon", "Lon:", "Longitude"),
-               textInput("recId", "RecId:", "RecId"),
-               HTML('<label>Site Notes:</label>'),
-               HTML('<textarea id="siteNotes" rows="3" cols="40">Site Notes</textarea>'),
-               HTML('<label>Start date/time: </label>'),
-               textOutput("minTime"),
-               HTML('<label>End date/time: </label>'),
-               textOutput("maxTime"),
-               # textInput("siteNotes", "Site Notes:", "Notes"),
-               actionButton("siteInfo", class = "inactive-button", "Submit")
-               ),
-           div(id = "species-select-file-container",
-           div(id = "right-column-upload", "Upload Species File"),
-           shinyFilesButton('csvFile', class = "inactive-button", 'File select', 'Please select a file', FALSE)
-           ),
-           div(id = "submit-site-complete-container", 
-               div(id = "submit-site-text", "When you have submited data for all clips on a given site, click below and move on to the next"),
-               div(id = "submit-site-complete", "Finish Site"))
-    ))),
+    uiOutput("audiotag"),
     div(id = "playButton"),
     div(id = "pauseButton"),
-    plotOutput("spectrogram", brush = brushOpts(id = "plot_brush", direction = "x", resetOnNew = TRUE)),
+    plotOutput("spectrogram", brush = brushOpts(id = "plot_brush", direction = "x", resetOnNew = TRUE, delay = 500, opacity = 0.45, stroke = "#FFD265", fill="#EEEE00")),
     # textOutput('speciesName'),
     useShinyjs(),
-    column(width = 4, id = "spectro-clip-container",
-           plotOutput("spectroClip"),
-           column(width = 10, id = "clip-species-dropdown",
-                  box(width = NULL, id = "species-dropdown-box",status = "warning",
-                      div(id = "close-species-drop", "X"),
-                      # div(id = "time-min-container", "Time Start: ",span(id = "timeMin", 1)),
-                      # div(id = "time-max-container", "Time End:",span(id = "timeMax", 2)),
-                      textInput("timeMin", "Time Start:", 1),
-                      textInput("timeMax", "Time End:", 2),
-                      #These column selectors are dynamically created when the file is loaded
-                      uiOutput("commonName"),
-                      uiOutput("speciesType"),
-                      HTML('<label>Site Notes:</label>'),
-                      HTML('<textarea id="annotNotes" rows="3" cols="40">Annotation Notes</textarea>'),
-                      actionButton("speciesDropSubmit", "Submit")
-                  )
-           )
-    )
+    fluidRow(
+      column(width = 6, id = "oscillo-clip-container",
+        plotOutput("spectroClip", brush = brushOpts(id = "plotZoom", direction = "xy", delay = 500, opacity = 0.45, stroke = "#FFD265", fill="#EEEE00")),
+        column(width = 10, id = "clip-species-dropdown",
+          box(width = NULL, id = "species-dropdown-box",status = "warning",
+            div(id = "close-species-drop", "X"),
+            # div(id = "time-min-container", "Time Start: ",span(id = "timeMin", 1)),
+            # div(id = "time-max-container", "Time End:",span(id = "timeMax", 2)),
+            textInput("timeMin", "Time Start:", 1),
+            textInput("timeMax", "Time End:  ", 2),
+            selectizeInput(
+              'species', 'Select the species that you heard', choices = itemsSpecies,
+              options = list(
+                placeholder = 'Please select a species below',
+                onInitialize = I('function() { this.setValue(""); }')
+              )
+            ),
+            #These column selectors are dynamically created when the file is loaded
+            uiOutput("commonName"),
+            uiOutput("speciesType"),
+            HTML('<label>Site Notes:</label>'),
+            HTML('<textarea id="annotNotes" rows="3" cols="40">Annotation Notes</textarea>'),
+            actionButton("speciesDropSubmit", "Submit")
+          )
+        )
+      ),
+      column(width = 6, id = "spectro-clip-container",
+        plotOutput("spectroZoomClip")
+      )
+  )
   )
 )

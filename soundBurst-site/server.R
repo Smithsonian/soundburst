@@ -1,4 +1,4 @@
-# install.packages("shiny")
+  # install.packages("shiny")
 # install.packages("devtools")
 # install.packages("aws.s3", repos = c("cloudyr" = "http://cloudyr.github.io/drat"))
 # install.packages('shinyFiles')
@@ -13,9 +13,11 @@ library(stringr)
 library(shinyFiles)
 # library("aws.s3")
 library(shinyTree)
+library(seewave)
+library(tuneR)
 # install_github("trestletech/shinyStore")
 # load_all('~/dev/emammal-soundburst/soundBurst/R')
-load_all('~/dev/emammal-soundBurst/soundBurst/R')
+# load_all('~/dev/emammal-soundBurst/soundBurst/R')
 library(audio)
 # setWavPlayer('"/Applications/QuickTime\ Player"')
 setWavPlayer("afplay")
@@ -23,9 +25,7 @@ library(sound)
 source("createDirectoryTree.r")
 source("playSound.r")
 
-
-
-# play sound tags$audio(src = "audio.wav", type = "audio/wav", autoplay = NA, controls = NA)
+clipCount <<- 0
 
 options(shiny.trace=TRUE)
 options(shiny.maxRequestSize=70*1024^2) 
@@ -115,7 +115,10 @@ shinyServer(function(input, output, session) {
         currDir <- paste0(dirPath, "/", path, unlist(get_selected(input$tree)))
         sound <- readWave(currDir)
         shinyjs::html("right-column-title",createCSVFilePath())
-        oscillo(sound)
+        # spectro(sound)
+        # polygon(x=c(0.5,10,10,0.5),  y=c(-10,-10,10,10), col="yellow2", border="NA")
+        # par(new=TRUE)
+        spectro(sound, osc = TRUE, scale = FALSE)
         shinyjs::show("site-info-container")
         findFileInfo()
         shinyjs::show("submit-site-complete-container")
@@ -151,7 +154,7 @@ shinyServer(function(input, output, session) {
       currDir <- paste0(dirPath, "/", path, unlist(get_selected(input$tree)))
       # Use  from = 1, to = 5, units = "seconds" when playing from a certain time
       wave <- readWave(currDir)
-      sound <- audioSample(wave@left, wave@samp.rate, wave@bit)
+      sound <- audioSample(wave@right, wave@samp.rate, wave@bit)
       
       shinyjs::show(id = "pauseButton",anim = TRUE)
       shinyjs::hide(id = "playButton",anim = FALSE)
@@ -189,7 +192,7 @@ shinyServer(function(input, output, session) {
   
   shinyFileChoose(input, 'csvFile', updateFreq=60000, session=session, roots=c(home='~'), restrictions=system.file(package='base'))
   shinyjs::onclick("csvFile",shinyjs::addClass("csvFile", "active-button"))
-  filedata <- reactive({
+  species <- reactive({
     req(input$csvFile)
     infile <- parseFilePaths(roots=c(home='~'),input$csvFile)
     correctPath <- file.path(infile$datapath)
@@ -198,21 +201,21 @@ shinyServer(function(input, output, session) {
   })
   
   output$commonName <- renderUI({
-    df <-filedata()
+    df <-species()
 
     if (is.null(df)) return(NULL)
 
-    items <- c('Select Species',as.character(df[[1]]))
-    selectInput("speciesDropdown", "Species:",items)
+    itemsSpecies <- c('Select Species',as.character(df[[1]]))
+    selectInput("speciesDropdown", "Species:",itemsSpecies)
   })
   
   output$speciesType <- renderUI({
-    df <-filedata()
+    df <-species()
 
     if (is.null(df)) return(NULL)
     
-    items <- c('Select Type',as.character(df[[3]]))
-    selectInput("typeDropdown", "Type:",items)
+    itemsSpecies <- c('Select Type',as.character(df[[3]]))
+    selectInput("typeDropdown", "Type:",itemsSpecies)
   })
   
   formulaText <- reactive({
@@ -231,7 +234,23 @@ shinyServer(function(input, output, session) {
   
   #This previews the CSV data file
   output$filetable <- renderTable({
-    filedata()
+    species()
+  })
+  
+  # This creates the oscillo clips after brush
+  output$spectroZoomClip <- renderPlot({
+    path <- getPath(get_selected(input$tree, "names"))
+    currDir <- paste0(dirPath, "/", path, unlist(get_selected(input$tree)))
+    sound <- readWave(currDir)
+    if(!is.null(input$plotZoom$xmax)) {
+      spectro(sound, scale = FALSE, osc = FALSE, tlim = c(input$plotZoom$xmin,input$plotZoom$xmax), flim = c(input$plotZoom$ymin,input$plotZoom$ymax))
+      # oscillo(sound, from=input$plot_brush$xmin, to=input$plot_brush$xmax)
+      # shinyjs::show("spectroClip")
+      xmin <- input$plot_brush$xmin
+      xmax <- input$plot_brush$xmax
+      # shinyjs::html('remove',tags$div(class = "close-clip", "hello There"))
+      shinyjs::onclick("spectroClip",showSpeciesDropdown(xmin, xmax)) 
+    }
   })
   
   # This creates the oscillo clips after brush
@@ -240,7 +259,8 @@ shinyServer(function(input, output, session) {
     currDir <- paste0(dirPath, "/", path, unlist(get_selected(input$tree)))
     sound <- readWave(currDir)
     if(!is.null(input$plot_brush$xmax)) {
-      oscillo(sound, from=input$plot_brush$xmin, to=input$plot_brush$xmax)
+      spectro(sound, scale = FALSE, osc = FALSE, tlim = c(input$plot_brush$xmin,input$plot_brush$xmax))
+      # oscillo(sound, from=input$plot_brush$xmin, to=input$plot_brush$xmax)
       # shinyjs::show("spectroClip")
       xmin <- input$plot_brush$xmin
       xmax <- input$plot_brush$xmax

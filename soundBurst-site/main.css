@@ -1,9 +1,9 @@
 label {
-  margin-top: 5%;
+  margin-top: 2.5%;
 }
 
 .content {
-  width: 80%;
+  width: 100%;
   margin-left: 0;
 }
 
@@ -47,11 +47,25 @@ label {
   margin-top: 5%;
 }
 
-#clip-species-dropdown {
+#spectroClip img {
+  width: 96%; /* 96% */
+}
+
+#oscilloClip img{
+  width: 95.5%; /* 95.5% */
+}
+
+#oscilloClip {
   position: absolute;
-  padding: 0;
-  right: 0;
   margin-top: 5%;
+}
+
+#clip-species-dropdown {
+    position: absolute;
+    padding: 0;
+    left: 50%;
+    margin-top: -25%;
+    z-index: 1;
 }
 
 .box.box-warning {
@@ -63,7 +77,12 @@ label {
 }
 
 #timeMin, #timeMax {
-  width: 25%;
+  width: 50%;
+  display:inline-block
+}
+
+.form-group .shiny-input-container {
+  margin-top: 5%;
 }
 
 #species-sidebox-container {
