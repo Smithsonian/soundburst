@@ -92,8 +92,9 @@ dashboardPage(
         column(width = 10, id = "clip-species-dropdown",
           box(width = NULL, id = "species-dropdown-box",status = "warning",
             div(id = "close-species-drop", "X"),
-            # div(id = "time-min-container", "Time Start: ",span(id = "timeMin", 1)),
-            # div(id = "time-max-container", "Time End:",span(id = "timeMax", 2)),
+            div(id = "site-info-warning-container",
+                div(id = "site-info-warning", "Attention: Please ensure you have submitted information for this Deployment on the left prior to submitting annotation information")
+            ),
             textInput("timeMin", "Time Start:", 1),
             textInput("timeMax", "Time End:  ", 2),
             selectizeInput(
@@ -111,8 +112,8 @@ dashboardPage(
               )
             ),
             #These column selectors are dynamically created when the file is loaded
-            uiOutput("commonName"),
-            uiOutput("speciesType"),
+            # uiOutput("commonName"),
+            # uiOutput("speciesType"),
             HTML('<label>Site Notes:</label>'),
             HTML('<textarea id="annotNotes" rows="3" cols="40">Annotation Notes</textarea>'),
             actionButton("speciesDropSubmit", "Submit")

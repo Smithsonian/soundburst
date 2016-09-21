@@ -79,6 +79,7 @@ shinyServer(function(input, output, session) {
 
   projectName <<- NULL
   spectroFromTime <<- 0
+  siteDF <<- NULL
 
   shinyjs::onclick("left-column-title", toggleProjectSelect())
   # shinyjs::onclick("species-file-upload", togglecsvFileUploadButton())
@@ -99,6 +100,7 @@ shinyServer(function(input, output, session) {
   shinyjs::hide("directorypath")
   shinyjs::hide(id = "playButton",anim = FALSE)
   shinyjs::hide("file-name-warning-container")
+  shinyjs::hide("site-info-warning-container")
   
   shinyjs::onclick("sF-selectButton", toggleAfterProjectSelect())
   
@@ -189,6 +191,7 @@ shinyServer(function(input, output, session) {
           shinyjs::show("site-info-container")
         }) 
           observeEvent(input$noTimeSubmission,{
+            spectroToTime <<- soundDuration
             renderSpectro(sound)
             shinyjs::show("playButton",anim = FALSE)
             shinyjs::show("site-info-container")
@@ -424,7 +427,8 @@ shinyServer(function(input, output, session) {
   
   createCSVFilePath = function(){
     if(!is.null(newName)) {
-      return(newName)
+      fileName <- sub(".wav", "", newName)
+      return(fileName)
     } else {
       fileFullName <- unlist(get_selected(input$tree))
       fileName <- sub(".wav", "", fileFullName)
@@ -537,16 +541,21 @@ shinyServer(function(input, output, session) {
   # Adding the clip metadata to the spectrogram metadata
   # ClipCount -> If we have multiple clips on a given spectro, give a new column name to each clip
   observeEvent(input$speciesDropSubmit, {
-    clipCount <<- clipCount + 1
-    dataSet <- formDataSpecies()
-    names(dataSet)[1] <- paste0(names(dataSet)[1],clipCount)
-    names(dataSet)[2] <- paste0(names(dataSet)[2],clipCount)
-    names(dataSet)[3] <- paste0(names(dataSet)[3],clipCount)
-    names(dataSet)[4] <- paste0(names(dataSet)[4],clipCount)
-    names(dataSet)[5] <- paste0(names(dataSet)[5],clipCount)
-    formattedData <- c(siteDF, dataSet)
-    siteDF <<- formattedData
-    write.csv(siteDF, paste0(dirPath,"/",paste0(createCSVFilePath(),'.csv')))
+    if (is.null(siteDF)) {
+      shinyjs::show("site-info-warning-container")
+    } else {
+      shinyjs::hide("site-info-warning-container")
+      clipCount <<- clipCount + 1
+      dataSet <- formDataSpecies()
+      names(dataSet)[1] <- paste0(names(dataSet)[1],clipCount)
+      names(dataSet)[2] <- paste0(names(dataSet)[2],clipCount)
+      names(dataSet)[3] <- paste0(names(dataSet)[3],clipCount)
+      names(dataSet)[4] <- paste0(names(dataSet)[4],clipCount)
+      names(dataSet)[5] <- paste0(names(dataSet)[5],clipCount)
+      formattedData <- c(siteDF, dataSet)
+      siteDF <<- formattedData
+      write.csv(siteDF, paste0(dirPath,"/",paste0(createCSVFilePath(),'.csv')))
+    }
   })
   
   substrRight <- function(x, n){
