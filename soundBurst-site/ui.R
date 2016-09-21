@@ -7,6 +7,7 @@ library(shinydashboard)
 library(shinyTree)
 library(shinyjs)
 library(shinyFiles)
+# source("customHeader.r")
 
 species <- read.csv("data/species-short.csv", header = TRUE)
 itemsSpecies <<- c('Select Type',as.character(species$CommonName))
@@ -113,6 +114,8 @@ dashboardPage(
       column(width = 6, id = "spectro-clip-container",
         plotOutput("spectroZoomClip")
       )
-  )
-  )
+  ),
+  # tags$head(tags$script(src="libraries/jquery-3.1.0.min.js")),
+  tags$head(tags$script(src="multiClip.js"))
+)
 )
