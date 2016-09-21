@@ -26,6 +26,7 @@ source("createDirectoryTree.r")
 source("playSound.r")
 
 clipCount <<- 0
+newName <- NULL
 
 options(shiny.trace=TRUE)
 options(shiny.maxRequestSize=70*1024^2) 
@@ -162,7 +163,7 @@ shinyServer(function(input, output, session) {
   shinyjs::onclick("playButton", playSound())
   shinyjs::onclick("pauseButton", pauseSound())
   
-  observe({
+  observeEvent(unlist(get_selected(input$tree)), {
     # Plot main spectrogram
     if (is.null(unlist(get_selected(input$tree))))
     {
@@ -318,7 +319,7 @@ shinyServer(function(input, output, session) {
   })
   
   output$commonName <- renderUI({
-    df <-species()
+    df <- species()
 
     if (is.null(df)) return(NULL)
 
@@ -357,7 +358,12 @@ shinyServer(function(input, output, session) {
   # This creates the oscillo clips after brush
   output$spectroZoomClip <- renderPlot({
     path <- getPath(get_selected(input$tree, "names"))
-    currDir <- paste0(dirPath, "/", path, unlist(get_selected(input$tree)))
+    if(!is.null(newName)) {
+      currDir <- paste0(dirPath, "/", path, newName)
+    }
+    else {
+      currDir <- paste0(dirPath, "/", path, unlist(get_selected(input$tree)))
+    }
     sound <- readWave(currDir)
     if(!is.null(input$plotZoom$xmax)) {
       spectro(sound, scale = FALSE, osc = FALSE, tlim = c(input$plotZoom$xmin,input$plotZoom$xmax), flim = c(input$plotZoom$ymin,input$plotZoom$ymax))
@@ -373,7 +379,12 @@ shinyServer(function(input, output, session) {
   # This creates the oscillo clips after brush
   output$spectroClip <- renderPlot({
     path <- getPath(get_selected(input$tree, "names"))
-    currDir <- paste0(dirPath, "/", path, unlist(get_selected(input$tree)))
+    if(!is.null(newName)) {
+      currDir <- paste0(dirPath, "/", path, newName)
+    }
+    else {
+      currDir <- paste0(dirPath, "/", path, unlist(get_selected(input$tree)))
+    }
     sound <- readWave(currDir)
     # shinyjs::show("spectro-clip-container")
     if(!is.null(input$plot_brush$xmax)) {
@@ -412,40 +423,54 @@ shinyServer(function(input, output, session) {
   })
   
   createCSVFilePath = function(){
-    fileFullName <- unlist(get_selected(input$tree))
-    fileName <- sub(".wav", "", fileFullName)
-    fileName
+    if(!is.null(newName)) {
+      return(newName)
+    } else {
+      fileFullName <- unlist(get_selected(input$tree))
+      fileName <- sub(".wav", "", fileFullName)
+      return(fileName) 
+    }
   }
   
   observeEvent(input$siteInfo, {
+    # Getting file list
     files <- list.files(dirPath, all.files=F, recursive=T, include.dirs=T)
     # fileFullName <- unlist(get_selected(input$tree))
     # fileName <- sub(".wav", "", fileFullName)
+    # Getting the file name
     fileFullName <- unlist(get_selected(input$tree))
+    # Creating the path with the file name
     filePathFull <- paste0(dirPath,"/",fileFullName)
-    print(paste0(dirPath,"/",paste0(createCSVFilePath(),'.csv')))
+    # Getting the site data
     data <- formDataSite()
+    # Adding the min and max time variables to the data
     data <- c(data, as.character(minTimeVar))
     names(data)[6] <- "start_time_date"
     data <- c(data, as.character(maxTimeVar))
     names(data)[7] <- "end_time_date"
-    print(data)
     siteDF <<- data
+    # If we have multiple clips on a given spectro, give a new column name to each clip
     clipCount <<- 0
+    # Reformating user input
     fileDate <- gsub(" ", "-",data[[6]], fixed = TRUE)
     fileDate <- gsub(":", "-",fileDate, fixed = TRUE)
+    # Creating a new filename out of the metadata
     newFileName <- paste0(projectName,"_",data[[1]],"_",fileDate)
     # shinyjs::html("right-column-title",newFileName)
+    # Creating the new file path
     newFullFilePath <- paste0(dirPath,"/",newFileName)
-    
+
+    # Checking for file duplicate
     fileNameDuplicate <- 0
-    
+
+    # Checking for file duplicates within that folder
     for (i in 1:length(files)) {
       if (files[i] == paste0(newFileName,".wav")) {
         fileNameDuplicate <- as.numeric(fileNameDuplicate) + 1
       }
     }
-    
+
+    # Checking for file duplication, alert if any; otherwise create the file
     if (fileNameDuplicate == 0) {
       shinyjs::hide("file-name-warning-container")
       # Update tree
@@ -457,10 +482,11 @@ shinyServer(function(input, output, session) {
         {
           print(count)
           names(tree)[count] <- paste0(newFileName, ".wav")
+          newName <<- paste0(newFileName, ".wav")
         }
       }
       output$tree <- renderTree(tree, quoted = FALSE)
-      
+
       file.rename(filePathFull, paste0(newFullFilePath,".wav"))
       write.csv(data, paste0(dirPath,"/",paste0(newFileName,'.csv')))
       shinyjs::addClass("siteInfo", "active-button")
@@ -501,13 +527,15 @@ shinyServer(function(input, output, session) {
     shinyjs::show("tree", anim = TRUE)
   })
   
-  speciesFields <- c("timeMin", "timeMax", "speciesDropdown", "typeDropdown", "annotNotes")
+  speciesFields <- c("timeMin", "timeMax", "speciesInput", "typeInput", "annotNotes")
   
   formDataSpecies <- reactive({
     data <- sapply(speciesFields, function(x) input[[x]])
     data
   })
   
+  # Adding the clip metadata to the spectrogram metadata
+  # ClipCount -> If we have multiple clips on a given spectro, give a new column name to each clip
   observeEvent(input$speciesDropSubmit, {
     clipCount <<- clipCount + 1
     dataSet <- formDataSpecies()
@@ -518,8 +546,6 @@ shinyServer(function(input, output, session) {
     names(dataSet)[5] <- paste0(names(dataSet)[5],clipCount)
     formattedData <- c(siteDF, dataSet)
     siteDF <<- formattedData
-    # print(formattedData)
-    browser()
     write.csv(siteDF, paste0(dirPath,"/",paste0(createCSVFilePath(),'.csv')))
   })
   

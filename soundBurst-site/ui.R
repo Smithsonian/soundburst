@@ -7,9 +7,11 @@ library(shinydashboard)
 library(shinyTree)
 library(shinyjs)
 library(shinyFiles)
+# source("customHeader.r")
 
 species <- read.csv("www/species-short.csv", header = TRUE)
 itemsSpecies <<- c('Select Type',as.character(species$CommonName))
+speciesType <<- c('Select Type',as.character(species$Type))
 
 dashboardPage(
   dashboardHeader(title = "SoundBurst App"),
@@ -95,9 +97,16 @@ dashboardPage(
             textInput("timeMin", "Time Start:", 1),
             textInput("timeMax", "Time End:  ", 2),
             selectizeInput(
-              'species', 'Select the species that you heard', choices = itemsSpecies,
+              'speciesInput', 'Select the species that you heard', choices = itemsSpecies,
               options = list(
                 placeholder = 'Please select a species below',
+                onInitialize = I('function() { this.setValue(""); }')
+              )
+            ),
+            selectizeInput(
+              'typeInput', 'Select the type of species that you heard', choices = speciesType,
+              options = list(
+                placeholder = 'Please select a type below',
                 onInitialize = I('function() { this.setValue(""); }')
               )
             ),
@@ -113,6 +122,8 @@ dashboardPage(
       column(width = 6, id = "spectro-clip-container",
         plotOutput("spectroZoomClip")
       )
-  )
-  )
+  ),
+  # tags$head(tags$script(src="libraries/jquery-3.1.0.min.js")),
+  tags$head(tags$script(src="multiClip.js"))
+)
 )
