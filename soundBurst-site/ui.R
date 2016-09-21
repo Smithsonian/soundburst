@@ -8,7 +8,7 @@ library(shinyTree)
 library(shinyjs)
 library(shinyFiles)
 
-species <- read.csv("data/species-short.csv", header = TRUE)
+species <- read.csv("www/species-short.csv", header = TRUE)
 itemsSpecies <<- c('Select Type',as.character(species$CommonName))
 
 dashboardPage(

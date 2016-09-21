@@ -519,6 +519,7 @@ shinyServer(function(input, output, session) {
     formattedData <- c(siteDF, dataSet)
     siteDF <<- formattedData
     # print(formattedData)
+    browser()
     write.csv(siteDF, paste0(dirPath,"/",paste0(createCSVFilePath(),'.csv')))
   })
   
