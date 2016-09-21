@@ -187,6 +187,11 @@ shinyServer(function(input, output, session) {
           shinyjs::show("playButton",anim = FALSE)
           shinyjs::show("site-info-container")
         }) 
+          observeEvent(input$noTimeSubmission,{
+            renderSpectro(sound)
+            shinyjs::show("playButton",anim = FALSE)
+            shinyjs::show("site-info-container")
+          })
       } else {
         spectroToTime <<- soundDuration
         renderSpectro(sound)
