@@ -38,6 +38,14 @@ dashboardPage(
       div(id = "file-name-warning-container",
           div(id = "file-name-warning", "Attention: A file with the same name already exists. Please enter a new Deployment Name and resubmit.")
       ),
+      div(id = "time-box-container",
+          div(id = "secondary-time-box-container",
+              HTML('<label>This file exceeds 2 total minutes, would you like to increment the display?</label>'),
+              textInput("spectroEndTime", "This may include decimals such as 0.5 minutes, or rounded integers", 1),
+              actionButton("spectroTimeSubmit", "Submit"),
+              actionButton("noTimeSubmission", "Do not Increment")
+          )
+      ),
       div(id = "species-sidebox-container",
           column(width = 2, id = "species-sidebox",
                  div(id = "site-info-container", 
@@ -68,14 +76,6 @@ dashboardPage(
     div(id = "playButton"),
     div(id = "pauseButton"),
     plotOutput("spectrogram", brush = brushOpts(id = "plot_brush", direction = "x", resetOnNew = TRUE)),
-    div(id = "time-box-container",
-        div(id = "secondary-time-box-container",
-          div(id = "close-time-box", "X"),
-          HTML('<label>Add Time to Increment Display (mins)</label>'),
-          textInput("spectroEndTime", "Mins to Increment", 1),
-          actionButton("spectroTimeSubmit", "Submit")
-      )
-    ),
     div(id = "spectro-increment-container",
           div(id = "previous-spectro-increment", "Previous Increment"),
           div(id = "next-spectro-increment", "Next Increment")

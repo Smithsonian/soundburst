@@ -74,6 +74,8 @@ progressGroup <- function(text, value, min = 0, max = value, color = "aqua") {
 
 shinyServer(function(input, output, session) {
   
+  # HTML("nav",div(id="navbar-title-file-name", "Hello"))
+
   projectName <<- NULL
   spectroFromTime <<- 0
 
@@ -88,7 +90,7 @@ shinyServer(function(input, output, session) {
   shinyjs::hide("site-info-container")
   shinyjs::hide("complete-deployment")
   shinyjs::hide("status-bar-container")
-  # shinyjs::hide("spectroClip")
+  # shinyjs::hide("spectro-clip-container")
   shinyjs::hide("time-box-container")
   shinyjs::hide("spectro-increment-container")
   shinyjs::hide("previous-spectro-increment")
@@ -174,7 +176,7 @@ shinyServer(function(input, output, session) {
       sr <- sound@samp.rate
       soundDuration <- round(l/sr,2)
       if (soundDuration > 59) {
-        shinyjs::show("time-box-container")
+        shinyjs::show("time-box-container", anim = TRUE)
           observeEvent(input$spectroTimeSubmit, {
           incrementAmount <<- as.numeric(input$spectroEndTime) * 60
           spectroToTime <<- incrementAmount
@@ -182,14 +184,16 @@ shinyServer(function(input, output, session) {
           if (soundDuration > incrementAmount) {
             shinyjs::show("spectro-increment-container")
           }
+          shinyjs::show("playButton",anim = FALSE)
+          shinyjs::show("site-info-container")
         }) 
       } else {
         spectroToTime <<- soundDuration
         renderSpectro(sound)
+        shinyjs::show("playButton",anim = FALSE)
+        shinyjs::show("site-info-container")
       }
-      shinyjs::show("playButton",anim = FALSE)
-      shinyjs::show("site-info-container")
-      shinyjs::hide("tree")
+      shinyjs::hide("tree", anim = TRUE)
       shinyjs::addClass("show-tree", "closed-accordian")
       shinyjs::removeClass("show-tree", "open-accordian")
       shinyjs::addClass("right-column-title", "open-accordian")
@@ -199,12 +203,12 @@ shinyServer(function(input, output, session) {
   
   renderSpectro = function (sound){
     output$spectrogram <- renderPlot({
-      shinyjs::hide("time-box-container")
+      shinyjs::hide("time-box-container", anim = TRUE)
       anottationCount <<- 0
       # shinyjs::html("right-column-title",createCSVFilePath())
       oscillo(sound, from=spectroFromTime, to=spectroToTime)
       shinyjs::removeClass("right-column-title", "completed-step")
-      shinyjs::show("site-info-container")
+      shinyjs::show("site-info-container", anim = TRUE)
       findFileInfo()
       shinyjs::show("complete-deployment")
       shinyjs::onclick("complete-deployment", increaseStatusBar())
@@ -351,9 +355,9 @@ shinyServer(function(input, output, session) {
     path <- getPath(get_selected(input$tree, "names"))
     currDir <- paste0(dirPath, "/", path, unlist(get_selected(input$tree)))
     sound <- readWave(currDir)
+    # shinyjs::show("spectro-clip-container")
     if(!is.null(input$plot_brush$xmax)) {
       oscillo(sound, from=input$plot_brush$xmin, to=input$plot_brush$xmax)
-      # shinyjs::show("spectroClip")
       xmin <- input$plot_brush$xmin
       xmax <- input$plot_brush$xmax
       shinyjs::onclick("spectroClip",showSpeciesDropdown(xmin, xmax)) 
@@ -376,7 +380,6 @@ shinyServer(function(input, output, session) {
   }
   
   shinyjs::onclick("close-species-drop",shinyjs::hide("clip-species-dropdown"))
-  shinyjs::onclick("close-time-box",shinyjs::hide("time-box-container"))
   shinyjs::hide("clip-species-dropdown")
   
   siteFields <- c("name", "lat", "lon", "recId", "siteNotes")
@@ -467,13 +470,13 @@ shinyServer(function(input, output, session) {
     # shinyjs::hide("csvFile", anim = TRUE)
     shinyjs::hide("directory", anim = TRUE)
     shinyjs::addClass("projectInfo", "active-button")
-    shinyjs::hide("project-info-container")
+    shinyjs::hide("project-info-container", anim = TRUE)
     shinyjs::addClass("enter-project-info-label", "completed-step")
     shinyjs::toggleClass("enter-project-info-label", "open-accordian")
     shinyjs::toggleClass("enter-project-info-label", "closed-accordian")
     shinyjs::toggleClass("show-tree", "open-accordian")
     shinyjs::toggleClass("show-tree", "closed-accordian")
-    shinyjs::show("tree")
+    shinyjs::show("tree", anim = TRUE)
   })
   
   speciesFields <- c("timeMin", "timeMax", "speciesDropdown", "typeDropdown", "annotNotes")

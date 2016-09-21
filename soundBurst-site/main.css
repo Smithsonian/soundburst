@@ -165,12 +165,12 @@ section.sidebar .shiny-input-container {
 
 #time-box-container {
   width: 100%;
+  color: #222D32;
 }
 
 #secondary-time-box-container {
   background: white;
   padding: 1em;
-  width: 20em;
   position: relative;
   margin: 0 auto;
   z-index: 1000;
@@ -203,4 +203,11 @@ section.sidebar .shiny-input-container {
 
 .completed-step {
   color: #3C8DBC;
+}
+
+#navbar-title-file-name {
+  position: absolute;
+  font-size: 2em;
+  margin-left: 50%;
+  color: #fff;
 }
