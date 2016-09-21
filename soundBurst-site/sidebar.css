@@ -1,3 +1,11 @@
+.main-header>.navbar {
+  margin-left: 20% !important;
+}
+
+.logo, .main-sidebar {
+  width: 20% !important;
+}
+
 .sidebar li {
   list-style-type: none;
 }
@@ -49,4 +57,24 @@
 #project-info-container {
   margin-top: 5%;
   margin-bottom: 10%;
+}
+
+.closed-accordian::before {
+    content: '';
+    background-image: url('close.png');
+    width: 0.7em;
+    float: left;
+    height: 0.7em;
+    background-size: cover;
+    margin-top: 0.3em;
+}
+
+.open-accordian::before {
+    content: '';
+    background-image: url('open.png');
+    width: 0.7em;
+    float: left;
+    height: 0.7em;
+    background-size: cover;
+    margin-top: 0.3em;
 }

@@ -1,10 +1,9 @@
-label {
-  margin-top: 2.5%;
+.content-wrapper {
+  margin-left: 20% !important;
 }
 
-.content {
-  width: 100%;
-  margin-left: 0;
+label {
+  margin-top: 5%;
 }
 
 #playButton, #pauseButton {
@@ -31,7 +30,7 @@ label {
   width: 100%;
 }
 
-#close-species-drop {
+#close-species-drop, #close-time-box {
   position: absolute;
   right: 0.5em;
   top: 0;
@@ -88,7 +87,6 @@ label {
 #species-sidebox-container {
   position: absolute;
   right: 0px;
-  padding-top: 65px;
   height: 100%;
   width: 100%;
   background: #222d32;
@@ -100,15 +98,11 @@ label {
   height: 100%;
 }
 
-#species-select-file-container {
-  margin-top: 2em;
+#left-column-title, #enter-project-info-label, #show-tree, #species-file-upload, #complete-deployment, #right-column-title {
+  cursor: pointer;
 }
 
-#left-column-title {
-  font-size: 1.5em;
-}
-
-#right-column-title {
+#left-column-title, #species-file-upload, #right-column-title, #enter-project-info-label, #show-tree, #complete-deployment {
   font-size: 1.5em;
 }
 
@@ -158,10 +152,6 @@ section.sidebar .shiny-input-container {
   padding: 0;
 }
 
-.content-all-open {
-  width: 99%;
-}
-
 #submit-site-complete-container {
   margin-top: 2em;
 }
@@ -190,4 +180,53 @@ section.sidebar .shiny-input-container {
 
 .btn-default:hover {
   background-color: #2CA02C !important;
+}
+
+#time-box-container {
+  width: 100%;
+  color: #222D32;
+}
+
+#secondary-time-box-container {
+  background: white;
+  padding: 1em;
+  position: relative;
+  margin: 0 auto;
+  z-index: 1000;
+}
+
+#spectro-increment-container {
+  margin: 0 auto;
+  position: relative;
+  width: 20em;
+}
+
+#previous-spectro-increment {
+  position: absolute;
+}
+
+#next-spectro-increment {
+  margin-left: 13em;
+}
+
+#previous-spectro-increment, #next-spectro-increment {
+  cursor: pointer;
+}
+
+#directorypath {
+  padding: 0px;
+  color: #222D32;
+  background-color: #222D32;
+  border: none;
+}
+
+.completed-step {
+  color: #3C8DBC;
+}
+
+#navbar-title-file-name {
+  position: absolute;
+  font-size: 2em;
+  margin-left: 50%;
+  color: #fff;
 }
