@@ -209,6 +209,12 @@ shinyServer(function(input, output, session) {
       shinyjs::removeClass("show-tree", "open-accordian")
       shinyjs::addClass("right-column-title", "open-accordian")
       shinyjs::removeClass("right-column-title", "closed-accordian")
+      if(!is.null(newName)) {
+        shinyjs::html("titleHeader",newName)
+      }
+      else {
+        shinyjs::html("titleHeader",unlist(get_selected(input$tree)))
+      }
     }
   })
   
@@ -523,6 +529,12 @@ shinyServer(function(input, output, session) {
 
       file.rename(filePathFull, paste0(newFullFilePath,".wav"))
       write.csv(data, paste0(dirPath,"/",paste0(newFileName,'.csv')))
+      if(!is.null(newName)) {
+        shinyjs::html("titleHeader",newName)
+      }
+      else {
+        shinyjs::html("titleHeader",unlist(get_selected(input$tree)))
+      }
       shinyjs::addClass("siteInfo", "active-button")
       shinyjs::hide("site-info-container")
       shinyjs::addClass("right-column-title", "completed-step")

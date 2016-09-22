@@ -1,8 +1,26 @@
-.shiny-output-error { 
-  visibility: hidden; 
+.shiny-output-error {
+  visibility: hidden;
 }
-.shiny-output-error:before { 
-  visibility: hidden; 
+.shiny-output-error:before {
+  visibility: hidden;
+}
+
+#titleHeader {
+  width: 400px;
+  text-align: center;
+  right: 0;
+  left: 0;
+  margin: auto;
+  z-index: 100000;
+  background-color: #3C8DBC;
+  color: #fff;
+  border-bottom: 0 solid transparent;
+  position: absolute;
+  font-size: 14px;
+  line-height: 50px;
+  font-weight: 300;
+  overflow: hidden;
+  font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
 }
 
 #clipInfo-container {
@@ -17,8 +35,8 @@ label {
   margin-top: 5%;
 }
 
-#site-info-warning-container label {
-  margin-top: 3%;
+#clipInfo-container label {
+  margin-top: 1%;
 }
 
 #playButton, #pauseButton {
@@ -92,7 +110,16 @@ label {
 
 #timeMin, #timeMax {
   width: 50%;
-  display:inline-block
+  display:inline-block;
+  margin-top: 4%;
+}
+
+#timeMax {
+  margin-bottom: 2%;
+}
+
+#speciesDropSubmit {
+  margin-bottom: 4%;
 }
 
 .form-group .shiny-input-container {
@@ -252,4 +279,9 @@ section.sidebar .shiny-input-container {
 
 #clipInfo-container {
   margin-top: 1.5%;
+  min-height: 400px;
+}
+
+.selectize-control {
+  margin-bottom: 0 !important;
 }
