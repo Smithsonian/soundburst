@@ -1,3 +1,11 @@
+.shiny-output-error { 
+  visibility: hidden; 
+  
+}
+.shiny-output-error:before { 
+  visibility: hidden; 
+}
+
 .content-wrapper {
   margin-left: 20% !important;
 }
