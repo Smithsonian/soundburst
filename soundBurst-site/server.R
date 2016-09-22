@@ -183,7 +183,7 @@ shinyServer(function(input, output, session) {
       if (soundDuration > 59) {
         shinyjs::show("time-box-container", anim = TRUE)
           observeEvent(input$spectroTimeSubmit, {
-          incrementAmount <<- as.numeric(input$spectroEndTime) * 60
+          incrementAmount <<- (soundDuration / as.numeric(input$spectroEndTime))
           spectroToTime <<- incrementAmount
           renderSpectro(sound)
           if (soundDuration > incrementAmount) {

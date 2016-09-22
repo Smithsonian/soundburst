@@ -46,7 +46,7 @@ dashboardPage(
       div(id = "time-box-container",
           div(id = "secondary-time-box-container",
               HTML('<label>This file exceeds 2 total minutes, would you like to increment the display?</label>'),
-              textInput("spectroEndTime", "This may include decimals such as 0.5 minutes, or rounded integers", 1),
+              textInput("spectroEndTime", "How many times would you like to split the file?", 1),
               actionButton("spectroTimeSubmit", "Submit"),
               actionButton("noTimeSubmission", "Do not Increment")
           )
