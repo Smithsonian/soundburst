@@ -78,13 +78,13 @@ dashboardPage(
   dashboardBody(id = "content-id",
     includeCSS("main.css"),
     uiOutput("audiotag"),
+    div(id = "spectro-increment-container",
+        div(id = "previous-spectro-increment"),
+        div(id = "next-spectro-increment")
+    ),
     div(id = "playButton"),
     div(id = "pauseButton"),
     plotOutput("spectrogram", brush = brushOpts(id = "plot_brush", direction = "x", resetOnNew = TRUE, delay = 500, opacity = 0.45, stroke = "#FFD265", fill="#EEEE00")),
-    div(id = "spectro-increment-container",
-          div(id = "previous-spectro-increment", "Previous Increment"),
-          div(id = "next-spectro-increment", "Next Increment")
-        ),
     useShinyjs(),
     fluidRow(
       column(width = 4, id = "oscillo-clip-container",

@@ -239,16 +239,25 @@ section.sidebar .shiny-input-container {
 
 #spectro-increment-container {
   margin: 0 auto;
+  margin-bottom: 2%;
   position: relative;
   width: 20em;
 }
 
 #previous-spectro-increment {
   position: absolute;
+  height: 20px;
+  width: 20px;
+  background-image: url('left-arrow.png');
+  background-size: cover;
 }
 
 #next-spectro-increment {
   margin-left: 13em;
+  height: 20px;
+  width: 20px;
+  background-image: url('right-arrow.png');
+  background-size: cover;
 }
 
 #previous-spectro-increment, #next-spectro-increment {
