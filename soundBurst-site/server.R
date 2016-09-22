@@ -232,7 +232,12 @@ shinyServer(function(input, output, session) {
   
   showPreviousSpectroIncrement = function() {
     path <- getPath(get_selected(input$tree, "names"))
-    currDir <- paste0(dirPath, "/", path, unlist(get_selected(input$tree)))
+    if(!is.null(newName)) {
+      currDir <- paste0(dirPath, "/", path, newName)
+    }
+    else {
+      currDir <- paste0(dirPath, "/", path, unlist(get_selected(input$tree)))
+    }
     sound <- readWave(currDir)
     l <- length(sound@left)
     sr <- sound@samp.rate
@@ -249,7 +254,12 @@ shinyServer(function(input, output, session) {
   
   showNextSpectroIncrement = function() {
     path <- getPath(get_selected(input$tree, "names"))
-    currDir <- paste0(dirPath, "/", path, unlist(get_selected(input$tree)))
+    if(!is.null(newName)) {
+      currDir <- paste0(dirPath, "/", path, newName)
+    }
+    else {
+      currDir <- paste0(dirPath, "/", path, unlist(get_selected(input$tree)))
+    }
     sound <- readWave(currDir)
     l <- length(sound@left)
     sr <- sound@samp.rate
@@ -319,7 +329,6 @@ shinyServer(function(input, output, session) {
   csvFileSubmitClick = function(){
     shinyjs::addClass("csvFile", "active-button")
     csvSumbit <- TRUE
-    # browser()
   }
   
   species <- reactive({
@@ -331,7 +340,6 @@ shinyServer(function(input, output, session) {
       infile <- parseFilePaths(roots=c(home='~'),input$csvFile)
       correctPath <- file.path(infile$datapath)
       print(correctPath)
-      browser()
       read.csv(correctPath, header = TRUE)
     }
   })
@@ -344,7 +352,6 @@ shinyServer(function(input, output, session) {
     if (is.null(df)) return(NULL)
 
     itemsSpecies <- c('Select Species',as.character(df[[1]]))
-    # browser()
     selectInput("speciesDropdown", "Species:",itemsSpecies)
   })
   
@@ -512,7 +519,7 @@ shinyServer(function(input, output, session) {
           newName <<- paste0(newFileName, ".wav")
         }
       }
-      output$tree <- renderTree(tree, quoted = FALSE)
+      # output$tree <- renderTree(tree, quoted = FALSE)
 
       file.rename(filePathFull, paste0(newFullFilePath,".wav"))
       write.csv(data, paste0(dirPath,"/",paste0(newFileName,'.csv')))
@@ -524,7 +531,6 @@ shinyServer(function(input, output, session) {
     }
     else {
       shinyjs::show("file-name-warning-container")
-      # browser()
     }
 
   })
@@ -549,8 +555,8 @@ shinyServer(function(input, output, session) {
     shinyjs::addClass("enter-project-info-label", "completed-step")
     shinyjs::toggleClass("enter-project-info-label", "open-accordian")
     shinyjs::toggleClass("enter-project-info-label", "closed-accordian")
-    shinyjs::toggleClass("show-tree", "open-accordian")
-    shinyjs::toggleClass("show-tree", "closed-accordian")
+    shinyjs::addClass("show-tree", "open-accordian")
+    shinyjs::removeClass("show-tree", "closed-accordian")
     shinyjs::show("tree", anim = TRUE)
   })
   
