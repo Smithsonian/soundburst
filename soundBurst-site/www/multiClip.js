@@ -4,6 +4,7 @@ $(document).ready(function() {
   $("#speciesDropSubmit").click(function() {
     console.log("test");
     $("#spectrogram_brush").clone(true).prop("id", "test").css({'background-color':'green'}).appendTo("#spectrogram")
+    debugger;
   });
 
   var left = $("#test").css("left");
@@ -19,6 +20,5 @@ $(document).ready(function() {
   $("#spectrogram_brush").css("width", width);
   $("#spectrogram_brush").css("border-right", borderright);
   $("#spectrogram_brush").css("border-left", borderleft);
-
   $("#test").remove()
 });
