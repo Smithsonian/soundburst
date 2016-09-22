@@ -148,6 +148,10 @@ label {
   font-size: 1.5em;
 }
 
+#left-column-title, #enter-project-info-label, #show-tree, #right-column-title {
+  border: 1px solid white;
+}
+
 #right-column-container {
   top: 0px;
   position: absolute;
