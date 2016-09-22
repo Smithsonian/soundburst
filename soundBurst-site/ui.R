@@ -9,9 +9,9 @@ library(shinyjs)
 library(shinyFiles)
 # source("customHeader.r")
 
-species <- read.csv("www/species-short.csv", header = TRUE)
-itemsSpecies <<- c('Select Type',as.character(species$CommonName))
-speciesType <<- c('Select Type',as.character(species$Type))
+# species <- read.csv("www/species-short.csv", header = TRUE)
+# itemsSpecies <<- c('Select Type',as.character(species$CommonName))
+# speciesType <<- c('Select Type',as.character(species$Type))
 
 dashboardPage(
   dashboardHeader(title = "SoundBurst App"),
@@ -97,23 +97,23 @@ dashboardPage(
             ),
             textInput("timeMin", "Time Start:", 1),
             textInput("timeMax", "Time End:  ", 2),
-            selectizeInput(
-              'speciesInput', 'Select the species that you heard', choices = itemsSpecies,
-              options = list(
-                placeholder = 'Please select a species below',
-                onInitialize = I('function() { this.setValue(""); }')
-              )
-            ),
-            selectizeInput(
-              'typeInput', 'Select the type of species that you heard', choices = speciesType,
-              options = list(
-                placeholder = 'Please select a type below',
-                onInitialize = I('function() { this.setValue(""); }')
-              )
-            ),
+            # selectizeInput(
+            #   'speciesInput', 'Select the species that you heard', choices = itemsSpecies,
+            #   options = list(
+            #     placeholder = 'Please select a species below',
+            #     onInitialize = I('function() { this.setValue(""); }')
+            #   )
+            # ),
+            # selectizeInput(
+            #   'typeInput', 'Select the type of species that you heard', choices = speciesType,
+            #   options = list(
+            #     placeholder = 'Please select a type below',
+            #     onInitialize = I('function() { this.setValue(""); }')
+            #   )
+            # ),
             #These column selectors are dynamically created when the file is loaded
-            # uiOutput("commonName"),
-            # uiOutput("speciesType"),
+            uiOutput("commonName"),
+            uiOutput("speciesType"),
             HTML('<label>Site Notes:</label>'),
             HTML('<textarea id="annotNotes" rows="3" cols="40">Annotation Notes</textarea>'),
             actionButton("speciesDropSubmit", "Submit")

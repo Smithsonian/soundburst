@@ -312,26 +312,43 @@ shinyServer(function(input, output, session) {
   # LOAD IN SPECIES DROPDOWN
   
   shinyFileChoose(input, 'csvFile', updateFreq=60000, session=session, roots=c(home='~'), restrictions=system.file(package='base'))
-  shinyjs::onclick("csvFile",shinyjs::addClass("csvFile", "active-button"))
+  shinyjs::onclick("csvFile",csvFileSubmitClick())
+  
+  csvFileSubmitClick = function(){
+    shinyjs::addClass("csvFile", "active-button")
+    csvSumbit <- TRUE
+    # browser()
+  }
+  
   species <- reactive({
-    req(input$csvFile)
-    infile <- parseFilePaths(roots=c(home='~'),input$csvFile)
-    correctPath <- file.path(infile$datapath)
-    print(correctPath)
-    read.csv(correctPath, header = TRUE)
+    if (is.null(input$csvFile)) {
+      testCSV <- read.csv("www/species-short.csv", header = TRUE)
+      read.csv("www/species-short.csv", header = TRUE)
+    } else {
+      req(input$csvFile)
+      infile <- parseFilePaths(roots=c(home='~'),input$csvFile)
+      correctPath <- file.path(infile$datapath)
+      print(correctPath)
+      browser()
+      read.csv(correctPath, header = TRUE)
+    }
   })
   
   output$commonName <- renderUI({
-    df <- species()
+
+      df <- species()
+
 
     if (is.null(df)) return(NULL)
 
     itemsSpecies <- c('Select Species',as.character(df[[1]]))
+    # browser()
     selectInput("speciesDropdown", "Species:",itemsSpecies)
   })
   
   output$speciesType <- renderUI({
-    df <-species()
+
+      df <- species()
 
     if (is.null(df)) return(NULL)
     
@@ -531,7 +548,7 @@ shinyServer(function(input, output, session) {
     shinyjs::show("tree", anim = TRUE)
   })
   
-  speciesFields <- c("timeMin", "timeMax", "speciesInput", "typeInput", "annotNotes")
+  speciesFields <- c("timeMin", "timeMax", "speciesDropdown", "typeDropdown", "annotNotes")
   
   formDataSpecies <- reactive({
     data <- sapply(speciesFields, function(x) input[[x]])
