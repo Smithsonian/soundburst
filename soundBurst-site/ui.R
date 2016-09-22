@@ -87,44 +87,40 @@ dashboardPage(
         ),
     useShinyjs(),
     fluidRow(
-      column(width = 6, id = "oscillo-clip-container",
-        plotOutput("spectroClip", brush = brushOpts(id = "plotZoom", direction = "xy", delay = 500, opacity = 0.45, stroke = "#FFD265", fill="#EEEE00")),
-        column(width = 10, id = "clip-species-dropdown",
-          box(width = NULL, id = "species-dropdown-box",status = "warning",
-            div(id = "close-species-drop", "X"),
-            div(id = "site-info-warning-container",
-                div(id = "site-info-warning", "Attention: Please ensure you have submitted information for this Deployment on the left prior to submitting annotation information")
-            ),
-            textInput("timeMin", "Time Start:", 1),
-            textInput("timeMax", "Time End:  ", 2),
-            # selectizeInput(
-            #   'speciesInput', 'Select the species that you heard', choices = itemsSpecies,
-            #   options = list(
-            #     placeholder = 'Please select a species below',
-            #     onInitialize = I('function() { this.setValue(""); }')
-            #   )
-            # ),
-            # selectizeInput(
-            #   'typeInput', 'Select the type of species that you heard', choices = speciesType,
-            #   options = list(
-            #     placeholder = 'Please select a type below',
-            #     onInitialize = I('function() { this.setValue(""); }')
-            #   )
-            # ),
-            #These column selectors are dynamically created when the file is loaded
-            uiOutput("commonName"),
-            uiOutput("speciesType"),
-            HTML('<label>Site Notes:</label>'),
-            HTML('<textarea id="annotNotes" rows="3" cols="40">Annotation Notes</textarea>'),
-            actionButton("speciesDropSubmit", "Submit")
-          )
-        )
+      column(width = 4, id = "oscillo-clip-container",
+        plotOutput("spectroClip", brush = brushOpts(id = "plotZoom", direction = "xy", delay = 500, opacity = 0.45, stroke = "#FFD265", fill="#EEEE00"))
       ),
-      column(width = 6, id = "spectro-clip-container",
+      column(width = 4, id = "spectro-clip-container",
         plotOutput("spectroZoomClip")
+      ),
+      column(width = 4, id = "clipInfo-container",
+             div(id = "site-info-warning-container",
+                 div(id = "site-info-warning", "Attention: Please ensure you have submitted information for this Deployment on the left prior to submitting annotation information")
+             ),
+             textInput("timeMin", "Time Start:", 1),
+             textInput("timeMax", "Time End:  ", 2),
+             # selectizeInput(
+             #   'speciesInput', 'Select the species that you heard', choices = itemsSpecies,
+             #   options = list(
+             #     placeholder = 'Please select a species below',
+             #     onInitialize = I('function() { this.setValue(""); }')
+             #   )
+             # ),
+             # selectizeInput(
+             #   'typeInput', 'Select the type of species that you heard', choices = speciesType,
+             #   options = list(
+             #     placeholder = 'Please select a type below',
+             #     onInitialize = I('function() { this.setValue(""); }')
+             #   )
+             # ),
+             #These column selectors are dynamically created when the file is loaded
+             uiOutput("commonName"),
+             uiOutput("speciesType"),
+             HTML('<label>Site Notes:</label>'),
+             HTML('<textarea id="annotNotes" rows="3" cols="40">Annotation Notes</textarea>'),
+             actionButton("speciesDropSubmit", "Submit")
       )
   ),
-  # tags$head(tags$script(src="libraries/jquery-3.1.0.min.js")),
   tags$head(tags$script(src="multiClip.js"))
 )
 )

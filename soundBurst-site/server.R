@@ -88,6 +88,8 @@ shinyServer(function(input, output, session) {
   # shinyjs::hide("csvFile")
   shinyjs::onclick("show-tree", toggleTree())
   shinyjs::hide("pauseButton")
+  shinyjs::hide("clipInfo-container")
+  # shinyjs::hide("spectroZoomClip")
   shinyjs::hide("project-info-container")
   shinyjs::hide("site-info-container")
   shinyjs::hide("complete-deployment")
@@ -393,7 +395,9 @@ shinyServer(function(input, output, session) {
       xmax <- input$plot_brush$xmax
       # shinyjs::html('remove',tags$div(class = "close-clip", "hello There"))
       shinyjs::onclick("spectroClip",showSpeciesDropdown(xmin, xmax)) 
+      
     }
+    
   })
   
   # This creates the oscillo clips after brush
@@ -413,8 +417,10 @@ shinyServer(function(input, output, session) {
       # shinyjs::show("spectroClip")
       xmin <- input$plot_brush$xmin
       xmax <- input$plot_brush$xmax
-      shinyjs::onclick("spectroClip",showSpeciesDropdown(xmin, xmax)) 
+      shinyjs::show("clipInfo-container")
+      
     }
+    showSpeciesDropdown(xmin, xmax)
   })
   
   showSpeciesDropdown = function (xmin, xmax){

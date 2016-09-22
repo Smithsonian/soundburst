@@ -1,9 +1,12 @@
 .shiny-output-error { 
   visibility: hidden; 
-  
 }
 .shiny-output-error:before { 
   visibility: hidden; 
+}
+
+#clipInfo-container {
+  background-color: white;
 }
 
 .content-wrapper {
@@ -12,6 +15,10 @@
 
 label {
   margin-top: 5%;
+}
+
+#site-info-warning-container label {
+  margin-top: 3%;
 }
 
 #playButton, #pauseButton {
@@ -238,3 +245,12 @@ section.sidebar .shiny-input-container {
   margin-left: 50%;
   color: #fff;
 }
+
+#spectroZoomClip{
+  margin-top: 5%;
+}
+
+#clipInfo-container {
+  margin-top: 1.5%;
+}
+
