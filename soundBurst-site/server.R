@@ -1,4 +1,4 @@
-  # install.packages("shiny")
+# install.packages("shiny")
 # install.packages("devtools")
 # install.packages("aws.s3", repos = c("cloudyr" = "http://cloudyr.github.io/drat"))
 # install.packages('shinyFiles')
@@ -92,7 +92,7 @@ shinyServer(function(input, output, session) {
   shinyjs::hide("clipInfo-container")
   # shinyjs::hide("spectroZoomClip")
   shinyjs::hide("project-info-container")
-  shinyjs::hide("site-info-container")
+  shinyjs::hide("species-sidebox-container")
   shinyjs::hide("complete-deployment")
   shinyjs::hide("status-bar-container")
   # shinyjs::hide("spectro-clip-container")
@@ -105,7 +105,7 @@ shinyServer(function(input, output, session) {
   shinyjs::hide(id = "playButtonClip",anim = FALSE)
   shinyjs::hide("file-name-warning-container")
   shinyjs::hide("site-info-warning-container")
-  
+
   shinyjs::onclick("sF-selectButton", toggleAfterProjectSelect())
   
   toggleProjectSelect = function() {
@@ -127,7 +127,7 @@ shinyServer(function(input, output, session) {
   }
   
   toggleSiteInfoContainer = function() {
-    shinyjs::toggle("site-info-container", anim = TRUE)
+    shinyjs::toggle("species-sidebox-container", anim = TRUE)
     shinyjs::toggleClass("right-column-title", "open-accordian")
     shinyjs::toggleClass("right-column-title", "closed-accordian")
   }
@@ -214,22 +214,23 @@ shinyServer(function(input, output, session) {
             shinyjs::show("spectro-increment-container")
           }
           shinyjs::show("playButton",anim = FALSE)
-          shinyjs::show("site-info-container")
+          shinyjs::show("species-sidebox-container")
         }) 
           observeEvent(input$noTimeSubmission,{
             spectroToTime <<- soundDuration
             renderSpectro(sound)
             shinyjs::show("playButton",anim = FALSE)
-            shinyjs::show("site-info-container")
+            shinyjs::show("species-sidebox-container")
           })
       } else {
         spectroToTime <<- soundDuration
         renderSpectro(sound)
         shinyjs::show("playButton",anim = FALSE)
-        shinyjs::show("site-info-container")
+        shinyjs::show("species-sidebox-container")
       }
       shinyjs::hide("tree", anim = TRUE)
       shinyjs::addClass("show-tree", "closed-accordian")
+      shinyjs::addClass("show-tree", "completed-step")
       shinyjs::removeClass("show-tree", "open-accordian")
       shinyjs::addClass("right-column-title", "open-accordian")
       shinyjs::removeClass("right-column-title", "closed-accordian")
@@ -249,7 +250,7 @@ shinyServer(function(input, output, session) {
       # shinyjs::html("right-column-title",createCSVFilePath())
       spectro(sound, osc = TRUE, scale = FALSE, tlim = c(spectroFromTime,spectroToTime))
       shinyjs::removeClass("right-column-title", "completed-step")
-      shinyjs::show("site-info-container", anim = TRUE)
+      shinyjs::show("species-sidebox-container", anim = TRUE)
       findFileInfo()
       shinyjs::show("complete-deployment")
       shinyjs::onclick("complete-deployment", increaseStatusBar())
@@ -383,7 +384,6 @@ shinyServer(function(input, output, session) {
   shinyjs::onclick("csvFile",csvFileSubmitClick())
   
   csvFileSubmitClick = function(){
-    shinyjs::addClass("csvFile", "active-button")
     csvSumbit <- TRUE
   }
   
@@ -586,7 +586,7 @@ shinyServer(function(input, output, session) {
         shinyjs::html("titleHeader",unlist(get_selected(input$tree)))
       }
       shinyjs::addClass("siteInfo", "active-button")
-      shinyjs::hide("site-info-container")
+      shinyjs::hide("species-sidebox-container")
       shinyjs::addClass("right-column-title", "completed-step")
       shinyjs::toggleClass("right-column-title", "open-accordian")
       shinyjs::toggleClass("right-column-title", "closed-accordian")
@@ -673,6 +673,11 @@ shinyServer(function(input, output, session) {
 
   increaseStatusBar = function () {
     progressValue$one <<- progressValue$one + 1
+    shinyjs::show("tree", anim = TRUE)
+    shinyjs::removeClass("show-tree", "closed-accordian")
+    shinyjs::removeClass("right-column-title", "completed-step")
+    shinyjs::removeClass("show-tree", "completed-step")
+    shinyjs::addClass("show-tree", "open-accordian")
   }
   
   findFileInfo = function() {
