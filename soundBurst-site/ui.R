@@ -18,7 +18,7 @@ dashboardPage(
   dashboardSidebar(
     includeCSS("sidebar.css"),
     includeCSS("main.css"),
-    column(12,
+    column(12, id = "sidebar-column",
       div(id = "status-bar-container",
               uiOutput(outputId = "progressOne")
           ),

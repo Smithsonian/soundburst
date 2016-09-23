@@ -290,7 +290,13 @@ shinyServer(function(input, output, session) {
     } 
     else {
       path <- getPath(get_selected(input$tree, "names"))
-      currDir <- paste0(dirPath, "/", path, unlist(get_selected(input$tree)))
+      if(!is.null(newName)) {
+        currDir <- paste0(dirPath, "/", path, newName)
+      }
+      else {
+        currDir <- paste0(dirPath, "/", path, unlist(get_selected(input$tree)))
+      }
+      browser()
       # Use  from = 1, to = 5, units = "seconds" when playing from a certain time
       wave <- readWave(currDir)
       sound <- audioSample(wave@right, wave@samp.rate, wave@bit)
