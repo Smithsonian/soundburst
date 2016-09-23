@@ -75,7 +75,7 @@ progressGroup <- function(text, value, min = 0, max = value, color = "aqua") {
 
 shinyServer(function(input, output, session) {
   
-  # HTML("nav",div(id="navbar-title-file-name", "Hello"))
+  # shinyjs::html("content-id",div("title", "Hello"), add = TRUE)
 
   projectName <<- NULL
   spectroFromTime <<- 0
