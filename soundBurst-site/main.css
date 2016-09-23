@@ -46,11 +46,18 @@ label {
   background-size: cover;
 }
 
-#playButton {
+#playButtonClip, #pauseButtonClip {
+  position: absolute;
+  height: 20px;
+  width: 20px;
+  background-size: cover;
+}
+
+#playButton, #playButtonClip {
   background-image: url('play.png');
 }
 
-#pauseButton {
+#pauseButton, #pauseButtonClip {
   background-image: url('pause.png');
   z-index: 1001;
 }

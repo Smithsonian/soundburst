@@ -88,6 +88,7 @@ shinyServer(function(input, output, session) {
   # shinyjs::hide("csvFile")
   shinyjs::onclick("show-tree", toggleTree())
   shinyjs::hide("pauseButton")
+  shinyjs::hide("pauseButtonClip")
   shinyjs::hide("clipInfo-container")
   # shinyjs::hide("spectroZoomClip")
   shinyjs::hide("project-info-container")
@@ -101,6 +102,7 @@ shinyServer(function(input, output, session) {
   shinyjs::hide("tree")
   shinyjs::hide("directorypath")
   shinyjs::hide(id = "playButton",anim = FALSE)
+  shinyjs::hide(id = "playButtonClip",anim = FALSE)
   shinyjs::hide("file-name-warning-container")
   shinyjs::hide("site-info-warning-container")
   
@@ -164,8 +166,30 @@ shinyServer(function(input, output, session) {
     findFileCount()
   })
   
-  shinyjs::onclick("playButton", playSound())
-  shinyjs::onclick("pauseButton", pauseSound())
+  shinyjs::onclick("playButton", onPlay("spectro"))
+  shinyjs::onclick("pauseButton", pauseSound("spectro"))
+  shinyjs::onclick("playButtonClip", onPlay("spectroClip"))
+  shinyjs::onclick("pauseButtonClip", pauseSound("spectroClip"))
+  
+  onPlay = function(chartType) {
+    if(chartType == "spectro")
+    {
+      playSound(spectroFromTime, spectroToTime, "spectro")
+    }
+    else {
+      playSound(xmin, xmax, "spectroClip")
+    }
+  }
+  
+  onPause = function(chartType) {
+    if(chartType == "spectro")
+    {
+      pauseSound("spectro")
+    }
+    else {
+      pauseSound("spectroClip")
+    }
+  }
   
   observeEvent(unlist(get_selected(input$tree)), {
     # Plot main spectrogram
@@ -176,7 +200,7 @@ shinyServer(function(input, output, session) {
     else {
       path <- getPath(get_selected(input$tree, "names"))
       currDir <- paste0(dirPath, "/", path, unlist(get_selected(input$tree)))
-      sound <- readWave(currDir)
+      sound <- readWave(currDir) ###### NEED THIS?
       l <- length(sound@left)
       sr <- sound@samp.rate
       soundDuration <- round(l/sr,2)
@@ -281,12 +305,19 @@ shinyServer(function(input, output, session) {
     }
   }
 
-  playSound = function (){
+  playSound = function (start, end, chartType){
     if(paused)
     {
       resume(audioSound)
-      shinyjs::show(id = "pauseButton",anim = TRUE)
-      shinyjs::hide(id = "playButton",anim = FALSE)
+      if(chartType == "spectro")
+      {
+        shinyjs::show(id = "pauseButton",anim = TRUE)
+        shinyjs::hide(id = "playButton",anim = FALSE)
+      }
+      else {
+        shinyjs::show(id = "pauseButtonClip",anim = TRUE)
+        shinyjs::hide(id = "playButtonClip",anim = FALSE)
+      }
     } 
     else {
       path <- getPath(get_selected(input$tree, "names"))
@@ -296,13 +327,19 @@ shinyServer(function(input, output, session) {
       else {
         currDir <- paste0(dirPath, "/", path, unlist(get_selected(input$tree)))
       }
-      browser()
       # Use  from = 1, to = 5, units = "seconds" when playing from a certain time
-      wave <- readWave(currDir)
-      sound <- audioSample(wave@right, wave@samp.rate, wave@bit)
+      wave <- readWave(currDir, from = start, to = end, unit = "seconds")
+      sound <- audioSample(wave@left, wave@samp.rate, wave@bit)
       
-      shinyjs::show(id = "pauseButton",anim = TRUE)
-      shinyjs::hide(id = "playButton",anim = FALSE)
+      if(chartType == "spectro")
+      {
+        shinyjs::show(id = "pauseButton",anim = TRUE)
+        shinyjs::hide(id = "playButton",anim = FALSE)
+      }
+      else {
+        shinyjs::show(id = "pauseButtonClip",anim = TRUE)
+        shinyjs::hide(id = "playButtonClip",anim = FALSE)
+      }
       audioSound <<- audio::play(sound)
       audioSound
       # pause(a)
@@ -310,11 +347,18 @@ shinyServer(function(input, output, session) {
     }
   }
   
-  pauseSound = function () {
+  pauseSound = function (chartType) {
     paused <<- TRUE
     pause(audioSound)
-    shinyjs::hide(id = "pauseButton", anim = TRUE)
-    shinyjs::show(id = "playButton", anim = FALSE)
+    if(chartType == "spectro")
+    {
+      shinyjs::hide(id = "pauseButton", anim = TRUE)
+      shinyjs::show(id = "playButton", anim = FALSE)
+    }
+    else {
+      shinyjs::hide(id = "pauseButtonClip", anim = TRUE)
+      shinyjs::show(id = "playButtonClip", anim = FALSE)
+    }
   }
 
   getPath = function(folderList) {
@@ -398,7 +442,7 @@ shinyServer(function(input, output, session) {
   
   # This creates the oscillo clips after brush
   output$spectroZoomClip <- renderPlot({
-    path <- getPath(get_selected(input$tree, "names"))
+    path <- getPath(get_selected(input$tree, "names"))         
     if(!is.null(newName)) {
       currDir <- paste0(dirPath, "/", path, newName)
     }
@@ -434,10 +478,10 @@ shinyServer(function(input, output, session) {
       spectro(sound, scale = FALSE, osc = FALSE, tlim = c(input$plot_brush$xmin,input$plot_brush$xmax))
       # oscillo(sound, from=input$plot_brush$xmin, to=input$plot_brush$xmax)
       # shinyjs::show("spectroClip")
-      xmin <- input$plot_brush$xmin
-      xmax <- input$plot_brush$xmax
+      xmin <<- input$plot_brush$xmin
+      xmax <<- input$plot_brush$xmax
       shinyjs::show("clipInfo-container")
-      
+      shinyjs::show("playButtonClip",anim = FALSE)
     }
     showSpeciesDropdown(xmin, xmax)
   })
