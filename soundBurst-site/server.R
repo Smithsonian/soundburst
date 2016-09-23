@@ -89,6 +89,7 @@ shinyServer(function(input, output, session) {
   shinyjs::onclick("show-tree", toggleTree())
   shinyjs::hide("pauseButton")
   shinyjs::hide("pauseButtonClip")
+  shinyjs::hide("pauseButtonClipZoom")
   shinyjs::hide("clipInfo-container")
   # shinyjs::hide("spectroZoomClip")
   shinyjs::hide("project-info-container")
@@ -103,6 +104,7 @@ shinyServer(function(input, output, session) {
   shinyjs::hide("directorypath")
   shinyjs::hide(id = "playButton",anim = FALSE)
   shinyjs::hide(id = "playButtonClip",anim = FALSE)
+  shinyjs::hide(id = "playButtonClipZoom", anim = FALSE)
   shinyjs::hide("file-name-warning-container")
   shinyjs::hide("site-info-warning-container")
 
@@ -166,25 +168,40 @@ shinyServer(function(input, output, session) {
     findFileCount()
   })
   
+  # Creating onclick event for each play and pause button
   shinyjs::onclick("playButton", onPlay("spectro"))
   shinyjs::onclick("pauseButton", pauseSound("spectro"))
   shinyjs::onclick("playButtonClip", onPlay("spectroClip"))
   shinyjs::onclick("pauseButtonClip", pauseSound("spectroClip"))
+  shinyjs::onclick("playButtonClipZoom", onPlay("spectroClipZoom"))
+  shinyjs::onclick("pauseButtonClipZoom", pauseSound("spectroClipZoom"))
   
+  # This is the function that actually calls the play sound function, as it was impossible to pass
+  # in arguments in the above shinyjs function call.
   onPlay = function(chartType) {
     if(chartType == "spectro")
     {
       playSound(spectroFromTime, spectroToTime, "spectro")
+    }
+    else if(chartType == "spectroClipZoom")
+    {
+      playSound(xminZoom, xmaxZoom, "spectroClipZoom")
     }
     else {
       playSound(xmin, xmax, "spectroClip")
     }
   }
   
+  # This is the function that actually calls the pause sound function, as it was impossible to pass
+  # in arguments in the above shinyjs function call.
   onPause = function(chartType) {
     if(chartType == "spectro")
     {
       pauseSound("spectro")
+    }
+    else if(chartType == "spectroClipZoom")
+    {
+      pauseSound("spectroClipZoom")
     }
     else {
       pauseSound("spectroClip")
@@ -315,6 +332,11 @@ shinyServer(function(input, output, session) {
         shinyjs::show(id = "pauseButton",anim = TRUE)
         shinyjs::hide(id = "playButton",anim = FALSE)
       }
+      else if(chartType == "spectroClipZoom")
+      {
+        shinyjs::show(id = "pauseButtonClipZoom",anim = TRUE)
+        shinyjs::hide(id = "playButtonClipZoom",anim = FALSE)
+      }
       else {
         shinyjs::show(id = "pauseButtonClip",anim = TRUE)
         shinyjs::hide(id = "playButtonClip",anim = FALSE)
@@ -336,6 +358,11 @@ shinyServer(function(input, output, session) {
       {
         shinyjs::show(id = "pauseButton",anim = TRUE)
         shinyjs::hide(id = "playButton",anim = FALSE)
+      }
+      else if(chartType == "spectroClipZoom")
+      {
+        shinyjs::show(id = "pauseButtonClipZoom",anim = TRUE)
+        shinyjs::hide(id = "playButtonClipZoom",anim = FALSE)
       }
       else {
         shinyjs::show(id = "pauseButtonClip",anim = TRUE)
@@ -451,16 +478,20 @@ shinyServer(function(input, output, session) {
     }
     sound <- readWave(currDir)
     if(!is.null(input$plotZoom$xmax)) {
+      
       spectro(sound, scale = FALSE, osc = FALSE, tlim = c(input$plotZoom$xmin,input$plotZoom$xmax), flim = c(input$plotZoom$ymin,input$plotZoom$ymax))
-      # oscillo(sound, from=input$plot_brush$xmin, to=input$plot_brush$xmax)
-      # shinyjs::show("spectroClip")
+      
+      # Min and max values for the spectropClipZoom
+      xminZoom <<- input$plotZoom$xmin
+      xmaxZoom <<- input$plotZoom$xmax
+      
+      # Min and max values for the spectroClip, not the spectroClipZoom
       xmin <- input$plot_brush$xmin
       xmax <- input$plot_brush$xmax
       # shinyjs::html('remove',tags$div(class = "close-clip", "hello There"))
       shinyjs::onclick("spectroClip",showSpeciesDropdown(xmin, xmax)) 
-      
+      shinyjs::show("playButtonClipZoom",anim = FALSE)
     }
-    
   })
   
   # This creates the oscillo clips after brush

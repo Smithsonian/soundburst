@@ -101,6 +101,8 @@ dashboardPage(
         plotOutput("spectroClip", brush = brushOpts(id = "plotZoom", direction = "xy", delay = 500, opacity = 0.45, stroke = "#FFD265", fill="#EEEE00"))
       ),
       column(width = 4, id = "spectro-clip-container",
+        div(id = "playButtonClipZoom"),
+        div(id = "pauseButtonClipZoom"),
         plotOutput("spectroZoomClip")
       ),
       column(width = 4, id = "clipInfo-container",
