@@ -31,7 +31,7 @@ newName <- NULL
 options(shiny.trace=TRUE)
 options(shiny.maxRequestSize=70*1024^2) 
 volumes <- getVolumes()
-paused <<- FALSE
+paused <<- FALSE 
 
 progressBar <- function(value = 0, label = FALSE, color = "aqua", size = NULL,
                         striped = FALSE, active = FALSE, vertical = FALSE) {

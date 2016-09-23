@@ -6,7 +6,7 @@ $(document).ready(function() {
     var count = $(".completedBrush").length;
     $("#spectrogram_brush").clone(true).prop("id", count + 1).prop("class", "completedBrush").css({'background-color':'green'}).appendTo("#spectrogram")
   });
-  //
+  // 
   // var left = $("#test").css("left");
   // var top = $("#test").css("top");
   // var height = $("#test").css("height");
