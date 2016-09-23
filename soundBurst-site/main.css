@@ -1,9 +1,43 @@
+
+.shiny-output-error {
+  visibility: hidden;
+}
+.shiny-output-error:before {
+  visibility: hidden;
+}
+
+#titleHeader {
+  width: 400px;
+  text-align: center;
+  right: 0;
+  left: 0;
+  margin: auto;
+  z-index: 100000;
+  background-color: #3C8DBC;
+  color: #fff;
+  border-bottom: 0 solid transparent;
+  position: absolute;
+  font-size: 14px;
+  line-height: 50px;
+  font-weight: 300;
+  overflow: hidden;
+  font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+}
+
+#clipInfo-container {
+  background-color: white;
+}
+
 .content-wrapper {
-  margin-left: 20% !important;
+  margin-left: 360px !important;
 }
 
 label {
   margin-top: 5%;
+}
+
+#clipInfo-container label {
+  margin-top: 1%;
 }
 
 #playButton, #pauseButton {
@@ -13,11 +47,25 @@ label {
   background-size: cover;
 }
 
-#playButton {
+#playButtonClip, #pauseButtonClip {
+  position: absolute;
+  height: 20px;
+  width: 20px;
+  background-size: cover;
+}
+
+#playButtonClipZoom, #pauseButtonClipZoom {
+  position: absolute;
+  height: 20px;
+  width: 20px;
+  background-size: cover;
+}
+
+#playButton, #playButtonClip, #playButtonClipZoom {
   background-image: url('play.png');
 }
 
-#pauseButton {
+#pauseButton, #pauseButtonClip, #pauseButtonClipZoom {
   background-image: url('pause.png');
   z-index: 1001;
 }
@@ -60,11 +108,11 @@ label {
 }
 
 #clip-species-dropdown {
-    position: absolute;
-    padding: 0;
-    left: 50%;
-    margin-top: -25%;
-    z-index: 1;
+  position: absolute;
+  padding: 0;
+  left: 50%;
+  margin-top: -25%;
+  z-index: 1;
 }
 
 .closeButtonClip {
@@ -82,7 +130,16 @@ label {
 
 #timeMin, #timeMax {
   width: 50%;
-  display:inline-block
+  display:inline-block;
+  margin-top: 4%;
+}
+
+#timeMax {
+  margin-bottom: 2%;
+}
+
+#speciesDropSubmit {
+  margin-bottom: 4%;
 }
 
 .form-group .shiny-input-container {
@@ -90,7 +147,6 @@ label {
 }
 
 #species-sidebox-container {
-  position: absolute;
   right: 0px;
   height: 100%;
   width: 100%;
@@ -107,8 +163,38 @@ label {
   cursor: pointer;
 }
 
-#left-column-title, #species-file-upload, #right-column-title, #enter-project-info-label, #show-tree, #complete-deployment {
+#left-column-title, #right-column-title, #enter-project-info-label, #show-tree, #complete-deployment {
+  padding: 4%;
   font-size: 1.5em;
+}
+
+#project-info-container, #tree, #species-sidebox-container {
+  padding-top: 4%;
+  padding-left: 4%;
+  padding-right: 4%;
+}
+
+#tree {
+  padding-top: 0;
+}
+
+/*
+#species-sidebox-container {
+padding-bottom: 0;
+}*/
+
+#species-file-upload {
+  text-align: left;
+  font-size: 1em;
+}
+
+#project-container, #full-project-info-container, #full-tree-container, #full-project-info-container {
+  text-align: center;
+  border: 1px solid white;
+}
+
+#project-info-container {
+  text-align: left;
 }
 
 #right-column-container {
@@ -165,18 +251,29 @@ section.sidebar .shiny-input-container {
   cursor: pointer;
 }
 
-#csvFile, #projectInfo, #directory, #siteInfo {
+#projectInfo, #directory, #siteInfo {
   font-size: 1.15em;
   border: none;
-  color: #e5e5e5;
+  color: black;
   padding: 0.5em;
   margin: 0.5em auto;
   text-decoration: none;
   transition: background-color ease 0.33s;
 }
 
+#projectInfo {
+  margin-left: 38%;
+}
+
+#csvFile {
+  color: black;
+  padding: 0;
+  border: none;
+  background-color: grey;
+}
+
 .inactive-button {
-  background-color: #d62d34 !important;
+  background-color: grey !important;
 }
 
 .active-button {
@@ -198,20 +295,30 @@ section.sidebar .shiny-input-container {
   position: relative;
   margin: 0 auto;
   z-index: 1000;
+  text-align: left;
 }
 
 #spectro-increment-container {
   margin: 0 auto;
+  margin-bottom: 2%;
   position: relative;
   width: 20em;
 }
 
 #previous-spectro-increment {
   position: absolute;
+  height: 20px;
+  width: 20px;
+  background-image: url('left-arrow.png');
+  background-size: cover;
 }
 
 #next-spectro-increment {
   margin-left: 13em;
+  height: 20px;
+  width: 20px;
+  background-image: url('right-arrow.png');
+  background-size: cover;
 }
 
 #previous-spectro-increment, #next-spectro-increment {
@@ -226,7 +333,7 @@ section.sidebar .shiny-input-container {
 }
 
 .completed-step {
-  color: #3C8DBC;
+  background-color: #3C8DBC;
 }
 
 #navbar-title-file-name {
@@ -234,4 +341,42 @@ section.sidebar .shiny-input-container {
   font-size: 2em;
   margin-left: 50%;
   color: #fff;
+}
+
+#spectroZoomClip{
+  margin-top: 5%;
+}
+
+#clipInfo-container {
+  margin-top: 1.5%;
+  min-height: 400px;
+}
+
+#site-info-container {
+  text-align: left;
+}
+
+#tree {
+  text-align: left;
+}
+
+textarea {
+  max-width: 300px;
+}
+
+#complete-deployment {
+  text-align: center;
+  max-width: 85%;
+  width: 15em;
+  font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+  font-size: 1.15em;
+  border: none;
+  background: #d62d34;
+  color: #E5E5E5;
+  padding: 0.5em;
+  margin: 0.67em auto;
+  display: block;
+  text-decoration: none;
+  border-radius: 1em;
+  transition: background ease 0.33s;
 }
