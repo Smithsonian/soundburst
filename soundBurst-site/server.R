@@ -138,7 +138,7 @@ shinyServer(function(input, output, session) {
   }
   
   toggleCompletedDeployment = function() {
-    shinyjs::toggle("completedDepContainer", anim = TRUE)
+    shinyjs::toggle("listCompleted", anim = TRUE)
     shinyjs::toggleClass("completedDepContainer", "open-accordian")
     shinyjs::toggleClass("completedDepContainer", "closed-accordian")
   }
@@ -227,6 +227,7 @@ shinyServer(function(input, output, session) {
       return()
     } 
     else {
+      listCompleted <<- list()
       path <- getPath(get_selected(input$tree, "names"))
       currDir <- paste0(dirPath, "/", path, unlist(get_selected(input$tree)))
       sound <- readWave(currDir) ###### NEED THIS?
@@ -694,8 +695,13 @@ shinyServer(function(input, output, session) {
       formattedData <- c(siteDF, dataSet)
       siteDF <<- formattedData
       write.csv(siteDF, paste0(dirPath,"/",paste0(createCSVFilePath(),'.csv')))
+      shinyjs::addClass('completedDepContainer', "open-accordian")
+      shinyjs::show("listCompleted")
       
-      shinyjs::html('listCompleted', as.character(tags$p(paste0(dataSet[[4]], " at " , dataSet[[1]]))))
+      listEl <- as.character(tags$div(id=clipCount, paste0(dataSet[[4]], " at " , dataSet[[1]])))
+      listCompleted <<- c(listCompleted, listEl)
+      finalCompleted <- tagList(listCompleted)
+      shinyjs::html('listCompleted', finalCompleted)
     }
   })
   
