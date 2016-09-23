@@ -22,6 +22,8 @@ dashboardPage(
       div(id = "status-bar-container",
               uiOutput(outputId = "progressOne")
           ),
+      div(id = "aws-upload-container",
+          actionButton("aws-upload-button", class="inactive-aws-button", "Upload to AWS")),
       div(id = "project-container",
           div(id = "left-column-title", class = "open-accordian", "Select a Project"),
           shinyDirButton('directory', class = 'inactive-button', 'Folder select', 'Please select a folder')
@@ -47,9 +49,6 @@ dashboardPage(
           ),
       div(id = "full-project-info-container",
           div(id = "right-column-title", class = "closed-accordian", "Enter Deployment Info"),
-          div(id = "file-name-warning-container",
-              div(id = "file-name-warning", "Attention: A file with the same name already exists. Please enter a new Deployment Name and resubmit.")
-          ),
           div(id = "time-box-container",
               div(id = "secondary-time-box-container",
                   HTML('<label>This file exceeds 2 total minutes, would you like to increment the display?</label>'),
@@ -72,6 +71,9 @@ dashboardPage(
                          HTML('<label>End date/time: </label>'),
                          textOutput("maxTime"),
                          # textInput("siteNotes", "Site Notes:", "Notes"),
+                         div(id = "file-name-warning-container",
+                             div(id = "file-name-warning", "Attention: A file with the same name already exists. Please enter a new Deployment Name and resubmit.")
+                         ),
                          actionButton("siteInfo", class = "inactive-button", "Submit")
                      )
                      # div(id = "submit-site-complete-container", 
@@ -86,13 +88,13 @@ dashboardPage(
   dashboardBody(id = "content-id",
     includeCSS("main.css"),
     uiOutput("audiotag"),
+    div(id = "playButton"),
+    div(id = "pauseButton"),
+    plotOutput("spectrogram", brush = brushOpts(id = "plot_brush", direction = "x", resetOnNew = TRUE, delay = 500, opacity = 0.45, stroke = "#FFD265", fill="#EEEE00")),
     div(id = "spectro-increment-container",
         div(id = "previous-spectro-increment"),
         div(id = "next-spectro-increment")
     ),
-    div(id = "playButton"),
-    div(id = "pauseButton"),
-    plotOutput("spectrogram", brush = brushOpts(id = "plot_brush", direction = "x", resetOnNew = TRUE, delay = 500, opacity = 0.45, stroke = "#FFD265", fill="#EEEE00")),
     useShinyjs(),
     fluidRow(
       column(width = 4, id = "oscillo-clip-container",
@@ -126,8 +128,8 @@ dashboardPage(
              #   )
              # ),
              #These column selectors are dynamically created when the file is loaded
-             uiOutput("commonName"),
              uiOutput("speciesType"),
+             uiOutput("commonName"),
              HTML('<label>Site Notes:</label>'),
              HTML('<textarea id="annotNotes" rows="3" cols="40">Annotation Notes</textarea>'),
              actionButton("speciesDropSubmit", "Submit")

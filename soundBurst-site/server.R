@@ -95,7 +95,7 @@ shinyServer(function(input, output, session) {
   shinyjs::hide("project-info-container")
   shinyjs::hide("species-sidebox-container")
   shinyjs::hide("complete-deployment")
-  shinyjs::hide("status-bar-container")
+  shinyjs::hide("progressOne")
   # shinyjs::hide("spectro-clip-container")
   shinyjs::hide("time-box-container")
   shinyjs::hide("spectro-increment-container")
@@ -107,6 +107,8 @@ shinyServer(function(input, output, session) {
   shinyjs::hide(id = "playButtonClipZoom", anim = FALSE)
   shinyjs::hide("file-name-warning-container")
   shinyjs::hide("site-info-warning-container")
+  shinyjs::hide("aws-upload-button")
+  shinyjs::disable("aws-upload-button")
 
   shinyjs::onclick("sF-selectButton", toggleAfterProjectSelect())
   
@@ -159,11 +161,12 @@ shinyServer(function(input, output, session) {
     folders <- list.dirs(dirPath, full.names = F, recursive = TRUE)
     
     if(!(is.null(dirPath))) {
-      shinyjs::show("status-bar-container")
+      shinyjs::show("progressOne")
       create_directory_tree(dirPath)
       load("www/dir_tree.Rdata")
       output$tree <- renderTree(tree, quoted = FALSE)
       shinyjs::addClass("directory", "active-button")
+      shinyjs::show("aws-upload-button")
     }
     findFileCount()
   })
@@ -245,6 +248,7 @@ shinyServer(function(input, output, session) {
         shinyjs::show("playButton",anim = FALSE)
         shinyjs::show("species-sidebox-container")
       }
+      shinyjs::show("content-id")
       shinyjs::hide("tree", anim = TRUE)
       shinyjs::addClass("show-tree", "closed-accordian")
       shinyjs::addClass("show-tree", "completed-step")
@@ -686,11 +690,12 @@ shinyServer(function(input, output, session) {
 
   findFileCount = function() {
     projectFileCount <- 0
-    projectStatusCount <<- 0
+    projectFileCountGlobal <<- 0
     files <- list.files(dirPath, all.files=F, recursive=T, include.dirs=T)
     for (i in 1:length(files)) {
       if (substrRight(files[i],4) == ".wav") {
         projectFileCount <- projectFileCount +1
+        projectFileCountGlobal <<- projectFileCountGlobal + 1
       } 
     }
     # Create some REACTIVE VALUES
@@ -703,12 +708,18 @@ shinyServer(function(input, output, session) {
   }
 
   increaseStatusBar = function () {
+    shinyjs::hide("content-id")
     progressValue$one <<- progressValue$one + 1
-    shinyjs::show("tree", anim = TRUE)
-    shinyjs::removeClass("show-tree", "closed-accordian")
-    shinyjs::removeClass("right-column-title", "completed-step")
-    shinyjs::removeClass("show-tree", "completed-step")
-    shinyjs::addClass("show-tree", "open-accordian")
+    if (progressValue$one == projectFileCountGlobal) {
+      shinyjs::enable("aws-upload-button")
+      shinyjs::addClass(".active-aws-button")
+    } else {
+      shinyjs::show("tree", anim = TRUE)
+      shinyjs::removeClass("show-tree", "closed-accordian")
+      shinyjs::removeClass("right-column-title", "completed-step")
+      shinyjs::removeClass("show-tree", "completed-step")
+      shinyjs::addClass("show-tree", "open-accordian")
+    }
   }
   
   findFileInfo = function() {
