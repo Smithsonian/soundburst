@@ -85,6 +85,7 @@ shinyServer(function(input, output, session) {
   # shinyjs::onclick("species-file-upload", togglecsvFileUploadButton())
   shinyjs::onclick("enter-project-info-label", toggleProjectInfoDisplay())
   shinyjs::onclick("right-column-title", toggleSiteInfoContainer())
+  shinyjs::onclick("completed-container", toggleCompletedDeployment())
   # shinyjs::hide("csvFile")
   shinyjs::onclick("show-tree", toggleTree())
   shinyjs::hide("pauseButton")
@@ -136,6 +137,12 @@ shinyServer(function(input, output, session) {
     shinyjs::toggleClass("right-column-title", "closed-accordian")
   }
   
+  toggleCompletedDeployment = function() {
+    shinyjs::toggle("completedDepContainer", anim = TRUE)
+    shinyjs::toggleClass("completedDepContainer", "open-accordian")
+    shinyjs::toggleClass("completedDepContainer", "closed-accordian")
+  }
+  
   toggleAfterProjectSelect = function (){
     shinyjs::hide("directory", anim = TRUE)
     shinyjs::addClass("left-column-title", "completed-step")
@@ -178,6 +185,8 @@ shinyServer(function(input, output, session) {
   shinyjs::onclick("pauseButtonClip", pauseSound("spectroClip"))
   shinyjs::onclick("playButtonClipZoom", onPlay("spectroClipZoom"))
   shinyjs::onclick("pauseButtonClipZoom", pauseSound("spectroClipZoom"))
+  
+  
   
   # This is the function that actually calls the play sound function, as it was impossible to pass
   # in arguments in the above shinyjs function call.
@@ -386,6 +395,10 @@ shinyServer(function(input, output, session) {
     {
       shinyjs::hide(id = "pauseButton", anim = TRUE)
       shinyjs::show(id = "playButton", anim = FALSE)
+    }
+    else if (chartType == "spectroClipZoom") {
+      shinyjs::hide(id = "pauseButtonClipZoom", anim = TRUE)
+      shinyjs::show(id = "playButtonClipZoom", anim = FALSE)
     }
     else {
       shinyjs::hide(id = "pauseButtonClip", anim = TRUE)
@@ -681,6 +694,8 @@ shinyServer(function(input, output, session) {
       formattedData <- c(siteDF, dataSet)
       siteDF <<- formattedData
       write.csv(siteDF, paste0(dirPath,"/",paste0(createCSVFilePath(),'.csv')))
+      
+      shinyjs::html('listCompleted', as.character(tags$p(paste0(dataSet[[4]], " at " , dataSet[[1]]))))
     }
   })
   
