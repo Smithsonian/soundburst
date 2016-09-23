@@ -31,7 +31,7 @@ newName <- NULL
 options(shiny.trace=TRUE)
 options(shiny.maxRequestSize=70*1024^2) 
 volumes <- getVolumes()
-paused <<- FALSE
+paused <<- FALSE 
 
 progressBar <- function(value = 0, label = FALSE, color = "aqua", size = NULL,
                         striped = FALSE, active = FALSE, vertical = FALSE) {
@@ -85,6 +85,7 @@ shinyServer(function(input, output, session) {
   # shinyjs::onclick("species-file-upload", togglecsvFileUploadButton())
   shinyjs::onclick("enter-project-info-label", toggleProjectInfoDisplay())
   shinyjs::onclick("right-column-title", toggleSiteInfoContainer())
+  shinyjs::onclick("completed-container", toggleCompletedDeployment())
   # shinyjs::hide("csvFile")
   shinyjs::onclick("show-tree", toggleTree())
   shinyjs::hide("pauseButton")
@@ -136,6 +137,12 @@ shinyServer(function(input, output, session) {
     shinyjs::toggleClass("right-column-title", "closed-accordian")
   }
   
+  toggleCompletedDeployment = function() {
+    shinyjs::toggle("listCompleted", anim = TRUE)
+    shinyjs::toggleClass("completedDepContainer", "open-accordian")
+    shinyjs::toggleClass("completedDepContainer", "closed-accordian")
+  }
+  
   toggleAfterProjectSelect = function (){
     shinyjs::hide("directory", anim = TRUE)
     shinyjs::addClass("left-column-title", "completed-step")
@@ -179,6 +186,8 @@ shinyServer(function(input, output, session) {
   shinyjs::onclick("playButtonClipZoom", onPlay("spectroClipZoom"))
   shinyjs::onclick("pauseButtonClipZoom", pauseSound("spectroClipZoom"))
   
+  
+  
   # This is the function that actually calls the play sound function, as it was impossible to pass
   # in arguments in the above shinyjs function call.
   onPlay = function(chartType) {
@@ -218,6 +227,7 @@ shinyServer(function(input, output, session) {
       return()
     } 
     else {
+      listCompleted <<- list()
       path <- getPath(get_selected(input$tree, "names"))
       currDir <- paste0(dirPath, "/", path, unlist(get_selected(input$tree)))
       sound <- readWave(currDir) ###### NEED THIS?
@@ -386,6 +396,10 @@ shinyServer(function(input, output, session) {
     {
       shinyjs::hide(id = "pauseButton", anim = TRUE)
       shinyjs::show(id = "playButton", anim = FALSE)
+    }
+    else if (chartType == "spectroClipZoom") {
+      shinyjs::hide(id = "pauseButtonClipZoom", anim = TRUE)
+      shinyjs::show(id = "playButtonClipZoom", anim = FALSE)
     }
     else {
       shinyjs::hide(id = "pauseButtonClip", anim = TRUE)
@@ -681,6 +695,13 @@ shinyServer(function(input, output, session) {
       formattedData <- c(siteDF, dataSet)
       siteDF <<- formattedData
       write.csv(siteDF, paste0(dirPath,"/",paste0(createCSVFilePath(),'.csv')))
+      shinyjs::addClass('completedDepContainer', "open-accordian")
+      shinyjs::show("listCompleted")
+      
+      listEl <- as.character(tags$div(id=clipCount, paste0(dataSet[[4]], " at " , dataSet[[1]])))
+      listCompleted <<- c(listCompleted, listEl)
+      finalCompleted <- tagList(listCompleted)
+      shinyjs::html('listCompleted', finalCompleted)
     }
   })
   

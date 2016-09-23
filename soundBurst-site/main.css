@@ -76,7 +76,7 @@ label {
   width: 80%;
 }
 
-#spectrogram img {
+#spectrogram img{
   width: 100%;
 }
 
@@ -122,6 +122,11 @@ label {
   z-index: 1;
 }
 
+.closeButtonClip {
+  float: right;
+  margin-right: 5px;
+}
+
 .box.box-warning {
   border: 0px;
 }
@@ -161,11 +166,11 @@ label {
   height: 100%;
 }
 
-#left-column-title, #enter-project-info-label, #show-tree, #species-file-upload, #complete-deployment, #right-column-title {
+#left-column-title, #enter-project-info-label, #show-tree, #species-file-upload, #complete-deployment, #right-column-title, #completed-container {
   cursor: pointer;
 }
 
-#left-column-title, #right-column-title, #enter-project-info-label, #show-tree, #complete-deployment {
+#left-column-title, #right-column-title, #enter-project-info-label, #show-tree, #complete-deployment, #completed-container {
   padding: 4%;
   font-size: 1.5em;
 }
@@ -191,7 +196,7 @@ padding-bottom: 0;
   float: left;
 }
 
-#project-container, #full-project-info-container, #full-tree-container, #full-project-info-container {
+#project-container, #full-project-info-container, #full-tree-container, #full-project-info-container, #completed-container {
   text-align: center;
   border: 1px solid white;
 }
