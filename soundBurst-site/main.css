@@ -45,6 +45,7 @@ label {
   height: 20px;
   width: 20px;
   background-size: cover;
+  z-index: 100
 }
 
 #playButtonClip, #pauseButtonClip {
@@ -52,6 +53,7 @@ label {
   height: 20px;
   width: 20px;
   background-size: cover;
+  z-index: 100;
 }
 
 #playButtonClipZoom, #pauseButtonClipZoom {
@@ -87,11 +89,12 @@ label {
 
 #spectro-clip-container {
   position: relative;
+  margin-top: 3%;
 }
 
 #spectroClip {
   position: absolute;
-  margin-top: 5%;
+  /*margin-top: 5%;*/
 }
 
 #spectroClip img {
@@ -102,9 +105,13 @@ label {
   width: 95.5%; /* 95.5% */
 }
 
+#oscillo-clip-container {
+  margin-top: 3%;
+}
+
 #oscilloClip {
   position: absolute;
-  margin-top: 5%;
+  /*margin-top: 5%;*/
 }
 
 #clip-species-dropdown {
@@ -186,6 +193,7 @@ padding-bottom: 0;
 #species-file-upload {
   text-align: left;
   font-size: 1em;
+  float: left;
 }
 
 #project-container, #full-project-info-container, #full-tree-container, #full-project-info-container {
@@ -265,15 +273,23 @@ section.sidebar .shiny-input-container {
   margin-left: 38%;
 }
 
+#siteInfo {
+  margin-left: 36%;
+  padding-left: 5%;
+  padding-right: 5%;
+}
+
 #csvFile {
   color: black;
-  padding: 0;
+  padding: 0.5%;
   border: none;
-  background-color: grey;
+  background-color: #357CA5;
+  margin-left: 5%;
+  float: left;
 }
 
 .inactive-button {
-  background-color: grey !important;
+  background-color: #357CA5 !important;
 }
 
 .active-button {
@@ -300,9 +316,9 @@ section.sidebar .shiny-input-container {
 
 #spectro-increment-container {
   margin: 0 auto;
-  margin-bottom: 2%;
+  margin-bottom: 1%;
   position: relative;
-  width: 20em;
+  width: 13em;
 }
 
 #previous-spectro-increment {
@@ -344,11 +360,11 @@ section.sidebar .shiny-input-container {
 }
 
 #spectroZoomClip{
-  margin-top: 5%;
+  /*margin-top: 5%;*/
 }
 
 #clipInfo-container {
-  margin-top: 1.5%;
+  margin-top: 3%;
   min-height: 400px;
 }
 
@@ -371,7 +387,7 @@ textarea {
   font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
   font-size: 1.15em;
   border: none;
-  background: #d62d34;
+  background: #2CA02C;
   color: #E5E5E5;
   padding: 0.5em;
   margin: 0.67em auto;
@@ -379,4 +395,8 @@ textarea {
   text-decoration: none;
   border-radius: 1em;
   transition: background ease 0.33s;
+}
+
+#file-name-warning {
+  color: #d62d34;
 }

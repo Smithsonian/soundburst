@@ -6,6 +6,11 @@
   width: 360px !important;
 }
 
+.main-sidebar {
+  max-height: 800px !important;
+  overflow: scroll !important;
+}
+
 .sidebar li {
   list-style-type: none;
 }
@@ -75,6 +80,34 @@
 }
 
 #sidebar-column {
+  margin-top: 5px !important;
   padding-left: 2px;
   padding-right: 2px;
+}
+
+#status-bar-container {
+  height: 50px;
+}
+
+#species-select-file-container {
+  margin-bottom: 10%;
+}
+
+#aws-upload-container {
+  height: 35px;
+  text-align: center;
+}
+
+#aws-upload-button {
+  border: none;
+  padding: 1%;
+  color: black;
+}
+
+.inactive-aws-button {
+  background-color: grey;
+}
+
+.active-aws-button {
+  background-color: #357CA5;
 }
