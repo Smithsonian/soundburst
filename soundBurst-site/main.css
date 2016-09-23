@@ -67,6 +67,11 @@ label {
     z-index: 1;
 }
 
+.closeButtonClip {
+  float: right;
+  margin-right: 5px;
+}
+
 .box.box-warning {
   border: 0px;
 }
