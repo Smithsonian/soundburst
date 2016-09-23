@@ -1,9 +1,9 @@
 .main-header>.navbar {
-  margin-left: 20% !important;
+  margin-left: 360px !important;
 }
 
 .logo, .main-sidebar {
-  width: 20% !important;
+  width: 360px !important;
 }
 
 .sidebar li {
@@ -52,11 +52,6 @@
   border: 1px solid #ccc;
   margin-bottom: 2%;
   resize: none;
-}
-
-#project-info-container {
-  margin-top: 5%;
-  margin-bottom: 10%;
 }
 
 .closed-accordian::before {

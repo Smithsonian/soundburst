@@ -22,56 +22,64 @@ dashboardPage(
       div(id = "status-bar-container",
               uiOutput(outputId = "progressOne")
           ),
-      div(id = "left-column-title", class = "open-accordian", "Select a Project"),
-      shinyDirButton('directory', class = 'inactive-button', 'Folder select', 'Please select a folder'),
-      useShinyjs(),
-      div(id = "enter-project-info-label", class = "closed-accordian", "Enter Project Info"),
-      div(id = "project-info-container",
-          div(id = "species-select-file-container",
-              div(id = "species-file-upload", "Load New Species CSV?"),
-              shinyFilesButton('csvFile', class = "inactive-button", 'File select', 'Please select a file', FALSE)
-          ), 
-          textInput("projectName", " Name:", "Project Name"),
-          HTML('<label>Project Notes:</label>'),
-          HTML('<textarea id="projectNotes" rows="3" cols="40">Project Notes</textarea>'),
-          # textInput("projectNotes", "Project Notes:", "Project Notes"),
-          actionButton("projectInfo", class = "inactive-button", "Submit")
+      div(id = "project-container",
+          div(id = "left-column-title", class = "open-accordian", "Select a Project"),
+          shinyDirButton('directory', class = 'inactive-button', 'Folder select', 'Please select a folder')
           ),
-      div(id = "show-tree", class = "closed-accordian", "Select a Deployment"),
-      shinyTree("tree"),
-      div(id = "right-column-title", class = "closed-accordian", "Enter Deployment Info"),
-      div(id = "file-name-warning-container",
-          div(id = "file-name-warning", "Attention: A file with the same name already exists. Please enter a new Deployment Name and resubmit.")
-      ),
-      div(id = "time-box-container",
-          div(id = "secondary-time-box-container",
-              HTML('<label>This file exceeds 2 total minutes, would you like to increment the display?</label>'),
-              textInput("spectroEndTime", "How many times would you like to split the file?", 1),
-              actionButton("spectroTimeSubmit", "Submit"),
-              actionButton("noTimeSubmission", "Do not Increment")
+      useShinyjs(),
+      div(id = "full-project-info-container", 
+          div(id = "enter-project-info-label", class = "closed-accordian", "Enter Project Info"),
+          div(id = "project-info-container",
+              div(id = "species-select-file-container",
+                  div(id = "species-file-upload", "Load New Species CSV?"),
+                  shinyFilesButton('csvFile', 'File select', 'Please select a file', FALSE)
+              ), 
+              textInput("projectName", " Name:", "Project Name"),
+              HTML('<label>Project Notes:</label>'),
+              HTML('<textarea id="projectNotes" rows="3" cols="40">Project Notes</textarea>'),
+              # textInput("projectNotes", "Project Notes:", "Project Notes"),
+              actionButton("projectInfo", class = "inactive-button", "Submit")
           )
-      ),
-      div(id = "species-sidebox-container",
-          column(width = 2, id = "species-sidebox",
-                 div(id = "site-info-container", 
-                     textInput("name", "Name:", "Name"),
-                     textInput("lat", "Lat:", "Latitude"),
-                     textInput("lon", "Lon:", "Longitude"),
-                     textInput("recId", "RecId:", "RecId"),
-                     HTML('<label>Site Notes:</label>'),
-                     HTML('<textarea id="siteNotes" rows="3" cols="40">Site Notes</textarea>'),
-                     HTML('<label>Start date/time: </label>'),
-                     textOutput("minTime"),
-                     HTML('<label>End date/time: </label>'),
-                     textOutput("maxTime"),
-                     # textInput("siteNotes", "Site Notes:", "Notes"),
-                     actionButton("siteInfo", class = "inactive-button", "Submit")
-                 ),
-                 div(id = "complete-deployment", "Complete Deployment")
-                 # div(id = "submit-site-complete-container", 
-                 #     div(id = "submit-site-text", "When you have submited data for all clips on a given site, click below and move on to the next"),
-                 #     div(id = "submit-site-complete", "Finish Site"))
-          )),
+          ),
+      div(id = "full-tree-container", 
+          div(id = "show-tree", class = "closed-accordian", "Select a Deployment"),
+          shinyTree("tree")
+          ),
+      div(id = "full-project-info-container",
+          div(id = "right-column-title", class = "closed-accordian", "Enter Deployment Info"),
+          div(id = "file-name-warning-container",
+              div(id = "file-name-warning", "Attention: A file with the same name already exists. Please enter a new Deployment Name and resubmit.")
+          ),
+          div(id = "time-box-container",
+              div(id = "secondary-time-box-container",
+                  HTML('<label>This file exceeds 2 total minutes, would you like to increment the display?</label>'),
+                  textInput("spectroEndTime", "How many times would you like to split the file?", 1),
+                  actionButton("spectroTimeSubmit", "Submit"),
+                  actionButton("noTimeSubmission", "Do not Increment")
+              )
+          ),
+          div(id = "species-sidebox-container",
+              div(id = "species-sidebox",
+                     div(id = "site-info-container", 
+                         textInput("name", "Name:", "Name"),
+                         textInput("lat", "Lat:", "Latitude"),
+                         textInput("lon", "Lon:", "Longitude"),
+                         textInput("recId", "RecId:", "RecId"),
+                         HTML('<label>Site Notes:</label>'),
+                         HTML('<textarea id="siteNotes" rows="3" cols="40">Site Notes</textarea>'),
+                         HTML('<label>Start date/time: </label>'),
+                         textOutput("minTime"),
+                         HTML('<label>End date/time: </label>'),
+                         textOutput("maxTime"),
+                         # textInput("siteNotes", "Site Notes:", "Notes"),
+                         actionButton("siteInfo", class = "inactive-button", "Submit")
+                     )
+                     # div(id = "submit-site-complete-container", 
+                     #     div(id = "submit-site-text", "When you have submited data for all clips on a given site, click below and move on to the next"),
+                     #     div(id = "submit-site-complete", "Finish Site"))
+              ))
+          ),
+      div(id = "complete-deployment", "Complete Deployment"),
       verbatimTextOutput('directorypath')
     )
   ),
