@@ -696,6 +696,7 @@ shinyServer(function(input, output, session) {
       siteDF <<- formattedData
       write.csv(siteDF, paste0(dirPath,"/",paste0(createCSVFilePath(),'.csv')))
       shinyjs::addClass('completedDepContainer', "open-accordian")
+      shinyjs::removeClass('completedDepContainer', "closed-accordian")
       shinyjs::show("listCompleted")
       
       listEl <- as.character(tags$div(id=clipCount, paste0(dataSet[[4]], " at " , dataSet[[1]])))
