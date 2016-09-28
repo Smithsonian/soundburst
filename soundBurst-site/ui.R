@@ -53,7 +53,7 @@ dashboardPage(
               div(id = "secondary-time-box-container",
                   HTML('<label>This file exceeds 2 total minutes, would you like to increment the display?</label>'),
                   textInput("spectroEndTime", "How many times would you like to split the file?", 1),
-                  actionButton("spectroTimeSubmit", "Submit"),
+                  actionButton("spectroTimeSubmit", "Increment"),
                   actionButton("noTimeSubmission", "Do not Increment")
               )
           ),

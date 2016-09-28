@@ -198,7 +198,7 @@ padding-bottom: 0;
 
 #project-container, #full-project-info-container, #full-tree-container, #full-project-info-container, #completed-container {
   text-align: center;
-  border: 1px solid white;
+  border: 1px solid #222D32;
 }
 
 #project-info-container {
@@ -262,7 +262,7 @@ section.sidebar .shiny-input-container {
 #projectInfo, #directory, #siteInfo {
   font-size: 1.15em;
   border: none;
-  color: black;
+  color: white;
   padding: 0.5em;
   margin: 0.5em auto;
   text-decoration: none;
@@ -280,7 +280,7 @@ section.sidebar .shiny-input-container {
 }
 
 #csvFile {
-  color: black;
+  color: white;
   padding: 0.5%;
   border: none;
   background-color: #357CA5;
@@ -289,11 +289,12 @@ section.sidebar .shiny-input-container {
 }
 
 .inactive-button {
-  background-color: #357CA5 !important;
+  background-color: #757575 !important;
+  color: white;
 }
 
 .active-button {
-  background-color: #2CA02C !important;
+  background-color: #3C8DBC !important;
 }
 
 .btn-default:hover {
