@@ -555,6 +555,7 @@ shinyServer(function(input, output, session) {
   
   siteFields <- c("name", "lat", "lon", "recId", "siteNotes")
   
+  # Getting user input data from the deployment info
   formDataSite <- reactive({
     data <- sapply(siteFields, function(x) input[[x]])
     data
@@ -687,20 +688,24 @@ shinyServer(function(input, output, session) {
       shinyjs::hide("site-info-warning-container")
       clipCount <<- clipCount + 1
       dataSet <- formDataSpecies()
-      names(dataSet)[1] <- paste0(names(dataSet)[1],clipCount)
-      names(dataSet)[2] <- paste0(names(dataSet)[2],clipCount)
-      names(dataSet)[3] <- paste0(names(dataSet)[3],clipCount)
-      names(dataSet)[4] <- paste0(names(dataSet)[4],clipCount)
-      names(dataSet)[5] <- paste0(names(dataSet)[5],clipCount)
+      names(dataSet)[1] <- paste0(names(dataSet)[1],clipCount) # timeMin
+      names(dataSet)[2] <- paste0(names(dataSet)[2],clipCount) # timeMax
+      names(dataSet)[3] <- paste0(names(dataSet)[3],clipCount) # spciesInput
+      names(dataSet)[4] <- paste0(names(dataSet)[4],clipCount) # typeInput
+      names(dataSet)[5] <- paste0(names(dataSet)[5],clipCount) # annotNotes
       formattedData <- c(siteDF, dataSet)
       siteDF <<- formattedData
       write.csv(siteDF, paste0(dirPath,"/",paste0(createCSVFilePath(),'.csv')))
       shinyjs::addClass('completedDepContainer', "open-accordian")
       shinyjs::show("listCompleted")
       
+      # Creating the element that will old the name of the completed annotation
       listEl <- as.character(tags$div(id=clipCount, paste0(dataSet[[4]], " at " , dataSet[[1]])))
+      # Storing the element in a list that gets reset every time a new deployment is selected
       listCompleted <<- c(listCompleted, listEl)
+      # Converting that list to a tagList
       finalCompleted <- tagList(listCompleted)
+      # Display the list of tag in the UI
       shinyjs::html('listCompleted', finalCompleted)
     }
   })

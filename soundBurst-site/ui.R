@@ -84,7 +84,6 @@ dashboardPage(
       div(id = "completed-container",
           div(id = "completedDepContainer", class = "closed-accordian", "Completed annotations"),
           div(id = "listCompleted")
-              
       ),
       div(id = "complete-deployment", "Complete Deployment"),
       verbatimTextOutput('directorypath')
