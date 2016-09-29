@@ -11,6 +11,13 @@
   overflow: scroll !important;
 }
 
+.removeAnn:before {
+  font-family: 'FontAwesome';
+  content:"\f00d";
+  padding:0 5px 0 15px;   
+  display: inline;
+} 
+
 .sidebar li {
   list-style-type: none;
 }

@@ -222,6 +222,7 @@ shinyServer(function(input, output, session) {
   
   observeEvent(unlist(get_selected(input$tree)), {
     # Plot main spectrogram
+    shinyjs::show("loadingContainer1")
     if (is.null(unlist(get_selected(input$tree))))
     {
       return()
@@ -230,7 +231,7 @@ shinyServer(function(input, output, session) {
       listCompleted <<- list()
       path <- getPath(get_selected(input$tree, "names"))
       currDir <- paste0(dirPath, "/", path, unlist(get_selected(input$tree)))
-      sound <- readWave(currDir) ###### NEED THIS?
+      sound <- readWave(currDir)
       l <- length(sound@left)
       sr <- sound@samp.rate
       soundDuration <- round(l/sr,2)
@@ -415,16 +416,7 @@ shinyServer(function(input, output, session) {
     return(path)
   }
   
-
-  
-  # get_audio_tag<-function(filename){
-  #   tags$audio(src = filename, type ="audio/wav", controls = NA)
-  # }
-  # 
-  # output$audiotag<-renderUI(get_audio_tag("tempwav.wav")) #starting wave file
-  
   # LOAD IN SPECIES DROPDOWN
-  
   shinyFileChoose(input, 'csvFile', updateFreq=60000, session=session, roots=c(home='~'), restrictions=system.file(package='base'))
   shinyjs::onclick("csvFile",csvFileSubmitClick())
   
@@ -700,7 +692,7 @@ shinyServer(function(input, output, session) {
       shinyjs::show("listCompleted")
       
       # Creating the element that will old the name of the completed annotation
-      listEl <- as.character(tags$div(id=clipCount, paste0(dataSet[[4]], " at " , dataSet[[1]])))
+      listEl <- as.character(paste0(tags$div(id=clipCount, paste0(dataSet[[4]], " at " , dataSet[[1]]),tags$div(class='removeAnn'))))
       # Storing the element in a list that gets reset every time a new deployment is selected
       listCompleted <<- c(listCompleted, listEl)
       # Converting that list to a tagList

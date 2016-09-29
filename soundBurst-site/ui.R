@@ -25,12 +25,12 @@ dashboardPage(
       div(id = "aws-upload-container",
           actionButton("aws-upload-button", class="inactive-aws-button", "Upload to AWS")),
       div(id = "project-container",
-          div(id = "left-column-title", class = "open-accordian", "Select a Project"),
+          div(id = "left-column-title", class = "open-accordian unfinished-step", "Select a Project"),
           shinyDirButton('directory', class = 'inactive-button', 'Folder select', 'Please select a folder')
           ),
       useShinyjs(),
       div(id = "full-project-info-container", 
-          div(id = "enter-project-info-label", class = "closed-accordian", "Enter Project Info"),
+          div(id = "enter-project-info-label", class = "closed-accordian unfinished-step", "Enter Project Info"),
           div(id = "project-info-container",
               div(id = "species-select-file-container",
                   div(id = "species-file-upload", "Load New Species CSV?"),
@@ -44,16 +44,16 @@ dashboardPage(
           )
           ),
       div(id = "full-tree-container", 
-          div(id = "show-tree", class = "closed-accordian", "Select a Deployment"),
+          div(id = "show-tree", class = "closed-accordian unfinished-step", "Select a Deployment"),
           shinyTree("tree")
           ),
       div(id = "full-project-info-container",
-          div(id = "right-column-title", class = "closed-accordian", "Enter Deployment Info"),
+          div(id = "right-column-title", class = "closed-accordian unfinished-step", "Enter Deployment Info"),
           div(id = "time-box-container",
               div(id = "secondary-time-box-container",
                   HTML('<label>This file exceeds 2 total minutes, would you like to increment the display?</label>'),
                   textInput("spectroEndTime", "How many times would you like to split the file?", 1),
-                  actionButton("spectroTimeSubmit", "Submit"),
+                  actionButton("spectroTimeSubmit", "Increment"),
                   actionButton("noTimeSubmission", "Do not Increment")
               )
           ),
@@ -82,7 +82,7 @@ dashboardPage(
               ))
           ),
       div(id = "completed-container",
-          div(id = "completedDepContainer", class = "closed-accordian", "Completed annotations"),
+          div(id = "completedDepContainer", class = "closed-accordian unfinished-step", "Completed annotations"),
           div(id = "listCompleted")
       ),
       div(id = "complete-deployment", "Complete Deployment"),
@@ -94,10 +94,14 @@ dashboardPage(
     uiOutput("audiotag"),
     div(id = "playButton"),
     div(id = "pauseButton"),
-    plotOutput("spectrogram", brush = brushOpts(id = "plot_brush", direction = "x", resetOnNew = TRUE, delay = 500, opacity = 0.45, stroke = "#FFD265", fill="#EEEE00")),
+    div(id = "mainPlotContainer",
+      # img(src = "ajax-loader.gif", id = "plotSpinner"),
+      hidden(tags$div(id = "loadingContainer1", HTML("<i id='loadingMain' class='fa fa-spinner fa-spin' style='font-size:128px;'></i>"))),
+      plotOutput("spectrogram", brush = brushOpts(id = "plot_brush", direction = "x", resetOnNew = TRUE, delay = 500, opacity = 0.45, stroke = "#FFD265", fill="#EEEE00"))
+    ),
     div(id = "spectro-increment-container",
-        div(id = "previous-spectro-increment"),
-        div(id = "next-spectro-increment")
+      div(id = "previous-spectro-increment"),
+      div(id = "next-spectro-increment")
     ),
     useShinyjs(),
     fluidRow(

@@ -1,3 +1,21 @@
+#loadingContainer1 {
+  position: relative;
+}
+#loadingMain {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 1;
+  margin-top: 90px;  /* half of the spinner's height */
+  margin-left: -33px; /* half of the spinner's width */
+}
+#spectrogram {
+  z-index: 2;
+  position: relative;
+}
+#spectrogram.recalculating {
+  z-index: 0;
+}
 
 .shiny-output-error {
   visibility: hidden;
@@ -166,11 +184,11 @@ label {
   height: 100%;
 }
 
-#left-column-title, #enter-project-info-label, #show-tree, #species-file-upload, #complete-deployment, #right-column-title, #completed-container {
+#left-column-title, #enter-project-info-label, #show-tree, #species-file-upload, #complete-deployment, #right-column-title, #completedDepContainer {
   cursor: pointer;
 }
 
-#left-column-title, #right-column-title, #enter-project-info-label, #show-tree, #complete-deployment, #completed-container {
+#left-column-title, #right-column-title, #enter-project-info-label, #show-tree, #complete-deployment, #completedDepContainer {
   padding: 4%;
   font-size: 1.5em;
 }
@@ -196,9 +214,9 @@ padding-bottom: 0;
   float: left;
 }
 
-#project-container, #full-project-info-container, #full-tree-container, #full-project-info-container, #completed-container {
+#project-container, #full-project-info-container, #full-tree-container, #full-project-info-container, #completedDepContainer {
   text-align: center;
-  border: 1px solid white;
+  border: 1px solid #222D32;
 }
 
 #project-info-container {
@@ -262,7 +280,7 @@ section.sidebar .shiny-input-container {
 #projectInfo, #directory, #siteInfo {
   font-size: 1.15em;
   border: none;
-  color: black;
+  color: white;
   padding: 0.5em;
   margin: 0.5em auto;
   text-decoration: none;
@@ -280,7 +298,7 @@ section.sidebar .shiny-input-container {
 }
 
 #csvFile {
-  color: black;
+  color: white;
   padding: 0.5%;
   border: none;
   background-color: #357CA5;
@@ -289,11 +307,12 @@ section.sidebar .shiny-input-container {
 }
 
 .inactive-button {
-  background-color: #357CA5 !important;
+  background-color: #757575 !important;
+  color: white;
 }
 
 .active-button {
-  background-color: #2CA02C !important;
+  background-color: #3C8DBC !important;
 }
 
 .btn-default:hover {
@@ -346,6 +365,10 @@ section.sidebar .shiny-input-container {
   color: #222D32;
   background-color: #222D32;
   border: none;
+}
+
+.unfinished-step {
+  background-color: #757575;
 }
 
 .completed-step {
