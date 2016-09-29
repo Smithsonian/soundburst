@@ -36,9 +36,9 @@ dashboardPage(
                   div(id = "species-file-upload", "Load New Species CSV?"),
                   shinyFilesButton('csvFile', 'File select', 'Please select a file', FALSE)
               ), 
-              textInput("projectName", " Name:", "Project Name"),
+              textInput("projectName", " Name:", placeholder = "Project Name"),
               HTML('<label>Project Notes:</label>'),
-              HTML('<textarea id="projectNotes" rows="3" cols="40">Project Notes</textarea>'),
+              HTML('<textarea id="projectNotes" rows="3" cols="40" placeholder = "Project Notes"></textarea>'),
               # textInput("projectNotes", "Project Notes:", "Project Notes"),
               actionButton("projectInfo", class = "inactive-button", "Submit")
           )
@@ -52,7 +52,7 @@ dashboardPage(
           div(id = "time-box-container",
               div(id = "secondary-time-box-container",
                   HTML('<label>This file exceeds 2 total minutes, would you like to increment the display?</label>'),
-                  textInput("spectroEndTime", "How many times would you like to split the file?", 1),
+                  textInput("spectroEndTime", "How many times would you like to split the file?", placeholder = ""),
                   actionButton("spectroTimeSubmit", "Increment"),
                   actionButton("noTimeSubmission", "Do not Increment")
               )
@@ -60,12 +60,12 @@ dashboardPage(
           div(id = "species-sidebox-container",
               div(id = "species-sidebox",
                      div(id = "site-info-container", 
-                         textInput("name", "Name:", "Name"),
-                         textInput("lat", "Lat:", "Latitude"),
-                         textInput("lon", "Lon:", "Longitude"),
-                         textInput("recId", "RecId:", "RecId"),
+                         textInput("name", "Name:", placeholder = "Name"),
+                         textInput("lat", "Lat:", placeholder = "Latitude"),
+                         textInput("lon", "Lon:", placeholder = "Longitude"),
+                         textInput("recId", "RecId:", placeholder = "RecId"),
                          HTML('<label>Site Notes:</label>'),
-                         HTML('<textarea id="siteNotes" rows="3" cols="40">Site Notes</textarea>'),
+                         HTML('<textarea id="siteNotes" rows="3" cols="40" placeholder="Enter Site Notes.."></textarea>'),
                          HTML('<label>Start date/time: </label>'),
                          textOutput("minTime"),
                          HTML('<label>End date/time: </label>'),
@@ -139,7 +139,7 @@ dashboardPage(
              uiOutput("speciesType"),
              uiOutput("commonName"),
              HTML('<label>Site Notes:</label>'),
-             HTML('<textarea id="annotNotes" rows="3" cols="40">Annotation Notes</textarea>'),
+             HTML('<textarea id="annotNotes" rows="3" cols="40" placeholder = "Annotation Notes"></textarea>'),
              actionButton("speciesDropSubmit", "Submit")
       )
   ),
