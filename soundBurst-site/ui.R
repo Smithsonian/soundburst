@@ -121,20 +121,6 @@ dashboardPage(
              ),
              textInput("timeMin", "Time Start:", 1),
              textInput("timeMax", "Time End:  ", 2),
-             # selectizeInput(
-             #   'speciesInput', 'Select the species that you heard', choices = itemsSpecies,
-             #   options = list(
-             #     placeholder = 'Please select a species below',
-             #     onInitialize = I('function() { this.setValue(""); }')
-             #   )
-             # ),
-             # selectizeInput(
-             #   'typeInput', 'Select the type of species that you heard', choices = speciesType,
-             #   options = list(
-             #     placeholder = 'Please select a type below',
-             #     onInitialize = I('function() { this.setValue(""); }')
-             #   )
-             # ),
              #These column selectors are dynamically created when the file is loaded
              uiOutput("speciesType"),
              uiOutput("commonName"),
