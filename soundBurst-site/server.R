@@ -580,7 +580,11 @@ shinyServer(function(input, output, session) {
     names(data)[6] <- "start_time_date"
     data <- c(data, as.character(maxTimeVar))
     names(data)[7] <- "end_time_date"
-    siteDF <<- data
+    dataArray <- c(data[[1]],data[[2]],data[[3]],data[[4]],data[[5]],data[[6]],data[[7]])
+    dataMatrix <- matrix(dataArray,ncol = 7, byrow = TRUE)
+    colnames(dataMatrix) <- c("Name", "Lat", "Lon", "RecId", "Site Notes", "Start", "End")
+    siteDataTable <- as.table(dataMatrix)
+    siteDF <<- siteDataTable
     # If we have multiple clips on a given spectro, give a new column name to each clip
     clipCount <<- 0
     # Reformating user input
@@ -620,7 +624,7 @@ shinyServer(function(input, output, session) {
       # output$tree <- renderTree(tree, quoted = FALSE)
 
       file.rename(filePathFull, paste0(newFullFilePath,".wav"))
-      write.csv(data, paste0(dirPath,"/",paste0(newFileName,'.csv')))
+      write.csv(siteDataTable, paste0(dirPath,"/",paste0(newFileName,'.csv')), row.names = FALSE)
       if(!is.null(newName)) {
         shinyjs::html("titleHeader",newName)
       }
@@ -649,9 +653,13 @@ shinyServer(function(input, output, session) {
   observeEvent(input$projectInfo, {
     print(paste0(dirPath,"/",'projectInfo.csv'))
     data <- formDataProject()
+    dataArray <- c(data[[1]],data[[2]])
+    dataMatrix <- matrix(dataArray,ncol = 2, byrow = TRUE)
+    colnames(dataMatrix) <- c("Project Name", "Project Notes")
+    projectData <- as.table(dataMatrix)
     print(data)
     projectName <<- data[[1]]
-    write.csv(data, paste0(dirPath,"/",'projectInfo.csv'))
+    write.csv(projectData, paste0(dirPath,"/",'projectInfo.csv'), row.names = FALSE)
     # shinyjs::hide("csvFile", anim = TRUE)
     shinyjs::hide("directory", anim = TRUE)
     shinyjs::addClass("projectInfo", "active-button")
@@ -677,17 +685,20 @@ shinyServer(function(input, output, session) {
     if (is.null(siteDF)) {
       shinyjs::show("site-info-warning-container")
     } else {
-      shinyjs::hide("site-info-warning-container")
-      clipCount <<- clipCount + 1
       dataSet <- formDataSpecies()
-      names(dataSet)[1] <- paste0(names(dataSet)[1],clipCount) # timeMin
-      names(dataSet)[2] <- paste0(names(dataSet)[2],clipCount) # timeMax
-      names(dataSet)[3] <- paste0(names(dataSet)[3],clipCount) # spciesInput
-      names(dataSet)[4] <- paste0(names(dataSet)[4],clipCount) # typeInput
-      names(dataSet)[5] <- paste0(names(dataSet)[5],clipCount) # annotNotes
-      formattedData <- c(siteDF, dataSet)
-      siteDF <<- formattedData
-      write.csv(siteDF, paste0(dirPath,"/",paste0(createCSVFilePath(),'.csv')))
+      shinyjs::hide("site-info-warning-container")
+      if (clipCount == 0) {
+        dataArray <- c(clipCount,dataSet[[1]],dataSet[[2]],dataSet[[3]],dataSet[[4]],dataSet[[5]])
+        dataMatrix <- matrix(dataArray,ncol = 6, byrow = TRUE)
+        colnames(dataMatrix) <- c("Annotation#","Time Min", "Time MAx","Type","Species","Annotation Notes")
+        dataTable <- as.table(dataMatrix)
+        siteDF <<- cbind(siteDF, dataTable)
+      } else {
+        dataArray <- c("","","","","","","",clipCount,dataSet[[1]],dataSet[[2]],dataSet[[3]],dataSet[[4]],dataSet[[5]])
+        siteDF <<- rbind(siteDF, dataArray)
+      }
+      clipCount <<- clipCount + 1
+      write.csv(siteDF, paste0(dirPath,"/",paste0(createCSVFilePath(),'.csv')), row.names = FALSE)
       shinyjs::addClass('completedDepContainer', "open-accordian")
       shinyjs::show("listCompleted")
       
