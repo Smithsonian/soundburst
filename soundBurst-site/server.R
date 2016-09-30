@@ -85,7 +85,7 @@ shinyServer(function(input, output, session) {
   # shinyjs::onclick("species-file-upload", togglecsvFileUploadButton())
   shinyjs::onclick("enter-project-info-label", toggleProjectInfoDisplay())
   shinyjs::onclick("right-column-title", toggleSiteInfoContainer())
-  shinyjs::onclick("completed-container", toggleCompletedDeployment())
+  shinyjs::onclick("completedDepContainer", toggleCompletedDeployment())
   # shinyjs::hide("csvFile")
   shinyjs::onclick("show-tree", toggleTree())
   shinyjs::hide("pauseButton")
@@ -703,13 +703,14 @@ shinyServer(function(input, output, session) {
       shinyjs::show("listCompleted")
       
       # Creating the element that will old the name of the completed annotation
-      listEl <- as.character(paste0(tags$div(id=clipCount, paste0(dataSet[[4]], " at " , dataSet[[1]]),tags$div(class='removeAnn'))))
+      listEl <- as.character(paste0(tags$div(class="annotations",id=clipCount, tags$span(paste0(dataSet[[4]], " at " , dataSet[[1]])),tags$div(class='removeAnn'))))
       # Storing the element in a list that gets reset every time a new deployment is selected
       listCompleted <<- c(listCompleted, listEl)
       # Converting that list to a tagList
       finalCompleted <- tagList(listCompleted)
       # Display the list of tag in the UI
       shinyjs::html('listCompleted', finalCompleted)
+      tags$head(tags$script(src="removeAnnotation.js"))
     }
   })
   

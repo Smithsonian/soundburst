@@ -16,7 +16,21 @@
   content:"\f00d";
   padding:0 5px 0 15px;   
   display: inline;
-} 
+}
+
+.removeAnn {
+  display: inline-block;
+   margin-left: -13px;
+}
+
+.annotations {
+  width: 55%;
+  margin: 0 auto;
+}
+
+.annotations span {
+  font-size: 21px;
+}
 
 .sidebar li {
   list-style-type: none;
