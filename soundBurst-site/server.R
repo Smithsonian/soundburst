@@ -220,6 +220,9 @@ shinyServer(function(input, output, session) {
     }
   }
   
+  ###########################
+  ##### Listener for file selection in "Select Deployment"
+  ###########################
   observeEvent(unlist(get_selected(input$tree)), {
     # Plot main spectrogram
     shinyjs::show("loadingContainer1")
@@ -229,12 +232,22 @@ shinyServer(function(input, output, session) {
     } 
     else {
       listCompleted <<- list()
+      # Root path of the selected file
       path <- getPath(get_selected(input$tree, "names"))
+      # Full file path
       currDir <- paste0(dirPath, "/", path, unlist(get_selected(input$tree)))
+      # Reading the sound file
       sound <- readWave(currDir)
+      # Duration of the sound file
+      durationMain <<- seewave::duration(sound)
+      # Storing the start and end time of the wave file in seconds
+      waveDate <<- as.character(as.POSIXct(file.info(currDir)[[4]], origin="1970-01-01", format = "%m/%d/%y"), "%m/%d/%y")
+      waveStartTime <<- as.character(as.POSIXct(file.info(currDir)[[4]], origin="1970-01-01", format = "%H:%M:%S %p"), format = "%H:%M:%S %p")
+      waveEndTime <<- as.character(as.POSIXct((file.info(currDir)[[4]] + durationMain), origin="1970-01-01", format = "%H:%M:%S %p"), format = "%H:%M:%S %p")
       l <- length(sound@left)
       sr <- sound@samp.rate
       soundDuration <- round(l/sr,2)
+      # TODO Maybe make a function out of this? Might make the code cleaner
       if (soundDuration > 59) {
         shinyjs::show("time-box-container", anim = TRUE)
           observeEvent(input$spectroTimeSubmit, {
@@ -338,7 +351,14 @@ shinyServer(function(input, output, session) {
     }
   }
 
+  ##############################
+  ###### Function that plays the sound after clicking the play button
+  ###### Arg    start       Start time of the sound
+  ###### Arg    end         End time of the sound
+  ###### Arg    chartType   String to know which play button has been pressed (as we have 3 in the app)
+  ##############################
   playSound = function (start, end, chartType){
+    currTime <- Sys.time()
     if(paused)
     {
       resume(audioSound)
@@ -371,6 +391,7 @@ shinyServer(function(input, output, session) {
       
       if(chartType == "spectro")
       {
+        spectroEnd <- currTime + end
         shinyjs::show(id = "pauseButton",anim = TRUE)
         shinyjs::hide(id = "playButton",anim = FALSE)
       }
@@ -514,6 +535,7 @@ shinyServer(function(input, output, session) {
       currDir <- paste0(dirPath, "/", path, unlist(get_selected(input$tree)))
     }
     sound <- readWave(currDir)
+
     # shinyjs::show("spectro-clip-container")
     if(!is.null(input$plot_brush$xmax)) {
       spectro(sound, scale = FALSE, osc = FALSE, tlim = c(input$plot_brush$xmin,input$plot_brush$xmax))
@@ -521,6 +543,8 @@ shinyServer(function(input, output, session) {
       # shinyjs::show("spectroClip")
       xmin <<- input$plot_brush$xmin
       xmax <<- input$plot_brush$xmax
+      # Getting the duration of the clipped graph
+      durationSmall <<- round(xmax - xmin, digits = 1)
       shinyjs::show("clipInfo-container")
       shinyjs::show("playButtonClip",anim = FALSE)
     }
@@ -580,9 +604,10 @@ shinyServer(function(input, output, session) {
     names(data)[6] <- "start_time_date"
     data <- c(data, as.character(maxTimeVar))
     names(data)[7] <- "end_time_date"
-    dataArray <- c(data[[1]],data[[2]],data[[3]],data[[4]],data[[5]],data[[6]],data[[7]])
-    dataMatrix <- matrix(dataArray,ncol = 7, byrow = TRUE)
-    colnames(dataMatrix) <- c("Name", "Lat", "Lon", "RecId", "Site Notes", "Start", "End")
+    googleMapsLink <- paste0("https://www.google.com/maps/@", data[[2]], ",", data[[3]], ",13z")
+    dataArray <- c(data[[1]],data[[2]],data[[3]],data[[4]],data[[5]],data[[6]],data[[7]], fileFullName, waveStartTime, waveEndTime, waveDate, googleMapsLink)
+    dataMatrix <- matrix(dataArray,ncol = 12, byrow = TRUE)
+    colnames(dataMatrix) <- c("Name", "Lat", "Lon", "Record ID", "Site Notes", "Start", "End", "File Name", "Wave Start", "Wave End", "Wave Date", "Google Maps")
     siteDataTable <- as.table(dataMatrix)
     siteDF <<- siteDataTable
     # If we have multiple clips on a given spectro, give a new column name to each clip
@@ -688,13 +713,13 @@ shinyServer(function(input, output, session) {
       dataSet <- formDataSpecies()
       shinyjs::hide("site-info-warning-container")
       if (clipCount == 0) {
-        dataArray <- c(clipCount,dataSet[[1]],dataSet[[2]],dataSet[[3]],dataSet[[4]],dataSet[[5]])
-        dataMatrix <- matrix(dataArray,ncol = 6, byrow = TRUE)
-        colnames(dataMatrix) <- c("Annotation#","Time Min", "Time MAx","Type","Species","Annotation Notes")
+        dataArray <- c(clipCount,dataSet[[1]],dataSet[[2]], durationSmall, dataSet[[3]],dataSet[[4]],dataSet[[5]])
+        dataMatrix <- matrix(dataArray,ncol = 7, byrow = TRUE)
+        colnames(dataMatrix) <- c("Annotation#","Time Min (s)", "Time Max (s)", "Duration", "Type", "Species", "Annotation Notes")
         dataTable <- as.table(dataMatrix)
         siteDF <<- cbind(siteDF, dataTable)
       } else {
-        dataArray <- c("","","","","","","",clipCount,dataSet[[1]],dataSet[[2]],dataSet[[3]],dataSet[[4]],dataSet[[5]])
+        dataArray <- c("","","","","","","","",clipCount,dataSet[[1]],dataSet[[2]],durationSmall, dataSet[[3]],dataSet[[4]],dataSet[[5]])
         siteDF <<- rbind(siteDF, dataArray)
       }
       clipCount <<- clipCount + 1
@@ -703,16 +728,21 @@ shinyServer(function(input, output, session) {
       shinyjs::show("listCompleted")
       
       # Creating the element that will old the name of the completed annotation
-      listEl <- as.character(paste0(tags$div(class="annotations",id=clipCount, tags$span(paste0(dataSet[[4]], " at " , dataSet[[1]])),tags$div(class='removeAnn'))))
+      listEl <- as.character(paste0(tags$div(class="annotations",id=paste0("clip", clipCount), tags$span(paste0(dataSet[[4]], " at " , dataSet[[1]])),tags$div(class='removeAnn', id=paste0("clipRemove", clipCount)))))
       # Storing the element in a list that gets reset every time a new deployment is selected
       listCompleted <<- c(listCompleted, listEl)
       # Converting that list to a tagList
       finalCompleted <- tagList(listCompleted)
       # Display the list of tag in the UI
       shinyjs::html('listCompleted', finalCompleted)
-      tags$head(tags$script(src="removeAnnotation.js"))
+      shinyjs::onclick(paste0("clipRemove", clipCount), removeAnnotationFromCSV(clipCount), add = TRUE)
+      # tags$head(tags$script(src="removeAnnotation.js"))
     }
   })
+  
+  removeAnnotationFromCSV <- function(clipCounts) {
+    browser()
+  }
   
   substrRight <- function(x, n){
     substr(x, nchar(x)-n+1, nchar(x))

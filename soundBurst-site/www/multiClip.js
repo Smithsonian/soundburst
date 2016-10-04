@@ -8,8 +8,8 @@ $(document).ready(function() {
 
   $(document).on('click', '.removeAnn', function(e) {
     var id = $(this).parent()[0].id;
-    $("#spectrogram #" + id).remove();
-    $("#listCompleted #" + id).remove();
+    $("#spectrogram #clip" + id).remove();
+    $("#listCompleted #clip" + id).remove();
   });
 
 });

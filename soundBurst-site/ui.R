@@ -13,6 +13,18 @@ library(shinyFiles)
 # itemsSpecies <<- c('Select Type',as.character(species$CommonName))
 # speciesType <<- c('Select Type',as.character(species$Type))
 
+jscode <- "
+  shinyjs.addClickListener = function(params) {
+    var defaultParams = {
+      id : null
+    };
+    params = shinyjs.getParams(params, defaultParams);
+    $('#params.id').click(function() {
+      $('#spectrogram_brush').clone(true).prop('id', count + 1).prop('class', 'completedBrush').css({'background-color':'green'}).appendTo('#spectrogram')
+    });
+  }
+"
+
 dashboardPage(
   dashboardHeader(title = "SoundBurst App"),
   dashboardSidebar(
@@ -25,7 +37,7 @@ dashboardPage(
       div(id = "aws-upload-container",
           actionButton("aws-upload-button", class="inactive-aws-button", "Upload to AWS")),
       div(id = "project-container",
-          div(id = "left-column-title", class = "open-accordian unfinished-step", "Select a Project"),
+          div(id = "left-column-title", class = "open-accordian unfinished-step", "Select Project"),
           shinyDirButton('directory', class = 'inactive-button', 'Folder select', 'Please select a folder')
           ),
       useShinyjs(),
@@ -44,7 +56,7 @@ dashboardPage(
           )
           ),
       div(id = "full-tree-container", 
-          div(id = "show-tree", class = "closed-accordian unfinished-step", "Select a Deployment"),
+          div(id = "show-tree", class = "closed-accordian unfinished-step", "Select Deployment"),
           shinyTree("tree")
           ),
       div(id = "full-project-info-container",
@@ -82,7 +94,7 @@ dashboardPage(
               ))
           ),
       div(id = "completed-container",
-          div(id = "completedDepContainer", class = "closed-accordian unfinished-step", "Completed annotations"),
+          div(id = "completedDepContainer", class = "closed-accordian unfinished-step", "View Annotations"),
           div(id = "listCompleted")
       ),
       div(id = "complete-deployment", "Complete Deployment"),
