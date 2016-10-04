@@ -5,21 +5,20 @@
 # install_github("trestletech/shinyTree")
 # install.packages("sound")
 # install.packages("audio")
+# install.packages("httr")
 
 library(shiny)
 library(tools)
 library(devtools)
 library(stringr)
 library(shinyFiles)
-# library("aws.s3")
+library("aws.s3")
 library(shinyTree)
 library(seewave)
 library(tuneR)
-# install_github("trestletech/shinyStore")
-# load_all('~/dev/emammal-soundburst/soundBurst/R')
+library(httr)
 # load_all('~/dev/emammal-soundBurst/soundBurst/R')
 library(audio)
-# setWavPlayer('"/Applications/QuickTime\ Player"')
 setWavPlayer("afplay")
 library(sound)
 source("createDirectoryTree.r")
@@ -27,6 +26,9 @@ source("playSound.r")
 
 clipCount <<- 0
 newName <- NULL
+
+# This is used to connect correctly with AWS
+set_config( config( ssl_verifypeer = 0L ) )
 
 options(shiny.trace=TRUE)
 options(shiny.maxRequestSize=70*1024^2) 
@@ -588,6 +590,9 @@ shinyServer(function(input, output, session) {
     }
   }
   
+  ######################################
+  ####### Observe event for the site information at the bottom right of the app
+  ######################################
   observeEvent(input$siteInfo, {
     # Getting file list
     files <- list.files(dirPath, all.files=F, recursive=T, include.dirs=T)
@@ -710,6 +715,7 @@ shinyServer(function(input, output, session) {
     if (is.null(siteDF)) {
       shinyjs::show("site-info-warning-container")
     } else {
+      shinyjs::enable("aws-upload-button")
       dataSet <- formDataSpecies()
       shinyjs::hide("site-info-warning-container")
       if (clipCount == 0) {
