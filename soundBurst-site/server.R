@@ -120,6 +120,11 @@ shinyServer(function(input, output, session) {
   shinyjs::hide("aws-upload-button")
   shinyjs::hide("deployment")
   shinyjs::disable("aws-upload-button")
+  shinyjs::hide("proj-name-warning")
+  shinyjs::hide("dep-name-warning")
+  shinyjs::hide("recid-name-warning")
+  shinyjs::hide("type-name-warning")
+  shinyjs::hide("species-name-warning")
 
   shinyjs::onclick("sF-selectButton", toggleAfterProjectSelect())
 
@@ -517,7 +522,7 @@ shinyServer(function(input, output, session) {
     if (is.null(df)) return(NULL)
 
     itemsSpecies <- c('Select Species',as.character(df[[1]]))
-    selectInput("speciesDropdown", "Species:",itemsSpecies)
+    selectInput("speciesDropdown", "Species*",itemsSpecies)
   })
 
   output$speciesType <- renderUI({
@@ -527,7 +532,7 @@ shinyServer(function(input, output, session) {
     if (is.null(df)) return(NULL)
 
     itemsSpecies <- c('Select Type',as.character(df[[3]]))
-    selectInput("typeDropdown", "Type:",itemsSpecies)
+    selectInput("typeDropdown", "Type*",itemsSpecies)
   })
 
   formulaText <- reactive({
@@ -653,79 +658,86 @@ shinyServer(function(input, output, session) {
     # annotationListWav <<- c(annotationListWav, normalizePath(filePathFull))
     # Getting the site data
     data <- formDataSite()
-    # Adding the min and max time variables to the data
-    data <- c(data, as.character(minTimeVar))
-    names(data)[6] <- "start_time_date"
-    data <- c(data, as.character(maxTimeVar))
-    names(data)[7] <- "end_time_date"
-    # Link to the location of the LAT/LON entered by the user, saved into the CSV
-    googleMapsLink <- paste0("https://www.google.com/maps/@", data[[2]], ",", data[[3]], ",13z")
-    # dataArray <- c(data[[1]],data[[2]],data[[3]],data[[4]],data[[5]],data[[6]],data[[7]], fileFullName, waveStartTime, waveEndTime, waveDate, googleMapsLink)
-    dataArray <- c(data[[1]],data[[2]],data[[3]],data[[4]],data[[5]],data[[6]],data[[7]], googleMapsLink)
-    dataMatrix <- matrix(dataArray,ncol = length(dataArray), byrow = TRUE)
-    # colnames(dataMatrix) <- c("Name", "Lat", "Lon", "Record ID", "Site Notes", "Start", "End", "File Name", "Wave Start", "Wave End", "Wave Date", "Google Maps")
-    colnames(dataMatrix) <- c("Name", "Lat", "Lon", "Record ID", "Site Notes", "Start", "End", "Google Maps")
-    siteDataTable <- as.table(dataMatrix)
-    siteDF <<- siteDataTable
-    # If we have multiple clips on a given spectro, give a new column name to each clip
-    clipCount <<- 0
-    # Reformating user input
-    fileDate <- gsub(" ", "-",data[[6]], fixed = TRUE)
-    fileDate <- gsub(":", "-",fileDate, fixed = TRUE)
-    # Creating a new filename out of the metadata
-    newFileName <<- paste0(projectName,"_",data[[1]],"_",fileDate)
-    # shinyjs::html("right-column-title",newFileName)
-    # Creating the new file path
-    newFullFilePath <- paste0(depPath,"/",newFileName)
-
-    # Checking for file duplicate
-    fileNameDuplicate <- 0
-
-    # Checking for file duplicates within that folder
-    for (i in 1:length(files)) {
-      if (files[i] == paste0(newFileName,".csv")) {
-        fileNameDuplicate <- as.numeric(fileNameDuplicate) + 1
+    if (data[[1]] == "") {
+      shinyjs::show("dep-name-warning")
+    } else if (data[[4]] == "") {
+      shinyjs::show("recid-name-warning")
+    } else {
+      shinyjs::hide("dep-name-warning")
+      shinyjs::hide("recid-name-warning")
+      # Adding the min and max time variables to the data
+      data <- c(data, as.character(minTimeVar))
+      names(data)[6] <- "start_time_date"
+      data <- c(data, as.character(maxTimeVar))
+      names(data)[7] <- "end_time_date"
+      # Link to the location of the LAT/LON entered by the user, saved into the CSV
+      googleMapsLink <- paste0("https://www.google.com/maps/@", data[[2]], ",", data[[3]], ",13z")
+      # dataArray <- c(data[[1]],data[[2]],data[[3]],data[[4]],data[[5]],data[[6]],data[[7]], fileFullName, waveStartTime, waveEndTime, waveDate, googleMapsLink)
+      dataArray <- c(data[[1]],data[[2]],data[[3]],data[[4]],data[[5]],data[[6]],data[[7]], googleMapsLink)
+      dataMatrix <- matrix(dataArray,ncol = length(dataArray), byrow = TRUE)
+      # colnames(dataMatrix) <- c("Name", "Lat", "Lon", "Record ID", "Site Notes", "Start", "End", "File Name", "Wave Start", "Wave End", "Wave Date", "Google Maps")
+      colnames(dataMatrix) <- c("Name", "Lat", "Lon", "Record ID", "Site Notes", "Start", "End", "Google Maps")
+      siteDataTable <- as.table(dataMatrix)
+      siteDF <<- siteDataTable
+      # If we have multiple clips on a given spectro, give a new column name to each clip
+      clipCount <<- 0
+      # Reformating user input
+      fileDate <- gsub(" ", "-",data[[6]], fixed = TRUE)
+      fileDate <- gsub(":", "-",fileDate, fixed = TRUE)
+      # Creating a new filename out of the metadata
+      newFileName <<- paste0(projectName,"_",data[[1]],"_",fileDate)
+      # shinyjs::html("right-column-title",newFileName)
+      # Creating the new file path
+      newFullFilePath <- paste0(depPath,"/",newFileName)
+  
+      # Checking for file duplicate
+      fileNameDuplicate <- 0
+  
+      # Checking for file duplicates within that folder
+      for (i in 1:length(files)) {
+        if (files[i] == paste0(newFileName,".csv")) {
+          fileNameDuplicate <- as.numeric(fileNameDuplicate) + 1
+        }
       }
-    }
-
-    # Checking for file duplication, alert if any; otherwise create the file
-    if (fileNameDuplicate == 0) {
-      shinyjs::hide("file-name-warning-container")
-      # Update tree
-      # load("www/dir_tree.Rdata")
-      count <- 0
-      # for (name in names(tree)) {
-      #   count = count + 1
-      #   if(name == unlist(get_selected(input$tree)))
-      #   {
-      #     print(count)
-      #     names(tree)[count] <- paste0(newFileName, ".wav")
-      #     newName <<- paste0(newFileName, ".wav")
-      #   }
-      # }
-      # output$tree <- renderTree(tree, quoted = FALSE)
-# 
-#       file.rename(filePathFull, paste0(newFullFilePath,".wav"))
-      
-      # annotationListCsv <<- c(annotationListCsv, normalizePath(paste0(dirPath,"/",paste0(newFileName,'.csv'))))
-      write.csv(siteDataTable, paste0(depPath,"/",paste0(newFileName,'.csv')), row.names = FALSE)
-
-      if(!is.null(newName)) {
-        shinyjs::html("titleHeader",newName)
+  
+      # Checking for file duplication, alert if any; otherwise create the file
+      if (fileNameDuplicate == 0) {
+        shinyjs::hide("file-name-warning-container")
+        # Update tree
+        # load("www/dir_tree.Rdata")
+        count <- 0
+        # for (name in names(tree)) {
+        #   count = count + 1
+        #   if(name == unlist(get_selected(input$tree)))
+        #   {
+        #     print(count)
+        #     names(tree)[count] <- paste0(newFileName, ".wav")
+        #     newName <<- paste0(newFileName, ".wav")
+        #   }
+        # }
+        # output$tree <- renderTree(tree, quoted = FALSE)
+  # 
+  #       file.rename(filePathFull, paste0(newFullFilePath,".wav"))
+        
+        # annotationListCsv <<- c(annotationListCsv, normalizePath(paste0(dirPath,"/",paste0(newFileName,'.csv'))))
+        write.csv(siteDataTable, paste0(depPath,"/",paste0(newFileName,'.csv')), row.names = FALSE)
+  
+        if(!is.null(newName)) {
+          shinyjs::html("titleHeader",newName)
+        }
+        else {
+          shinyjs::html("titleHeader",unlist(get_selected(input$tree)))
+        }
+        shinyjs::addClass("deploymentInfo", "active-button")
+        shinyjs::hide("species-sidebox-container")
+        shinyjs::addClass("right-column-title", "completed-step")
+        shinyjs::toggleClass("right-column-title", "open-accordian")
+        shinyjs::toggleClass("right-column-title", "closed-accordian")
       }
       else {
-        shinyjs::html("titleHeader",unlist(get_selected(input$tree)))
+        shinyjs::show("file-name-warning-container")
       }
-      shinyjs::addClass("deploymentInfo", "active-button")
-      shinyjs::hide("species-sidebox-container")
-      shinyjs::addClass("right-column-title", "completed-step")
-      shinyjs::toggleClass("right-column-title", "open-accordian")
-      shinyjs::toggleClass("right-column-title", "closed-accordian")
     }
-    else {
-      shinyjs::show("file-name-warning-container")
-    }
-
   })
 
   projectFields <- c("projectName", "projectNotes")
@@ -741,21 +753,26 @@ shinyServer(function(input, output, session) {
   #####################################
   observeEvent(input$projectInfo, {
     data <- formDataProject()
-    dataArray <- c(data[[1]],data[[2]])
-    dataMatrix <- matrix(dataArray,ncol = 2, byrow = TRUE)
-    colnames(dataMatrix) <- c("Project Name", "Project Notes")
-    projectData <<- as.table(dataMatrix)
-    print(data)
-    projectName <<- data[[1]]
-    write.csv(projectData, paste0(dirPath,"/",paste0('Project_', projectName,'.csv')), row.names = FALSE)
-    shinyjs::hide("directory", anim = TRUE)
-    shinyjs::addClass("projectInfo", "active-button")
-    shinyjs::hide("project-info-container", anim = TRUE)
-    shinyjs::addClass("enter-project-info-label", "completed-step")
-    shinyjs::toggleClass("enter-project-info-label", "open-accordian")
-    shinyjs::toggleClass("enter-project-info-label", "closed-accordian")
-    shinyjs::show("deployment", anim = TRUE)
-    shinyjs::addClass("select-dep-container", "open-accordian")
+    if (data[[1]] == "") {
+      shinyjs::show("proj-name-warning")
+    } else {
+      shinyjs::hide("proj-name-warning")
+      dataArray <- c(data[[1]],data[[2]])
+      dataMatrix <- matrix(dataArray,ncol = 2, byrow = TRUE)
+      colnames(dataMatrix) <- c("Project Name", "Project Notes")
+      projectData <<- as.table(dataMatrix)
+      print(data)
+      projectName <<- data[[1]]
+      write.csv(projectData, paste0(dirPath,"/",paste0('Project_', projectName,'.csv')), row.names = FALSE)
+      shinyjs::hide("directory", anim = TRUE)
+      shinyjs::addClass("projectInfo", "active-button")
+      shinyjs::hide("project-info-container", anim = TRUE)
+      shinyjs::addClass("enter-project-info-label", "completed-step")
+      shinyjs::toggleClass("enter-project-info-label", "open-accordian")
+      shinyjs::toggleClass("enter-project-info-label", "closed-accordian")
+      shinyjs::show("deployment", anim = TRUE)
+      shinyjs::addClass("select-dep-container", "open-accordian")
+    }
   })
 
   speciesFields <- c("timeMin", "timeMax", "speciesDropdown", "typeDropdown", "annotNotes")
@@ -775,37 +792,43 @@ shinyServer(function(input, output, session) {
       shinyjs::enable("aws-upload-button")
       dataSet <- formDataSpecies()
       shinyjs::hide("site-info-warning-container")
-      if (clipCount == 0) {
-        dataArray <- c(fileFullName,clipCount,dataSet[[1]],dataSet[[2]], durationSmall, dataSet[[3]],dataSet[[4]],dataSet[[5]])
-        dataMatrix <- matrix(dataArray,ncol = 8, byrow = TRUE)
-        colnames(dataMatrix) <- c("File Name", "Annotation#","Time Min (s)", "Time Max (s)", "Duration", "Type", "Species", "Annotation Notes")
-        dataTable <- as.table(dataMatrix)
-        siteDF <<- cbind(siteDF, dataTable)
+      if (dataSet[[3]] == "Select Species") {
+        shinyjs::show("type-name-warning")
+      } else if (dataSet[[4]] == "Select Type") {
+        shinyjs::show("type-name-warning")
       } else {
-        dataArray <- c(siteDF[1],siteDF[2],siteDF[3],siteDF[4],siteDF[5],siteDF[6],siteDF[7],siteDF[8],fileFullName, clipCount,dataSet[[1]],dataSet[[2]],durationSmall, dataSet[[3]],dataSet[[4]],dataSet[[5]])
-        siteDF <<- rbind(siteDF, dataArray)
+        if (clipCount == 0) {
+          dataArray <- c(fileFullName,clipCount,dataSet[[1]],dataSet[[2]], durationSmall, dataSet[[3]],dataSet[[4]],dataSet[[5]])
+          dataMatrix <- matrix(dataArray,ncol = 8, byrow = TRUE)
+          colnames(dataMatrix) <- c("File Name", "Annotation#","Time Min (s)", "Time Max (s)", "Duration", "Type", "Species", "Annotation Notes")
+          dataTable <- as.table(dataMatrix)
+          siteDF <<- cbind(siteDF, dataTable)
+        } else {
+          dataArray <- c(siteDF[1],siteDF[2],siteDF[3],siteDF[4],siteDF[5],siteDF[6],siteDF[7],siteDF[8],fileFullName, clipCount,dataSet[[1]],dataSet[[2]],durationSmall, dataSet[[3]],dataSet[[4]],dataSet[[5]])
+          siteDF <<- rbind(siteDF, dataArray)
+        }
+        increaseStatusBar()
+        clipCount <<- clipCount + 1
+        # Creating the path with the file name
+        filePathFull <- paste0(depPath,"/",fileFullName)
+        # Adding the file to the list of annotated files for later zipping and S3 upload
+        annotationListWav <<- c(annotationListWav, normalizePath(filePathFull))
+        write.csv(siteDF, paste0(depPath,"/",paste0(newFileName,'.csv')), row.names = FALSE)
+        annotationListCsv <<- c(annotationListCsv, normalizePath(paste0(depPath,"/",paste0(newFileName,'.csv'))))
+        shinyjs::addClass('completedDepContainer', "open-accordian")
+        shinyjs::show("listCompleted")
+        
+        # Creating the element that will old the name of the completed annotation
+        listEl <- as.character(paste0(tags$div(class="annotations",id=paste0("clip", clipCount), tags$span(paste0(dataSet[[4]], " at " , dataSet[[1]])),tags$div(class='removeAnn', id=paste0("clipRemove", clipCount)))))
+        # Storing the element in a list that gets reset every time a new deployment is selected
+        listCompleted <<- c(listCompleted, listEl)
+        # Converting that list to a tagList
+        finalCompleted <- tagList(listCompleted)
+        # Display the list of tag in the UI
+        shinyjs::html('listCompleted', finalCompleted)
+        shinyjs::onclick(paste0("clipRemove", clipCount), removeAnnotationFromCSV(clipCount), add = TRUE)
+        # tags$head(tags$script(src="removeAnnotation.js"))
       }
-      increaseStatusBar()
-      clipCount <<- clipCount + 1
-      # Creating the path with the file name
-      filePathFull <- paste0(depPath,"/",fileFullName)
-      # Adding the file to the list of annotated files for later zipping and S3 upload
-      annotationListWav <<- c(annotationListWav, normalizePath(filePathFull))
-      write.csv(siteDF, paste0(depPath,"/",paste0(newFileName,'.csv')), row.names = FALSE)
-      annotationListCsv <<- c(annotationListCsv, normalizePath(paste0(depPath,"/",paste0(newFileName,'.csv'))))
-      shinyjs::addClass('completedDepContainer', "open-accordian")
-      shinyjs::show("listCompleted")
-
-      # Creating the element that will old the name of the completed annotation
-      listEl <- as.character(paste0(tags$div(class="annotations",id=paste0("clip", clipCount), tags$span(paste0(dataSet[[4]], " at " , dataSet[[1]])),tags$div(class='removeAnn', id=paste0("clipRemove", clipCount)))))
-      # Storing the element in a list that gets reset every time a new deployment is selected
-      listCompleted <<- c(listCompleted, listEl)
-      # Converting that list to a tagList
-      finalCompleted <- tagList(listCompleted)
-      # Display the list of tag in the UI
-      shinyjs::html('listCompleted', finalCompleted)
-      shinyjs::onclick(paste0("clipRemove", clipCount), removeAnnotationFromCSV(clipCount), add = TRUE)
-      # tags$head(tags$script(src="removeAnnotation.js"))
     }
   })
 
