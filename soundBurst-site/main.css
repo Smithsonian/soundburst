@@ -277,7 +277,7 @@ section.sidebar .shiny-input-container {
   cursor: pointer;
 }
 
-#projectInfo, #directory, #siteInfo, #deployment {
+#projectInfo, #directory, #deploymentInfo, #deployment {
   font-size: 1.15em;
   border: none;
   color: white;
@@ -291,7 +291,7 @@ section.sidebar .shiny-input-container {
   margin-left: 38%;
 }
 
-#siteInfo {
+#deploymentInfo {
   margin-left: 36%;
   padding-left: 5%;
   padding-right: 5%;

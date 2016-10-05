@@ -91,7 +91,7 @@ shinyServer(function(input, output, session) {
   shinyjs::onclick("left-column-title", toggleProjectSelect())
   # shinyjs::onclick("species-file-upload", togglecsvFileUploadButton())
   shinyjs::onclick("enter-project-info-label", toggleProjectInfoDisplay())
-  shinyjs::onclick("right-column-title", toggleSiteInfoContainer())
+  shinyjs::onclick("right-column-title", toggledeploymentInfoContainer())
   shinyjs::onclick("completedDepContainer", toggleCompletedDeployment())
   shinyjs::onclick("select-dep-container", toggleDeploymentSelectDisplay())
   # shinyjs::hide("csvFile")
@@ -147,7 +147,7 @@ shinyServer(function(input, output, session) {
     shinyjs::toggleClass("species-file-upload", "closed-accordian")
   }
 
-  toggleSiteInfoContainer = function() {
+  toggledeploymentInfoContainer = function() {
     shinyjs::toggle("species-sidebox-container", anim = TRUE)
     shinyjs::toggleClass("right-column-title", "open-accordian")
     shinyjs::toggleClass("right-column-title", "closed-accordian")
@@ -183,10 +183,14 @@ shinyServer(function(input, output, session) {
     shinyjs::hide("deployment", anim = TRUE)
     shinyjs::addClass("select-dep-container", "completed-step")
     shinyjs::show("species-sidebox-container")
-    shinyjs::toggleClass("select-dep-container", "open-accordian")
-    shinyjs::toggleClass("select-dep-container", "closed-accordian")
-    shinyjs::toggleClass("right-column-title", "open-accordian")
-    shinyjs::toggleClass("right-column-title", "closed-accordian")
+    shinyjs::removeClass("select-dep-container", "open-accordian")
+    shinyjs::addClass("select-dep-container", "closed-accordian")
+    shinyjs::addClass("right-column-title", "open-accordian")
+    shinyjs::removeClass("right-column-title", "closed-accordian")
+    shinyjs::addClass("show-tree", "open-accordian")
+    shinyjs::removeClass("show-tree", "closed-accordian")
+    shinyjs::show("tree", anim = TRUE)
+    findFileInfo()
   }
 
   toggleTree = function() {
@@ -228,6 +232,8 @@ shinyServer(function(input, output, session) {
         output$tree <- renderTree(tree, quoted = FALSE)
         shinyjs::addClass("deployment", "active-button")
         toggleAfterDeploymentSelect()
+        deploymentName <<- gsub("^.*\\/", "", depPath)
+        updateTextInput(session, inputId = "name", label = NULL, value = deploymentName)
         findFileCount()
       }
     })
@@ -276,7 +282,7 @@ shinyServer(function(input, output, session) {
   }
 
   ###########################
-  ##### Listener for file selection in "Select Deployment"
+  ##### Listener for file selection in "Select Sequence"
   ###########################
   observeEvent(unlist(get_selected(input$tree)), {
     # Plot main spectrogram
@@ -287,7 +293,6 @@ shinyServer(function(input, output, session) {
     }
     else {
       # Saving project information
-      write.csv(projectData, paste0(dirPath,"/",paste0('projectInfo_', file_path_sans_ext(unlist(get_selected(input$tree))),'.csv')), row.names = FALSE)
       annotationListCsv <<- c(annotationListCsv, normalizePath(paste0(dirPath,"/", file_path_sans_ext(unlist(get_selected(input$tree)))),'.csv'))
       # Resetting listCompleted
       listCompleted <<- list()
@@ -317,27 +322,18 @@ shinyServer(function(input, output, session) {
             shinyjs::show("spectro-increment-container")
           }
           shinyjs::show("playButton",anim = FALSE)
-          shinyjs::show("species-sidebox-container")
         })
           observeEvent(input$noTimeSubmission,{
             spectroToTime <<- soundDuration
             renderSpectro(sound)
             shinyjs::show("playButton",anim = FALSE)
-            shinyjs::show("species-sidebox-container")
           })
       } else {
         spectroToTime <<- soundDuration
         renderSpectro(sound)
         shinyjs::show("playButton",anim = FALSE)
-        shinyjs::show("species-sidebox-container")
       }
       shinyjs::show("content-id")
-      shinyjs::hide("tree", anim = TRUE)
-      shinyjs::addClass("show-tree", "closed-accordian")
-      shinyjs::addClass("show-tree", "completed-step")
-      shinyjs::removeClass("show-tree", "open-accordian")
-      shinyjs::addClass("right-column-title", "open-accordian")
-      shinyjs::removeClass("right-column-title", "closed-accordian")
       if(!is.null(newName)) {
         shinyjs::html("titleHeader",newName)
       }
@@ -351,11 +347,7 @@ shinyServer(function(input, output, session) {
     output$spectrogram <- renderPlot({
       shinyjs::hide("time-box-container", anim = TRUE)
       anottationCount <<- 0
-      # shinyjs::html("right-column-title",createCSVFilePath())
       spectro(sound, osc = TRUE, scale = FALSE, tlim = c(spectroFromTime,spectroToTime))
-      shinyjs::removeClass("right-column-title", "completed-step")
-      shinyjs::show("species-sidebox-container", anim = TRUE)
-      findFileInfo()
       shinyjs::show("complete-deployment")
       # shinyjs::onclick("complete-deployment", increaseStatusBar())
       # spectroFromTime <<- spectroToTime
@@ -650,17 +642,15 @@ shinyServer(function(input, output, session) {
   ######################################
   ####### Observe event for the site information at the bottom right of the app
   ######################################
-  observeEvent(input$siteInfo, {
-    browser()
+  observeEvent(input$deploymentInfo, {
     # Getting file list
     files <- list.files(depPath, all.files=F, recursive=T, include.dirs=T)
-    # fileFullName <- unlist(get_selected(input$tree))
-    # fileName <- sub(".wav", "", fileFullName)
     # Getting the file name
-    fileFullName <- unlist(get_selected(input$tree))
+    # fileFullName <- unlist(get_selected(input$tree))
+    # filePathFull <- paste0(depPath,"/",fileFullName)
     # Creating the path with the file name
     # Adding the file to the list of annotated files for later zipping and S3 upload
-    annotationListWav <<- c(annotationListWav, normalizePath(filePathFull))
+    # annotationListWav <<- c(annotationListWav, normalizePath(filePathFull))
     # Getting the site data
     data <- formDataSite()
     # Adding the min and max time variables to the data
@@ -670,9 +660,11 @@ shinyServer(function(input, output, session) {
     names(data)[7] <- "end_time_date"
     # Link to the location of the LAT/LON entered by the user, saved into the CSV
     googleMapsLink <- paste0("https://www.google.com/maps/@", data[[2]], ",", data[[3]], ",13z")
-    dataArray <- c(data[[1]],data[[2]],data[[3]],data[[4]],data[[5]],data[[6]],data[[7]], fileFullName, waveStartTime, waveEndTime, waveDate, googleMapsLink)
+    # dataArray <- c(data[[1]],data[[2]],data[[3]],data[[4]],data[[5]],data[[6]],data[[7]], fileFullName, waveStartTime, waveEndTime, waveDate, googleMapsLink)
+    dataArray <- c(data[[1]],data[[2]],data[[3]],data[[4]],data[[5]],data[[6]],data[[7]])
     dataMatrix <- matrix(dataArray,ncol = length(dataArray), byrow = TRUE)
-    colnames(dataMatrix) <- c("Name", "Lat", "Lon", "Record ID", "Site Notes", "Start", "End", "File Name", "Wave Start", "Wave End", "Wave Date", "Google Maps")
+    # colnames(dataMatrix) <- c("Name", "Lat", "Lon", "Record ID", "Site Notes", "Start", "End", "File Name", "Wave Start", "Wave End", "Wave Date", "Google Maps")
+    colnames(dataMatrix) <- c("Name", "Lat", "Lon", "Record ID", "Site Notes", "Start", "End")
     siteDataTable <- as.table(dataMatrix)
     siteDF <<- siteDataTable
     # If we have multiple clips on a given spectro, give a new column name to each clip
@@ -681,7 +673,7 @@ shinyServer(function(input, output, session) {
     fileDate <- gsub(" ", "-",data[[6]], fixed = TRUE)
     fileDate <- gsub(":", "-",fileDate, fixed = TRUE)
     # Creating a new filename out of the metadata
-    newFileName <- paste0(projectName,"_",data[[1]],"_",fileDate)
+    newFileName <<- paste0(projectName,"_",data[[1]],"_",fileDate)
     # shinyjs::html("right-column-title",newFileName)
     # Creating the new file path
     newFullFilePath <- paste0(depPath,"/",newFileName)
@@ -691,7 +683,7 @@ shinyServer(function(input, output, session) {
 
     # Checking for file duplicates within that folder
     for (i in 1:length(files)) {
-      if (files[i] == paste0(newFileName,".wav")) {
+      if (files[i] == paste0(newFileName,".csv")) {
         fileNameDuplicate <- as.numeric(fileNameDuplicate) + 1
       }
     }
@@ -700,22 +692,22 @@ shinyServer(function(input, output, session) {
     if (fileNameDuplicate == 0) {
       shinyjs::hide("file-name-warning-container")
       # Update tree
-      load("www/dir_tree.Rdata")
+      # load("www/dir_tree.Rdata")
       count <- 0
-      for (name in names(tree)) {
-        count = count + 1
-        if(name == unlist(get_selected(input$tree)))
-        {
-          print(count)
-          names(tree)[count] <- paste0(newFileName, ".wav")
-          newName <<- paste0(newFileName, ".wav")
-        }
-      }
+      # for (name in names(tree)) {
+      #   count = count + 1
+      #   if(name == unlist(get_selected(input$tree)))
+      #   {
+      #     print(count)
+      #     names(tree)[count] <- paste0(newFileName, ".wav")
+      #     newName <<- paste0(newFileName, ".wav")
+      #   }
+      # }
       # output$tree <- renderTree(tree, quoted = FALSE)
-
-      file.rename(filePathFull, paste0(newFullFilePath,".wav"))
+# 
+#       file.rename(filePathFull, paste0(newFullFilePath,".wav"))
       
-      annotationListCsv <<- c(annotationListCsv, normalizePath(paste0(dirPath,"/",paste0(newFileName,'.csv'))))
+      # annotationListCsv <<- c(annotationListCsv, normalizePath(paste0(dirPath,"/",paste0(newFileName,'.csv'))))
       write.csv(siteDataTable, paste0(depPath,"/",paste0(newFileName,'.csv')), row.names = FALSE)
 
       if(!is.null(newName)) {
@@ -724,7 +716,7 @@ shinyServer(function(input, output, session) {
       else {
         shinyjs::html("titleHeader",unlist(get_selected(input$tree)))
       }
-      shinyjs::addClass("siteInfo", "active-button")
+      shinyjs::addClass("deploymentInfo", "active-button")
       shinyjs::hide("species-sidebox-container")
       shinyjs::addClass("right-column-title", "completed-step")
       shinyjs::toggleClass("right-column-title", "open-accordian")
@@ -755,6 +747,7 @@ shinyServer(function(input, output, session) {
     projectData <<- as.table(dataMatrix)
     print(data)
     projectName <<- data[[1]]
+    write.csv(projectData, paste0(dirPath,"/",paste0('Project_', projectName,'.csv')), row.names = FALSE)
     shinyjs::hide("directory", anim = TRUE)
     shinyjs::addClass("projectInfo", "active-button")
     shinyjs::hide("project-info-container", anim = TRUE)
@@ -763,11 +756,6 @@ shinyServer(function(input, output, session) {
     shinyjs::toggleClass("enter-project-info-label", "closed-accordian")
     shinyjs::show("deployment", anim = TRUE)
     shinyjs::addClass("select-dep-container", "open-accordian")
-    shinyjs::removeClass("select-dep-container", "closed-accordian")
-
-    shinyjs::addClass("show-tree", "open-accordian")
-    shinyjs::removeClass("show-tree", "closed-accordian")
-    shinyjs::show("tree", anim = TRUE)
   })
 
   speciesFields <- c("timeMin", "timeMax", "speciesDropdown", "typeDropdown", "annotNotes")
@@ -798,7 +786,13 @@ shinyServer(function(input, output, session) {
       }
       increaseStatusBar()
       clipCount <<- clipCount + 1
+      fileFullName <- unlist(get_selected(input$tree))
+      # Creating the path with the file name
+      filePathFull <- paste0(depPath,"/",fileFullName)
+      # Adding the file to the list of annotated files for later zipping and S3 upload
+      annotationListWav <<- c(annotationListWav, normalizePath(filePathFull))
       write.csv(siteDF, paste0(depPath,"/",paste0(createCSVFilePath(),'.csv')), row.names = FALSE)
+      annotationListCsv <<- c(annotationListCsv, normalizePath(paste0(dirPath,"/",paste0(newFileName,'.csv'))))
       shinyjs::addClass('completedDepContainer', "open-accordian")
       shinyjs::show("listCompleted")
 
@@ -899,16 +893,14 @@ shinyServer(function(input, output, session) {
   increaseStatusBar = function () {
     # shinyjs::hide("content-id")
     progressValue$one <<- progressValue$one + 1
-    # if (progressValue$one == projectFileCountGlobal) {
-    #   shinyjs::enable("aws-upload-button")
-    #   shinyjs::addClass(".active-aws-button")
-    # } else {
-    #   shinyjs::show("tree", anim = TRUE)
-    #   shinyjs::removeClass("show-tree", "closed-accordian")
-    #   shinyjs::removeClass("right-column-title", "completed-step")
-    #   shinyjs::removeClass("show-tree", "completed-step")
-    #   shinyjs::addClass("show-tree", "open-accordian")
-    # }
+    if (progressValue$one == projectFileCountGlobal) {
+      shinyjs::hide("tree", anim = TRUE)
+      shinyjs::addClass("show-tree", "closed-accordian")
+      shinyjs::addClass("show-tree", "completed-step")
+      shinyjs::removeClass("show-tree", "open-accordian")
+    } else {
+
+    }
   }
 
   findFileInfo = function() {

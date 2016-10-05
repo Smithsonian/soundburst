@@ -68,7 +68,7 @@ dashboardPage(
                       textInput("name", "Name:", placeholder = "Name"),
                       textInput("lat", "Lat:", placeholder = "Latitude"),
                       textInput("lon", "Lon:", placeholder = "Longitude"),
-                      textInput("Recorder ID", "Recorder ID:", placeholder = "RecId"),
+                      textInput("recId", "Recorder ID:", placeholder = "RecId"),
                       HTML('<label>Site Notes:</label>'),
                       HTML('<textarea id="siteNotes" rows="3" cols="40" placeholder="Enter Site Notes.."></textarea>'),
                       HTML('<label>Start date/time: </label>'),
@@ -79,7 +79,7 @@ dashboardPage(
                       div(id = "file-name-warning-container",
                           div(id = "file-name-warning", "Attention: A file with the same name already exists. Please enter a new Deployment Name and resubmit.")
                       ),
-                      actionButton("siteInfo", class = "inactive-button", "Submit")
+                      actionButton("deploymentInfo", class = "inactive-button", "Submit")
                   )
                   # div(id = "submit-site-complete-container",
                   #     div(id = "submit-site-text", "When you have submited data for all clips on a given site, click below and move on to the next"),
