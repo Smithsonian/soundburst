@@ -6,6 +6,7 @@
 # install.packages("sound")
 # install.packages("audio")
 # install.packages("httr")
+# install.packages("shinyBS")
 
 library(shiny)
 library(tools)
@@ -17,6 +18,7 @@ library(shinyTree)
 library(seewave)
 library(tuneR)
 library(httr)
+library(shinyBS)
 # load_all('~/dev/emammal-soundBurst/soundBurst/R')
 library(audio)
 setWavPlayer("afplay")
@@ -26,6 +28,8 @@ source("playSound.r")
 
 clipCount <<- 0
 newName <- NULL
+annotationListWav <<- vector()
+annotationListCsv <<- vector()
 
 # This is used to connect correctly with AWS
 set_config( config( ssl_verifypeer = 0L ) )
@@ -155,6 +159,10 @@ shinyServer(function(input, output, session) {
     shinyjs::toggleClass("enter-project-info-label", "open-accordian")
     shinyjs::toggleClass("enter-project-info-label", "closed-accordian")
     dirPath <<- parseDirPath(roots=c(home='~'), input$directory)
+    # Had to check if dirPath was not of length 0 otherwise shiny would return an error
+    if(length(dirPath) != 0) {
+      setwd(normalizePath(dirPath))
+    }
   }
   
   toggleTree = function() {
@@ -233,11 +241,15 @@ shinyServer(function(input, output, session) {
       return()
     } 
     else {
+      # Saving project information
+      write.csv(projectData, paste0(dirPath,"/",paste0('projectInfo_', file_path_sans_ext(unlist(get_selected(input$tree))),'.csv')), row.names = FALSE)
+      annotationListCsv <<- c(annotationListCsv, normalizePath(paste0(dirPath,"/", file_path_sans_ext(unlist(get_selected(input$tree)))),'.csv'))
+      # Resetting listCompleted
       listCompleted <<- list()
       # Root path of the selected file
       path <- getPath(get_selected(input$tree, "names"))
       # Full file path
-      currDir <- paste0(dirPath, "/", path, unlist(get_selected(input$tree)))
+      currDir <<- paste0(dirPath, "/", path, unlist(get_selected(input$tree)))
       # Reading the sound file
       sound <- readWave(currDir)
       # Duration of the sound file
@@ -300,7 +312,7 @@ shinyServer(function(input, output, session) {
       shinyjs::show("species-sidebox-container", anim = TRUE)
       findFileInfo()
       shinyjs::show("complete-deployment")
-      shinyjs::onclick("complete-deployment", increaseStatusBar())
+      # shinyjs::onclick("complete-deployment", increaseStatusBar())
       # spectroFromTime <<- spectroToTime
     })
   }
@@ -602,6 +614,8 @@ shinyServer(function(input, output, session) {
     fileFullName <- unlist(get_selected(input$tree))
     # Creating the path with the file name
     filePathFull <- paste0(dirPath,"/",fileFullName)
+    # Adding the file to the list of annotated files for later zipping and S3 upload
+    annotationListWav <<- c(annotationListWav, normalizePath(filePathFull))
     # Getting the site data
     data <- formDataSite()
     # Adding the min and max time variables to the data
@@ -609,9 +623,10 @@ shinyServer(function(input, output, session) {
     names(data)[6] <- "start_time_date"
     data <- c(data, as.character(maxTimeVar))
     names(data)[7] <- "end_time_date"
+    # Link to the location of the LAT/LON entered by the user, saved into the CSV
     googleMapsLink <- paste0("https://www.google.com/maps/@", data[[2]], ",", data[[3]], ",13z")
     dataArray <- c(data[[1]],data[[2]],data[[3]],data[[4]],data[[5]],data[[6]],data[[7]], fileFullName, waveStartTime, waveEndTime, waveDate, googleMapsLink)
-    dataMatrix <- matrix(dataArray,ncol = 12, byrow = TRUE)
+    dataMatrix <- matrix(dataArray,ncol = length(dataArray), byrow = TRUE)
     colnames(dataMatrix) <- c("Name", "Lat", "Lon", "Record ID", "Site Notes", "Start", "End", "File Name", "Wave Start", "Wave End", "Wave Date", "Google Maps")
     siteDataTable <- as.table(dataMatrix)
     siteDF <<- siteDataTable
@@ -654,6 +669,7 @@ shinyServer(function(input, output, session) {
       # output$tree <- renderTree(tree, quoted = FALSE)
 
       file.rename(filePathFull, paste0(newFullFilePath,".wav"))
+      annotationListCsv <<- c(annotationListCsv, normalizePath(paste0(dirPath,"/",paste0(newFileName,'.csv'))))
       write.csv(siteDataTable, paste0(dirPath,"/",paste0(newFileName,'.csv')), row.names = FALSE)
       if(!is.null(newName)) {
         shinyjs::html("titleHeader",newName)
@@ -681,15 +697,13 @@ shinyServer(function(input, output, session) {
   })
   
   observeEvent(input$projectInfo, {
-    print(paste0(dirPath,"/",'projectInfo.csv'))
     data <- formDataProject()
     dataArray <- c(data[[1]],data[[2]])
     dataMatrix <- matrix(dataArray,ncol = 2, byrow = TRUE)
     colnames(dataMatrix) <- c("Project Name", "Project Notes")
-    projectData <- as.table(dataMatrix)
+    projectData <<- as.table(dataMatrix)
     print(data)
     projectName <<- data[[1]]
-    write.csv(projectData, paste0(dirPath,"/",'projectInfo.csv'), row.names = FALSE)
     # shinyjs::hide("csvFile", anim = TRUE)
     shinyjs::hide("directory", anim = TRUE)
     shinyjs::addClass("projectInfo", "active-button")
@@ -728,6 +742,7 @@ shinyServer(function(input, output, session) {
         dataArray <- c("","","","","","","","",clipCount,dataSet[[1]],dataSet[[2]],durationSmall, dataSet[[3]],dataSet[[4]],dataSet[[5]])
         siteDF <<- rbind(siteDF, dataArray)
       }
+      increaseStatusBar()
       clipCount <<- clipCount + 1
       write.csv(siteDF, paste0(dirPath,"/",paste0(createCSVFilePath(),'.csv')), row.names = FALSE)
       shinyjs::addClass('completedDepContainer', "open-accordian")
@@ -743,6 +758,49 @@ shinyServer(function(input, output, session) {
       shinyjs::html('listCompleted', finalCompleted)
       shinyjs::onclick(paste0("clipRemove", clipCount), removeAnnotationFromCSV(clipCount), add = TRUE)
       # tags$head(tags$script(src="removeAnnotation.js"))
+    }
+  })
+  
+  ################################
+  ######## Modal UI
+  ################################
+  output$awsCredentials <- renderUI({
+    tagList(
+      textInput(inputId = "awsAccessKey", label = "Access key", value = "Your AWS access key"),
+      textInput(inputId = "awsSecretKey", label = "Secret key", value = "Your AWS secret key"),
+      textInput(inputId = "awsBucket", label = "AWS bucket", value = "Your AWS bucket"),
+      actionButton("awsUploadModal", "Upload to AWS")
+    )
+  })
+  
+  observeEvent(input$awsUploadModal, {
+    awsAccessKey <- input$awsAccessKey
+    awsSecretKey <- input$awsSecretKey
+    awsBucket <- input$awsBucket
+    Sys.setenv("AWS_ACCESS_KEY_ID" = "AKIAJVTBYKWQCWEZZ77A", "AWS_SECRET_ACCESS_KEY" = "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")
+    if(bucket_exists(awsBucket)) {
+      # Copy files to temp folder for zipping
+      tempDir <- tempdir()
+      csvDir <- paste0(tempDir, "/deployment")
+      wavDir <- paste0(tempDir, "/project")
+      dir.create(csvDir)
+      dir.create(wavDir)
+      file.copy(annotationListCsv, csvDir)
+      file.copy(annotationListWav, wavDir)
+      dirToZip <- c(csvDir, wavDir)
+      # Zip folder
+      zip(normalizePath(paste0(dirPath, "/test.zip")), dirToZip)
+      # Upload to AWS
+      put_object(file = normalizePath(paste0(dirPath, "/test.zip")), bucket = awsBucket)
+      # Resetting annotationListWav to 0
+      annotationListWav <<- vector();
+      annotationListCsv <<- vector();
+    } else {
+      output$warningBucket <- renderUI({
+        tagList(
+          HTML("Error: The bucket that you have entered does not exist. Please select another bucket or create one.")
+        )
+      })
     }
   })
   
@@ -774,18 +832,18 @@ shinyServer(function(input, output, session) {
   }
 
   increaseStatusBar = function () {
-    shinyjs::hide("content-id")
-    progressValue$one <<- progressValue$one + 1
-    if (progressValue$one == projectFileCountGlobal) {
-      shinyjs::enable("aws-upload-button")
-      shinyjs::addClass(".active-aws-button")
-    } else {
-      shinyjs::show("tree", anim = TRUE)
-      shinyjs::removeClass("show-tree", "closed-accordian")
-      shinyjs::removeClass("right-column-title", "completed-step")
-      shinyjs::removeClass("show-tree", "completed-step")
-      shinyjs::addClass("show-tree", "open-accordian")
-    }
+    # shinyjs::hide("content-id")
+    # progressValue$one <<- progressValue$one + 1
+    # if (progressValue$one == projectFileCountGlobal) {
+    #   shinyjs::enable("aws-upload-button")
+    #   shinyjs::addClass(".active-aws-button")
+    # } else {
+    #   shinyjs::show("tree", anim = TRUE)
+    #   shinyjs::removeClass("show-tree", "closed-accordian")
+    #   shinyjs::removeClass("right-column-title", "completed-step")
+    #   shinyjs::removeClass("show-tree", "completed-step")
+    #   shinyjs::addClass("show-tree", "open-accordian")
+    # }
   }
   
   findFileInfo = function() {

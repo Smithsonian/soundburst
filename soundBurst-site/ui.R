@@ -7,6 +7,7 @@ library(shinydashboard)
 library(shinyTree)
 library(shinyjs)
 library(shinyFiles)
+library(shinyBS)
 # source("customHeader.r")
 
 # species <- read.csv("www/species-short.csv", header = TRUE)
@@ -104,6 +105,8 @@ dashboardPage(
   dashboardBody(id = "content-id",
     includeCSS("main.css"),
     uiOutput("audiotag"),
+    bsModal(id = "awsModal", title = "Upload to AWS", trigger = "aws-upload-button", uiOutput("awsCredentials")),
+    bsModal(id = "warningBucket", trigger = "", title = "Error", uiOutput("warningBucket")),
     div(id = "playButton"),
     div(id = "pauseButton"),
     div(id = "mainPlotContainer",
