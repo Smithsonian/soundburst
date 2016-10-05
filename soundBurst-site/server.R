@@ -149,6 +149,10 @@ shinyServer(function(input, output, session) {
     shinyjs::toggleClass("completedDepContainer", "closed-accordian")
   }
   
+  #################################
+  ##### This function runs right after the selection of a project is done
+  ##### Mainly toggles classes and set the current directory
+  ################################
   toggleAfterProjectSelect = function (){
     shinyjs::hide("directory", anim = TRUE)
     shinyjs::addClass("left-column-title", "completed-step")
@@ -175,6 +179,10 @@ shinyServer(function(input, output, session) {
   test <- shinyDirChoose(input, 'directory', updateFreq=60000, session=session, roots=c(home='~'), restrictions=system.file(package='base'), filetypes=c('', '.wav'))
   output$directorypath <- renderPrint({
     dirPath <<- parseDirPath(roots=c(home='~'), input$directory)
+    # Get folder name -> which is also the project name
+    projectName <<- gsub("^.*\\/", "", dirPath)
+    # Updating the value of the project name input value
+    updateTextInput(session, inputId = "projectName", label = NULL, value = projectName)
     folders <- list.dirs(dirPath, full.names = F, recursive = TRUE)
     
     if(!(is.null(dirPath))) {
@@ -696,6 +704,10 @@ shinyServer(function(input, output, session) {
     data
   })
   
+  
+  #####################################
+  ###### Project info submit button listener
+  #####################################
   observeEvent(input$projectInfo, {
     data <- formDataProject()
     dataArray <- c(data[[1]],data[[2]])
@@ -704,7 +716,6 @@ shinyServer(function(input, output, session) {
     projectData <<- as.table(dataMatrix)
     print(data)
     projectName <<- data[[1]]
-    # shinyjs::hide("csvFile", anim = TRUE)
     shinyjs::hide("directory", anim = TRUE)
     shinyjs::addClass("projectInfo", "active-button")
     shinyjs::hide("project-info-container", anim = TRUE)

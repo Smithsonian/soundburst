@@ -49,7 +49,7 @@ dashboardPage(
                   div(id = "species-file-upload", "Load New Species CSV?"),
                   shinyFilesButton('csvFile', 'File select', 'Please select a file', FALSE)
               ), 
-              textInput("projectName", " Name:", placeholder = "Project Name"),
+              textInput("projectName", " Name:"),
               HTML('<label>Project Notes:</label>'),
               HTML('<textarea id="projectNotes" rows="3" cols="40" placeholder = "Project Notes"></textarea>'),
               # textInput("projectNotes", "Project Notes:", "Project Notes"),
