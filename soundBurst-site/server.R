@@ -661,10 +661,10 @@ shinyServer(function(input, output, session) {
     # Link to the location of the LAT/LON entered by the user, saved into the CSV
     googleMapsLink <- paste0("https://www.google.com/maps/@", data[[2]], ",", data[[3]], ",13z")
     # dataArray <- c(data[[1]],data[[2]],data[[3]],data[[4]],data[[5]],data[[6]],data[[7]], fileFullName, waveStartTime, waveEndTime, waveDate, googleMapsLink)
-    dataArray <- c(data[[1]],data[[2]],data[[3]],data[[4]],data[[5]],data[[6]],data[[7]])
+    dataArray <- c(data[[1]],data[[2]],data[[3]],data[[4]],data[[5]],data[[6]],data[[7]], googleMapsLink)
     dataMatrix <- matrix(dataArray,ncol = length(dataArray), byrow = TRUE)
     # colnames(dataMatrix) <- c("Name", "Lat", "Lon", "Record ID", "Site Notes", "Start", "End", "File Name", "Wave Start", "Wave End", "Wave Date", "Google Maps")
-    colnames(dataMatrix) <- c("Name", "Lat", "Lon", "Record ID", "Site Notes", "Start", "End")
+    colnames(dataMatrix) <- c("Name", "Lat", "Lon", "Record ID", "Site Notes", "Start", "End", "Google Maps")
     siteDataTable <- as.table(dataMatrix)
     siteDF <<- siteDataTable
     # If we have multiple clips on a given spectro, give a new column name to each clip
@@ -768,6 +768,7 @@ shinyServer(function(input, output, session) {
   # Adding the clip metadata to the spectrogram metadata
   # ClipCount -> If we have multiple clips on a given spectro, give a new column name to each clip
   observeEvent(input$speciesDropSubmit, {
+    fileFullName <- unlist(get_selected(input$tree))
     if (is.null(siteDF)) {
       shinyjs::show("site-info-warning-container")
     } else {
@@ -775,24 +776,23 @@ shinyServer(function(input, output, session) {
       dataSet <- formDataSpecies()
       shinyjs::hide("site-info-warning-container")
       if (clipCount == 0) {
-        dataArray <- c(clipCount,dataSet[[1]],dataSet[[2]], durationSmall, dataSet[[3]],dataSet[[4]],dataSet[[5]])
-        dataMatrix <- matrix(dataArray,ncol = 7, byrow = TRUE)
-        colnames(dataMatrix) <- c("Annotation#","Time Min (s)", "Time Max (s)", "Duration", "Type", "Species", "Annotation Notes")
+        dataArray <- c(fileFullName,clipCount,dataSet[[1]],dataSet[[2]], durationSmall, dataSet[[3]],dataSet[[4]],dataSet[[5]])
+        dataMatrix <- matrix(dataArray,ncol = 8, byrow = TRUE)
+        colnames(dataMatrix) <- c("File Name", "Annotation#","Time Min (s)", "Time Max (s)", "Duration", "Type", "Species", "Annotation Notes")
         dataTable <- as.table(dataMatrix)
         siteDF <<- cbind(siteDF, dataTable)
       } else {
-        dataArray <- c("","","","","","","","",clipCount,dataSet[[1]],dataSet[[2]],durationSmall, dataSet[[3]],dataSet[[4]],dataSet[[5]])
+        dataArray <- c(siteDF[1],siteDF[2],siteDF[3],siteDF[4],siteDF[5],siteDF[6],siteDF[7],siteDF[8],fileFullName, clipCount,dataSet[[1]],dataSet[[2]],durationSmall, dataSet[[3]],dataSet[[4]],dataSet[[5]])
         siteDF <<- rbind(siteDF, dataArray)
       }
       increaseStatusBar()
       clipCount <<- clipCount + 1
-      fileFullName <- unlist(get_selected(input$tree))
       # Creating the path with the file name
       filePathFull <- paste0(depPath,"/",fileFullName)
       # Adding the file to the list of annotated files for later zipping and S3 upload
       annotationListWav <<- c(annotationListWav, normalizePath(filePathFull))
-      write.csv(siteDF, paste0(depPath,"/",paste0(createCSVFilePath(),'.csv')), row.names = FALSE)
-      annotationListCsv <<- c(annotationListCsv, normalizePath(paste0(dirPath,"/",paste0(newFileName,'.csv'))))
+      write.csv(siteDF, paste0(depPath,"/",paste0(newFileName,'.csv')), row.names = FALSE)
+      annotationListCsv <<- c(annotationListCsv, normalizePath(paste0(depPath,"/",paste0(newFileName,'.csv'))))
       shinyjs::addClass('completedDepContainer', "open-accordian")
       shinyjs::show("listCompleted")
 
