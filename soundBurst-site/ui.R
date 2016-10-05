@@ -98,7 +98,7 @@ dashboardPage(
           div(id = "completedDepContainer", class = "closed-accordian unfinished-step", "View Annotations"),
           div(id = "listCompleted")
       ),
-      div(id = "complete-deployment", "Complete Deployment"),
+      # div(id = "complete-deployment", "Complete Deployment"),
       verbatimTextOutput('directorypath')
     )
   ),

@@ -842,9 +842,12 @@ shinyServer(function(input, output, session) {
     })
   }
 
+  #################################
+  ###### Function to increase the count of the status bar
+  #################################
   increaseStatusBar = function () {
     # shinyjs::hide("content-id")
-    # progressValue$one <<- progressValue$one + 1
+    progressValue$one <<- progressValue$one + 1
     # if (progressValue$one == projectFileCountGlobal) {
     #   shinyjs::enable("aws-upload-button")
     #   shinyjs::addClass(".active-aws-button")
