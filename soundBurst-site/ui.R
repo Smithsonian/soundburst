@@ -43,12 +43,39 @@ dashboardPage(
               actionButton("projectInfo", class = "inactive-button", "Submit")
           )
           ),
-      div(id = "full-tree-container", 
-          div(id = "show-tree", class = "closed-accordian unfinished-step", "Select a Deployment"),
-          shinyTree("tree")
-          ),
+      div(id = "deployment-select-container",
+          div(id = "select-dep-container", class = "closed-accordian unfinished-step", "Select a Deployment"),
+          shinyDirButton('deployment', class = 'inactive-button', 'Folder select', 'Please select a folder')
+      ),
       div(id = "full-project-info-container",
           div(id = "right-column-title", class = "closed-accordian unfinished-step", "Enter Deployment Info"),
+          div(id = "species-sidebox-container",
+              div(id = "species-sidebox",
+                  div(id = "site-info-container", 
+                      textInput("name", "Name:", placeholder = "Name"),
+                      textInput("lat", "Lat:", placeholder = "Latitude"),
+                      textInput("lon", "Lon:", placeholder = "Longitude"),
+                      textInput("Recorder ID", "Recorder ID:", placeholder = "RecId"),
+                      HTML('<label>Site Notes:</label>'),
+                      HTML('<textarea id="siteNotes" rows="3" cols="40" placeholder="Enter Site Notes.."></textarea>'),
+                      HTML('<label>Start date/time: </label>'),
+                      textOutput("minTime"),
+                      HTML('<label>End date/time: </label>'),
+                      textOutput("maxTime"),
+                      # textInput("siteNotes", "Site Notes:", "Notes"),
+                      div(id = "file-name-warning-container",
+                          div(id = "file-name-warning", "Attention: A file with the same name already exists. Please enter a new Deployment Name and resubmit.")
+                      ),
+                      actionButton("siteInfo", class = "inactive-button", "Submit")
+                  )
+                  # div(id = "submit-site-complete-container", 
+                  #     div(id = "submit-site-text", "When you have submited data for all clips on a given site, click below and move on to the next"),
+                  #     div(id = "submit-site-complete", "Finish Site"))
+              ))
+      ),
+      div(id = "full-tree-container",
+          div(id = "show-tree", class = "closed-accordian unfinished-step", "Select a Sequence"),
+          shinyTree("tree"),
           div(id = "time-box-container",
               div(id = "secondary-time-box-container",
                   HTML('<label>This file exceeds 2 total minutes, would you like to increment the display?</label>'),
@@ -56,37 +83,15 @@ dashboardPage(
                   actionButton("spectroTimeSubmit", "Increment"),
                   actionButton("noTimeSubmission", "Do not Increment")
               )
-          ),
-          div(id = "species-sidebox-container",
-              div(id = "species-sidebox",
-                     div(id = "site-info-container", 
-                         textInput("name", "Name:", placeholder = "Name"),
-                         textInput("lat", "Lat:", placeholder = "Latitude"),
-                         textInput("lon", "Lon:", placeholder = "Longitude"),
-                         textInput("recId", "RecId:", placeholder = "RecId"),
-                         HTML('<label>Site Notes:</label>'),
-                         HTML('<textarea id="siteNotes" rows="3" cols="40" placeholder="Enter Site Notes.."></textarea>'),
-                         HTML('<label>Start date/time: </label>'),
-                         textOutput("minTime"),
-                         HTML('<label>End date/time: </label>'),
-                         textOutput("maxTime"),
-                         # textInput("siteNotes", "Site Notes:", "Notes"),
-                         div(id = "file-name-warning-container",
-                             div(id = "file-name-warning", "Attention: A file with the same name already exists. Please enter a new Deployment Name and resubmit.")
-                         ),
-                         actionButton("siteInfo", class = "inactive-button", "Submit")
-                     )
-                     # div(id = "submit-site-complete-container", 
-                     #     div(id = "submit-site-text", "When you have submited data for all clips on a given site, click below and move on to the next"),
-                     #     div(id = "submit-site-complete", "Finish Site"))
-              ))
+          )
           ),
       div(id = "completed-container",
           div(id = "completedDepContainer", class = "closed-accordian unfinished-step", "Completed annotations"),
           div(id = "listCompleted")
       ),
       div(id = "complete-deployment", "Complete Deployment"),
-      verbatimTextOutput('directorypath')
+      verbatimTextOutput('directorypath'),
+      verbatimTextOutput('deploymentpath')
     )
   ),
   dashboardBody(id = "content-id",

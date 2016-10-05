@@ -184,11 +184,11 @@ label {
   height: 100%;
 }
 
-#left-column-title, #enter-project-info-label, #show-tree, #species-file-upload, #complete-deployment, #right-column-title, #completedDepContainer {
+#left-column-title, #enter-project-info-label, #show-tree, #species-file-upload, #complete-deployment, #right-column-title, #completedDepContainer, #select-dep-container {
   cursor: pointer;
 }
 
-#left-column-title, #right-column-title, #enter-project-info-label, #show-tree, #complete-deployment, #completedDepContainer {
+#left-column-title, #right-column-title, #enter-project-info-label, #show-tree, #complete-deployment, #completedDepContainer, #select-dep-container {
   padding: 4%;
   font-size: 1.5em;
 }
@@ -214,7 +214,7 @@ padding-bottom: 0;
   float: left;
 }
 
-#project-container, #full-project-info-container, #full-tree-container, #full-project-info-container, #completedDepContainer {
+#project-container, #full-project-info-container, #full-tree-container, #full-project-info-container, #completedDepContainer, #deployment-select-container {
   text-align: center;
   border: 1px solid #222D32;
 }
@@ -277,7 +277,7 @@ section.sidebar .shiny-input-container {
   cursor: pointer;
 }
 
-#projectInfo, #directory, #siteInfo {
+#projectInfo, #directory, #siteInfo, #deployment {
   font-size: 1.15em;
   border: none;
   color: white;
@@ -360,7 +360,7 @@ section.sidebar .shiny-input-container {
   cursor: pointer;
 }
 
-#directorypath {
+#directorypath, #deploymentpath {
   padding: 0px;
   color: #222D32;
   background-color: #222D32;

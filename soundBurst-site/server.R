@@ -80,12 +80,14 @@ shinyServer(function(input, output, session) {
   projectName <<- NULL
   spectroFromTime <<- 0
   siteDF <<- NULL
+  dirPath <<- NULL
 
   shinyjs::onclick("left-column-title", toggleProjectSelect())
   # shinyjs::onclick("species-file-upload", togglecsvFileUploadButton())
   shinyjs::onclick("enter-project-info-label", toggleProjectInfoDisplay())
   shinyjs::onclick("right-column-title", toggleSiteInfoContainer())
   shinyjs::onclick("completedDepContainer", toggleCompletedDeployment())
+  shinyjs::onclick("select-dep-container", toggleDeploymentSelectDisplay())
   # shinyjs::hide("csvFile")
   shinyjs::onclick("show-tree", toggleTree())
   shinyjs::hide("pauseButton")
@@ -109,6 +111,7 @@ shinyServer(function(input, output, session) {
   shinyjs::hide("file-name-warning-container")
   shinyjs::hide("site-info-warning-container")
   shinyjs::hide("aws-upload-button")
+  shinyjs::hide("deployment")
   shinyjs::disable("aws-upload-button")
 
   shinyjs::onclick("sF-selectButton", toggleAfterProjectSelect())
@@ -123,6 +126,12 @@ shinyServer(function(input, output, session) {
     shinyjs::toggle("project-info-container", anim = TRUE)
     shinyjs::toggleClass("enter-project-info-label", "open-accordian")
     shinyjs::toggleClass("enter-project-info-label", "closed-accordian")
+  }
+  
+  toggleDeploymentSelectDisplay = function() {
+    shinyjs::toggle("deployment", anim = TRUE)
+    shinyjs::toggleClass("select-dep-container", "open-accordian")
+    shinyjs::toggleClass("select-dep-container", "closed-accordian")
   }
   
   togglecsvFileUploadButton = function() {
@@ -162,20 +171,37 @@ shinyServer(function(input, output, session) {
     shinyjs::toggle("tree", anim = TRUE)
   }
   
-  test <- shinyDirChoose(input, 'directory', updateFreq=60000, session=session, roots=c(home='~'), restrictions=system.file(package='base'), filetypes=c('', '.wav'))
+  test <- shinyDirChoose(input, 'directory', updateFreq=60000, session=session, root=c(home='~'), restrictions=system.file(package='base'), filetypes=c('', '.wav'))
+  
   output$directorypath <- renderPrint({
     dirPath <<- parseDirPath(roots=c(home='~'), input$directory)
     folders <- list.dirs(dirPath, full.names = F, recursive = TRUE)
-    
-    if(!(is.null(dirPath))) {
+    if(length(dirPath)) {
       shinyjs::show("progressOne")
       create_directory_tree(dirPath)
-      load("www/dir_tree.Rdata")
-      output$tree <- renderTree(tree, quoted = FALSE)
+      # load("www/dir_tree.Rdata")
+      # output$tree <- renderTree(tree, quoted = FALSE)
       shinyjs::addClass("directory", "active-button")
       shinyjs::show("aws-upload-button")
+      deploymentSelect <- shinyDirChoose(input, 'deployment', updateFreq=60000, session=session, root=c(home=normalizePath(dirPath)), restrictions=system.file(package='base'), filetypes=c('', '.wav')) 
     }
-    findFileCount()
+  })
+  
+  output$deploymentpath <- renderPrint({
+    observeEvent(input$deployment, {
+      depPath <<- parseDirPath(root=c(home=normalizePath(dirPath)), input$deployment)
+      if(length(dirPath)) {
+        
+        folders <- list.dirs(depPath, full.names = F, recursive = TRUE)
+        shinyjs::show("progressOne")
+        create_directory_tree(depPath)
+        load("www/dir_tree.Rdata")
+        output$tree <- renderTree(tree, quoted = FALSE)
+        shinyjs::addClass("directory", "active-button")
+        shinyjs::show("aws-upload-button")
+        findFileCount()
+      }
+    })
   })
   
   # Creating onclick event for each play and pause button
@@ -230,7 +256,7 @@ shinyServer(function(input, output, session) {
     else {
       listCompleted <<- list()
       path <- getPath(get_selected(input$tree, "names"))
-      currDir <- paste0(dirPath, "/", path, unlist(get_selected(input$tree)))
+      currDir <- paste0(depPath, "/", path, unlist(get_selected(input$tree)))
       sound <- readWave(currDir)
       l <- length(sound@left)
       sr <- sound@samp.rate
@@ -296,10 +322,10 @@ shinyServer(function(input, output, session) {
   showPreviousSpectroIncrement = function() {
     path <- getPath(get_selected(input$tree, "names"))
     if(!is.null(newName)) {
-      currDir <- paste0(dirPath, "/", path, newName)
+      currDir <- paste0(depPath, "/", path, newName)
     }
     else {
-      currDir <- paste0(dirPath, "/", path, unlist(get_selected(input$tree)))
+      currDir <- paste0(depPath, "/", path, unlist(get_selected(input$tree)))
     }
     sound <- readWave(currDir)
     l <- length(sound@left)
@@ -318,10 +344,10 @@ shinyServer(function(input, output, session) {
   showNextSpectroIncrement = function() {
     path <- getPath(get_selected(input$tree, "names"))
     if(!is.null(newName)) {
-      currDir <- paste0(dirPath, "/", path, newName)
+      currDir <- paste0(depPath, "/", path, newName)
     }
     else {
-      currDir <- paste0(dirPath, "/", path, unlist(get_selected(input$tree)))
+      currDir <- paste0(depPath, "/", path, unlist(get_selected(input$tree)))
     }
     sound <- readWave(currDir)
     l <- length(sound@left)
@@ -360,10 +386,10 @@ shinyServer(function(input, output, session) {
     else {
       path <- getPath(get_selected(input$tree, "names"))
       if(!is.null(newName)) {
-        currDir <- paste0(dirPath, "/", path, newName)
+        currDir <- paste0(depPath, "/", path, newName)
       }
       else {
-        currDir <- paste0(dirPath, "/", path, unlist(get_selected(input$tree)))
+        currDir <- paste0(depPath, "/", path, unlist(get_selected(input$tree)))
       }
       # Use  from = 1, to = 5, units = "seconds" when playing from a certain time
       wave <- readWave(currDir, from = start, to = end, unit = "seconds")
@@ -481,10 +507,10 @@ shinyServer(function(input, output, session) {
   output$spectroZoomClip <- renderPlot({
     path <- getPath(get_selected(input$tree, "names"))         
     if(!is.null(newName)) {
-      currDir <- paste0(dirPath, "/", path, newName)
+      currDir <- paste0(depPath, "/", path, newName)
     }
     else {
-      currDir <- paste0(dirPath, "/", path, unlist(get_selected(input$tree)))
+      currDir <- paste0(depPath, "/", path, unlist(get_selected(input$tree)))
     }
     sound <- readWave(currDir)
     if(!is.null(input$plotZoom$xmax)) {
@@ -508,10 +534,10 @@ shinyServer(function(input, output, session) {
   output$spectroClip <- renderPlot({
     path <- getPath(get_selected(input$tree, "names"))
     if(!is.null(newName)) {
-      currDir <- paste0(dirPath, "/", path, newName)
+      currDir <- paste0(depPath, "/", path, newName)
     }
     else {
-      currDir <- paste0(dirPath, "/", path, unlist(get_selected(input$tree)))
+      currDir <- paste0(depPath, "/", path, unlist(get_selected(input$tree)))
     }
     sound <- readWave(currDir)
     # shinyjs::show("spectro-clip-container")
@@ -565,14 +591,15 @@ shinyServer(function(input, output, session) {
   }
   
   observeEvent(input$siteInfo, {
+    browser()
     # Getting file list
-    files <- list.files(dirPath, all.files=F, recursive=T, include.dirs=T)
+    files <- list.files(depPath, all.files=F, recursive=T, include.dirs=T)
     # fileFullName <- unlist(get_selected(input$tree))
     # fileName <- sub(".wav", "", fileFullName)
     # Getting the file name
     fileFullName <- unlist(get_selected(input$tree))
     # Creating the path with the file name
-    filePathFull <- paste0(dirPath,"/",fileFullName)
+    filePathFull <- paste0(depPath,"/",fileFullName)
     # Getting the site data
     data <- formDataSite()
     # Adding the min and max time variables to the data
@@ -594,7 +621,7 @@ shinyServer(function(input, output, session) {
     newFileName <- paste0(projectName,"_",data[[1]],"_",fileDate)
     # shinyjs::html("right-column-title",newFileName)
     # Creating the new file path
-    newFullFilePath <- paste0(dirPath,"/",newFileName)
+    newFullFilePath <- paste0(depPath,"/",newFileName)
 
     # Checking for file duplicate
     fileNameDuplicate <- 0
@@ -624,7 +651,7 @@ shinyServer(function(input, output, session) {
       # output$tree <- renderTree(tree, quoted = FALSE)
 
       file.rename(filePathFull, paste0(newFullFilePath,".wav"))
-      write.csv(siteDataTable, paste0(dirPath,"/",paste0(newFileName,'.csv')), row.names = FALSE)
+      write.csv(siteDataTable, paste0(depPath,"/",paste0(newFileName,'.csv')), row.names = FALSE)
       if(!is.null(newName)) {
         shinyjs::html("titleHeader",newName)
       }
@@ -667,6 +694,10 @@ shinyServer(function(input, output, session) {
     shinyjs::addClass("enter-project-info-label", "completed-step")
     shinyjs::toggleClass("enter-project-info-label", "open-accordian")
     shinyjs::toggleClass("enter-project-info-label", "closed-accordian")
+    shinyjs::show("deployment", anim = TRUE)
+    shinyjs::addClass("select-dep-container", "open-accordian")
+    shinyjs::removeClass("select-dep-container", "closed-accordian")
+    
     shinyjs::addClass("show-tree", "open-accordian")
     shinyjs::removeClass("show-tree", "closed-accordian")
     shinyjs::show("tree", anim = TRUE)
@@ -698,7 +729,7 @@ shinyServer(function(input, output, session) {
         siteDF <<- rbind(siteDF, dataArray)
       }
       clipCount <<- clipCount + 1
-      write.csv(siteDF, paste0(dirPath,"/",paste0(createCSVFilePath(),'.csv')), row.names = FALSE)
+      write.csv(siteDF, paste0(depPath,"/",paste0(createCSVFilePath(),'.csv')), row.names = FALSE)
       shinyjs::addClass('completedDepContainer', "open-accordian")
       shinyjs::show("listCompleted")
       
@@ -721,7 +752,7 @@ shinyServer(function(input, output, session) {
   findFileCount = function() {
     projectFileCount <- 0
     projectFileCountGlobal <<- 0
-    files <- list.files(dirPath, all.files=F, recursive=T, include.dirs=T)
+    files <- list.files(depPath, all.files=F, recursive=T, include.dirs=T)
     for (i in 1:length(files)) {
       if (substrRight(files[i],4) == ".wav") {
         projectFileCount <- projectFileCount +1
@@ -753,11 +784,11 @@ shinyServer(function(input, output, session) {
   }
   
   findFileInfo = function() {
-    files <- list.files(dirPath, all.files=F, recursive=T, include.dirs=T)
+    files <- list.files(depPath, all.files=F, recursive=T, include.dirs=T)
     filesArray <<- 0
     for (i in 1:length(files)) {
       if (substrRight(files[i],4) == ".wav") {
-        fileName <- paste0(dirPath,"/",files[i])
+        fileName <- paste0(depPath,"/",files[i])
         filesArray <<- c(filesArray, fileName)
       }
     }
