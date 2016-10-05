@@ -113,7 +113,15 @@ dashboardPage(
   dashboardBody(id = "content-id",
     includeCSS("main.css"),
     uiOutput("audiotag"),
-    bsModal(id = "awsModal", title = "Upload to AWS", trigger = "aws-upload-button", uiOutput("awsCredentials")),
+    bsModal(id = "awsModal", title = "Upload to AWS", trigger = "aws-upload-button", 
+            textInput(inputId = "awsAccessKey", label = "Access key", value = NULL, placeholder = "Your AWS access key"),
+            textInput(inputId = "awsSecretKey", label = "Secret key", value = NULL, placeholder = "Your AWS secret key"),
+            textInput(inputId = "awsBucket", label = "AWS bucket", value = NULL, placeholder = "Your AWS bucket"),
+            actionButton("awsUploadModal", "Upload to AWS"),
+            div(id = "awsEmptyFieldsContainer",
+                div(id = "awsEmptyFields", "All fields must be filled!")
+            )
+      ),
     bsModal(id = "warningBucket", trigger = "", title = "Error", uiOutput("warningBucket")),
     div(id = "playButton"),
     div(id = "pauseButton"),

@@ -835,26 +835,16 @@ shinyServer(function(input, output, session) {
   ################################
   ######## Modal UI
   ################################
-  output$awsCredentials <- renderUI({
-    tagList(
-      textInput(inputId = "awsAccessKey", label = "Access key", value = NULL, placeholder = "Your AWS access key"),
-      textInput(inputId = "awsSecretKey", label = "Secret key", value = NULL, placeholder = "Your AWS secret key"),
-      textInput(inputId = "awsBucket", label = "AWS bucket", value = NULL, placeholder = "Your AWS bucket"),
-      actionButton("awsUploadModal", "Upload to AWS"),
-      div(id = "awsEmptyFieldsContainer",
-          div(id = "awsEmptyFields", "All fields must be filled!")
-      )
-    )
-  })
 
   observeEvent(input$awsUploadModal, {
     awsAccessKey <- input$awsAccessKey
     awsSecretKey <- input$awsSecretKey
     awsBucket <- input$awsBucket
-    if(length(awsBucket) || length(awsSecretKey) || length(awsAccessKey)) {
+    if(awsBucket == "" || awsSecretKey == "" || awsAccessKey == "" ) {
       shinyjs::show("awsEmptyFieldsContainer")
     }
     else {
+      shinyjs::hide("awsEmptyFieldsContainer")
       Sys.setenv("AWS_ACCESS_KEY_ID" = input$awsAccessKey, "AWS_SECRET_ACCESS_KEY" = input$awsSecretKey)
       if(bucket_exists(awsBucket)) {
         # Copy files to temp folder for zipping
