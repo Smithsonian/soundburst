@@ -7,11 +7,24 @@ library(shinydashboard)
 library(shinyTree)
 library(shinyjs)
 library(shinyFiles)
+library(shinyBS)
 # source("customHeader.r")
 
 # species <- read.csv("www/species-short.csv", header = TRUE)
 # itemsSpecies <<- c('Select Type',as.character(species$CommonName))
 # speciesType <<- c('Select Type',as.character(species$Type))
+
+jscode <- "
+  shinyjs.addClickListener = function(params) {
+    var defaultParams = {
+      id : null
+    };
+    params = shinyjs.getParams(params, defaultParams);
+    $('#params.id').click(function() {
+      $('#spectrogram_brush').clone(true).prop('id', count + 1).prop('class', 'completedBrush').css({'background-color':'green'}).appendTo('#spectrogram')
+    });
+  }
+"
 
 dashboardPage(
   dashboardHeader(title = "SoundBurst App"),
@@ -25,18 +38,18 @@ dashboardPage(
       div(id = "aws-upload-container",
           actionButton("aws-upload-button", class="inactive-aws-button", "Upload to AWS")),
       div(id = "project-container",
-          div(id = "left-column-title", class = "open-accordian unfinished-step", "Select a Project"),
+          div(id = "left-column-title", class = "open-accordian unfinished-step", "Select Project"),
           shinyDirButton('directory', class = 'inactive-button', 'Folder select', 'Please select a folder')
           ),
       useShinyjs(),
-      div(id = "full-project-info-container", 
+      div(id = "full-project-info-container",
           div(id = "enter-project-info-label", class = "closed-accordian unfinished-step", "Enter Project Info"),
           div(id = "project-info-container",
               div(id = "species-select-file-container",
                   div(id = "species-file-upload", "Load New Species CSV?"),
                   shinyFilesButton('csvFile', 'File select', 'Please select a file', FALSE)
-              ), 
-              textInput("projectName", " Name:", placeholder = "Project Name"),
+              ),
+              textInput("projectName", " Name:"),
               HTML('<label>Project Notes:</label>'),
               HTML('<textarea id="projectNotes" rows="3" cols="40" placeholder = "Project Notes"></textarea>'),
               # textInput("projectNotes", "Project Notes:", "Project Notes"),
@@ -51,7 +64,7 @@ dashboardPage(
           div(id = "right-column-title", class = "closed-accordian unfinished-step", "Enter Deployment Info"),
           div(id = "species-sidebox-container",
               div(id = "species-sidebox",
-                  div(id = "site-info-container", 
+                  div(id = "site-info-container",
                       textInput("name", "Name:", placeholder = "Name"),
                       textInput("lat", "Lat:", placeholder = "Latitude"),
                       textInput("lon", "Lon:", placeholder = "Longitude"),
@@ -68,7 +81,7 @@ dashboardPage(
                       ),
                       actionButton("siteInfo", class = "inactive-button", "Submit")
                   )
-                  # div(id = "submit-site-complete-container", 
+                  # div(id = "submit-site-complete-container",
                   #     div(id = "submit-site-text", "When you have submited data for all clips on a given site, click below and move on to the next"),
                   #     div(id = "submit-site-complete", "Finish Site"))
               ))
@@ -86,10 +99,10 @@ dashboardPage(
           )
           ),
       div(id = "completed-container",
-          div(id = "completedDepContainer", class = "closed-accordian unfinished-step", "Completed annotations"),
+          div(id = "completedDepContainer", class = "closed-accordian unfinished-step", "View Annotations"),
           div(id = "listCompleted")
       ),
-      div(id = "complete-deployment", "Complete Deployment"),
+      # div(id = "complete-deployment", "Complete Deployment"),
       verbatimTextOutput('directorypath'),
       verbatimTextOutput('deploymentpath')
     )
@@ -97,6 +110,8 @@ dashboardPage(
   dashboardBody(id = "content-id",
     includeCSS("main.css"),
     uiOutput("audiotag"),
+    bsModal(id = "awsModal", title = "Upload to AWS", trigger = "aws-upload-button", uiOutput("awsCredentials")),
+    bsModal(id = "warningBucket", trigger = "", title = "Error", uiOutput("warningBucket")),
     div(id = "playButton"),
     div(id = "pauseButton"),
     div(id = "mainPlotContainer",
