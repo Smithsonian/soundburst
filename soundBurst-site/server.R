@@ -114,6 +114,7 @@ shinyServer(function(input, output, session) {
   shinyjs::hide(id = "playButtonClipZoom", anim = FALSE)
   shinyjs::hide("file-name-warning-container")
   shinyjs::hide("site-info-warning-container")
+  shinyjs::hide("awsEmptyFieldsContainer")
   shinyjs::hide("aws-upload-button")
   shinyjs::disable("aws-upload-button")
 
@@ -777,10 +778,13 @@ shinyServer(function(input, output, session) {
   ################################
   output$awsCredentials <- renderUI({
     tagList(
-      textInput(inputId = "awsAccessKey", label = "Access key", value = "Your AWS access key"),
-      textInput(inputId = "awsSecretKey", label = "Secret key", value = "Your AWS secret key"),
-      textInput(inputId = "awsBucket", label = "AWS bucket", value = "Your AWS bucket"),
-      actionButton("awsUploadModal", "Upload to AWS")
+      textInput(inputId = "awsAccessKey", label = "Access key", value = NULL, placeholder = "Your AWS access key"),
+      textInput(inputId = "awsSecretKey", label = "Secret key", value = NULL, placeholder = "Your AWS secret key"),
+      textInput(inputId = "awsBucket", label = "AWS bucket", value = NULL, placeholder = "Your AWS bucket"),
+      actionButton("awsUploadModal", "Upload to AWS"),
+      div(id = "awsEmptyFieldsContainer",
+          div(id = "awsEmptyFields", "All fields must be filled!")
+      )
     )
   })
   
@@ -788,30 +792,35 @@ shinyServer(function(input, output, session) {
     awsAccessKey <- input$awsAccessKey
     awsSecretKey <- input$awsSecretKey
     awsBucket <- input$awsBucket
-    Sys.setenv("AWS_ACCESS_KEY_ID" = "AKIAJVTBYKWQCWEZZ77A", "AWS_SECRET_ACCESS_KEY" = "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")
-    if(bucket_exists(awsBucket)) {
-      # Copy files to temp folder for zipping
-      tempDir <- tempdir()
-      csvDir <- paste0(tempDir, "/deployment")
-      wavDir <- paste0(tempDir, "/project")
-      dir.create(csvDir)
-      dir.create(wavDir)
-      file.copy(annotationListCsv, csvDir)
-      file.copy(annotationListWav, wavDir)
-      dirToZip <- c(csvDir, wavDir)
-      # Zip folder
-      zip(normalizePath(paste0(dirPath, "/test.zip")), dirToZip)
-      # Upload to AWS
-      put_object(file = normalizePath(paste0(dirPath, "/test.zip")), bucket = awsBucket)
-      # Resetting annotationListWav to 0
-      annotationListWav <<- vector();
-      annotationListCsv <<- vector();
-    } else {
-      output$warningBucket <- renderUI({
-        tagList(
-          HTML("Error: The bucket that you have entered does not exist. Please select another bucket or create one.")
-        )
-      })
+    if(length(awsBucket) || length(awsSecretKey) || length(awsAccessKey)) {
+      shinyjs::show("awsEmptyFieldsContainer")
+    }
+    else {
+      Sys.setenv("AWS_ACCESS_KEY_ID" = input$awsAccessKey, "AWS_SECRET_ACCESS_KEY" = input$awsSecretKey)
+      if(bucket_exists(awsBucket)) {
+        # Copy files to temp folder for zipping
+        tempDir <- tempdir()
+        csvDir <- paste0(tempDir, "/deployment")
+        wavDir <- paste0(tempDir, "/project")
+        dir.create(csvDir)
+        dir.create(wavDir)
+        file.copy(annotationListCsv, csvDir)
+        file.copy(annotationListWav, wavDir)
+        dirToZip <- c(csvDir, wavDir)
+        # Zip folder
+        zip(normalizePath(paste0(dirPath, "/test.zip")), dirToZip)
+        # Upload to AWS
+        put_object(file = normalizePath(paste0(dirPath, "/test.zip")), bucket = awsBucket)
+        # Resetting annotationListWav to 0
+        annotationListWav <<- vector();
+        annotationListCsv <<- vector();
+      } else {
+        output$warningBucket <- renderUI({
+          tagList(
+            HTML("Error: The bucket that you have entered does not exist. Please select another bucket or create one.")
+          )
+        })
+      }
     }
   })
   
