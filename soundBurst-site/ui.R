@@ -76,7 +76,7 @@ dashboardPage(
                          textInput("name", "Name:", placeholder = "Name"),
                          textInput("lat", "Lat:", placeholder = "Latitude"),
                          textInput("lon", "Lon:", placeholder = "Longitude"),
-                         textInput("recId", "RecId:", placeholder = "RecId"),
+                         textInput("recId", "Record ID:", placeholder = "Record ID"),
                          HTML('<label>Site Notes:</label>'),
                          HTML('<textarea id="siteNotes" rows="3" cols="40" placeholder="Enter Site Notes.."></textarea>'),
                          HTML('<label>Start date/time: </label>'),
