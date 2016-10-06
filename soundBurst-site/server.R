@@ -224,7 +224,7 @@ shinyServer(function(input, output, session) {
     projectName <<- gsub("^.*\\/", "", dirPath)
     # Updating the value of the project name input value
     updateTextInput(session, inputId = "projectName", label = NULL, value = projectName)
-    folders <- list.dirs(dirPath, full.names = F, recursive = TRUE)
+    # folders <- list.dirs(dirPath, full.names = F, recursive = TRUE)
     if(length(dirPath)) {
       shinyjs::show("progressOne")
       create_directory_tree(dirPath)
@@ -241,7 +241,7 @@ shinyServer(function(input, output, session) {
       depPath <<- parseDirPath(root=c(home=normalizePath(dirPath)), input$deployment)
       if(length(dirPath)) {
 
-        folders <- list.dirs(depPath, full.names = F, recursive = TRUE)
+        # folders <- list.dirs(depPath, full.names = F, recursive = TRUE)
         shinyjs::show("progressOne")
         create_directory_tree(depPath)
         load("www/dir_tree.Rdata")
