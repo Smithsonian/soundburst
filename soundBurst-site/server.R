@@ -564,34 +564,34 @@ shinyServer(function(input, output, session) {
   output$filetable <- renderTable({
     species()
   })
-
-  # This creates the oscillo clips after brush
-  output$spectroZoomClip <- renderPlot({
-    path <- getPath(get_selected(input$tree, "names"))
-    if(!is.null(newName)) {
-      currDir <- paste0(depPath, "/", path, newName)
-    }
-    else {
-      currDir <- paste0(depPath, "/", path, unlist(get_selected(input$tree)))
-    }
-    sound <- readWave(currDir)
-    if(!is.null(input$plotZoom$xmax)) {
-
-      spectro(sound, scale = FALSE, osc = FALSE, tlim = c(input$plotZoom$xmin,input$plotZoom$xmax), flim = c(input$plotZoom$ymin,input$plotZoom$ymax))
-
-      # Min and max values for the spectropClipZoom
-      xminZoom <<- input$plotZoom$xmin
-      xmaxZoom <<- input$plotZoom$xmax
-
-      # Min and max values for the spectroClip, not the spectroClipZoom
-      xmin <- input$plot_brush$xmin
-      xmax <- input$plot_brush$xmax
-      # shinyjs::html('remove',tags$div(class = "close-clip", "hello There"))
-      shinyjs::onclick("spectroClip",showSpeciesDropdown(xmin, xmax))
-      shinyjs::show("playButtonClipZoom",anim = FALSE)
-    }
-  })
-
+# 
+#   # This creates the oscillo clips after brush
+#   output$spectroZoomClip <- renderPlot({
+#     path <- getPath(get_selected(input$tree, "names"))
+#     if(!is.null(newName)) {
+#       currDir <- paste0(depPath, "/", path, newName)
+#     }
+#     else {
+#       currDir <- paste0(depPath, "/", path, unlist(get_selected(input$tree)))
+#     }
+#     sound <- readWave(currDir)
+#     if(!is.null(input$plotZoom$xmax)) {
+# 
+#       spectro(sound, scale = FALSE, osc = FALSE, tlim = c(input$plotZoom$xmin,input$plotZoom$xmax), flim = c(input$plotZoom$ymin,input$plotZoom$ymax))
+# 
+#       # Min and max values for the spectropClipZoom
+#       xminZoom <<- input$plotZoom$xmin
+#       xmaxZoom <<- input$plotZoom$xmax
+# 
+#       # Min and max values for the spectroClip, not the spectroClipZoom
+#       xmin <- input$plot_brush$xmin
+#       xmax <- input$plot_brush$xmax
+#       # shinyjs::html('remove',tags$div(class = "close-clip", "hello There"))
+#       shinyjs::onclick("spectroClip",showSpeciesDropdown(xmin, xmax))
+#       shinyjs::show("playButtonClipZoom",anim = FALSE)
+#     }
+#   })
+# 
   # This creates the oscillo clips after brush
   output$spectroClip <- renderPlot({
     path <- getPath(get_selected(input$tree, "names"))

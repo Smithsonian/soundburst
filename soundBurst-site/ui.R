@@ -140,16 +140,16 @@ dashboardPage(
     ),
     useShinyjs(),
     fluidRow(
-      column(width = 4, id = "oscillo-clip-container",
+      column(width = 8, id = "oscillo-clip-container",
         div(id = "playButtonClip"),
         div(id = "pauseButtonClip"),
         plotOutput("spectroClip", brush = brushOpts(id = "plotZoom", direction = "xy", delay = 500, opacity = 0.45, stroke = "#FFD265", fill="#EEEE00"))
       ),
-      column(width = 4, id = "spectro-clip-container",
-        div(id = "playButtonClipZoom"),
-        div(id = "pauseButtonClipZoom"),
-        plotOutput("spectroZoomClip")
-      ),
+      # column(width = 4, id = "spectro-clip-container",
+      #   div(id = "playButtonClipZoom"),
+      #   div(id = "pauseButtonClipZoom"),
+      #   plotOutput("spectroZoomClip")
+      # ),
       column(width = 4, id = "clipInfo-container",
              div(id = "site-info-warning-container",
                  div(id = "site-info-warning", "Attention: Please ensure you have submitted information for this Deployment on the left prior to submitting annotation information")
