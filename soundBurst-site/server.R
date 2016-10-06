@@ -830,14 +830,14 @@ shinyServer(function(input, output, session) {
         shinyjs::show("listCompleted")
         
         # Creating the element that will old the name of the completed annotation
-        listEl <- as.character(paste0(tags$div(class="annotations",id=paste0("clip", clipCount), tags$span(paste0(dataSet[[4]], " at " , dataSet[[1]])),tags$div(class='removeAnn', id=paste0("clipRemove", clipCount)))))
+        listEl <- as.character(paste0(tags$div(class="annotations",id=paste0("clip", clipCount), tags$span(paste0(dataSet[[4]], " at " , dataSet[[1]])))))
         # Storing the element in a list that gets reset every time a new deployment is selected
         listCompleted <<- c(listCompleted, listEl)
         # Converting that list to a tagList
         finalCompleted <- tagList(listCompleted)
         # Display the list of tag in the UI
         shinyjs::html('listCompleted', finalCompleted)
-        shinyjs::onclick(paste0("clipRemove", clipCount), removeAnnotationFromCSV(clipCount), add = TRUE)
+        # shinyjs::onclick(paste0("clipRemove", clipCount), removeAnnotationFromCSV(clipCount), add = TRUE)
         # tags$head(tags$script(src="removeAnnotation.js"))
       }
     }
