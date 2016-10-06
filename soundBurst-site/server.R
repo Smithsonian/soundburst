@@ -125,9 +125,20 @@ shinyServer(function(input, output, session) {
   shinyjs::hide("recid-name-warning")
   shinyjs::hide("type-name-warning")
   shinyjs::hide("species-name-warning")
+  shinyjs::hide("csv-info-modal-container")
+  shinyjs::onevent('mouseenter', "csvFile", showCSVModal())
+  shinyjs::onevent('mouseleave', "csvFile", hideCSVModal())
 
   shinyjs::onclick("sF-selectButton", toggleAfterProjectSelect())
 
+  showCSVModal = function() {
+    shinyjs::show("csv-info-modal-container")
+  }
+  
+  hideCSVModal = function() {
+    shinyjs::hide("csv-info-modal-container")
+  }
+  
   toggleProjectSelect = function() {
     shinyjs::toggle("directory", anim = TRUE)
     shinyjs::toggleClass("left-column-title", "open-accordian")

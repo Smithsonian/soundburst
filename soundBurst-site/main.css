@@ -423,3 +423,8 @@ textarea {
 #file-name-warning {
   color: #d62d34;
 }
+
+#csv-info-modal-container {
+  text-align: left;
+  float: left
+}

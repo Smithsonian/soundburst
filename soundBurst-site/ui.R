@@ -45,9 +45,13 @@ dashboardPage(
       div(id = "full-project-info-container",
           div(id = "enter-project-info-label", class = "closed-accordian unfinished-step", "Enter Project Info"),
           div(id = "project-info-container",
+              div(id = "species-file-upload", "Load New Species CSV?"),
+              shinyFilesButton('csvFile', 'File select', 'Please select a file', FALSE),
               div(id = "species-select-file-container",
-                  div(id = "species-file-upload", "Load New Species CSV?"),
-                  shinyFilesButton('csvFile', 'File select', 'Please select a file', FALSE)
+                  div(id = "csv-info-modal-container",
+                    div(id = "csv-info-modal", "A CSV with a list of Species has already been loaded. However, you may upload a new CSV, as long as it is in the following format"),
+                    div(id = "csv-layout-guide", "A column must be included that contains the TYPE of animal. This columnd must be called 'Type'. Another column must include the specific SPECIES. This column must be titled 'CommonName'.")
+                  )
               ),
               div(id = "proj-name-warning", "Attention: Please make sure this field is filled out."),
               textInput("projectName", " Name*"),
