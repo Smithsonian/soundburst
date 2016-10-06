@@ -809,7 +809,7 @@ shinyServer(function(input, output, session) {
         shinyjs::show("type-name-warning")
       } else {
         if (clipCount == 0) {
-          dataArray <- c(fileFullName,clipCount,dataSet[[1]],dataSet[[2]], durationSmall, dataSet[[3]],dataSet[[4]],dataSet[[5]])
+          dataArray <- c(fileFullName,clipCount,dataSet[[1]],dataSet[[2]], durationSmall, dataSet[[4]],dataSet[[3]],dataSet[[5]])
           dataMatrix <- matrix(dataArray,ncol = 8, byrow = TRUE)
           colnames(dataMatrix) <- c("File Name", "Annotation#","Time Min (s)", "Time Max (s)", "Duration", "Type", "Species", "Annotation Notes")
           dataTable <- as.table(dataMatrix)
