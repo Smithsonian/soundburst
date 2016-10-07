@@ -23,13 +23,20 @@ library(shinyBS)
 library(audio)
 setWavPlayer("afplay")
 library(sound)
+library(V8)
 source("createDirectoryTree.r")
 source("playSound.r")
 
+# Initializing V8 for javascript interaction
+ctx <- V8::v8()
+# ctx$console()
+
+# Some global variables
 clipCount <<- 0
 newName <- NULL
 annotationListWav <<- vector()
 annotationListCsv <<- vector()
+annotationListCsvProject <<- vector()
 
 # This is used to connect correctly with AWS
 set_config( config( ssl_verifypeer = 0L ) )
@@ -309,7 +316,7 @@ shinyServer(function(input, output, session) {
     }
     else {
       # Saving project information
-      annotationListCsv <<- c(annotationListCsv, normalizePath(paste0(dirPath,"/", file_path_sans_ext(unlist(get_selected(input$tree)))),'.csv'))
+      # annotationListCsv <<- c(annotationListCsv, normalizePath(paste0(dirPath,"/", file_path_sans_ext(unlist(get_selected(input$tree)))),'.csv'))
       # Resetting listCompleted
       listCompleted <<- list()
       # Root path of the selected file
@@ -776,6 +783,7 @@ shinyServer(function(input, output, session) {
       print(data)
       projectName <<- data[[1]]
       write.csv(projectData, paste0(dirPath,"/",paste0('Project_', projectName,'.csv')), row.names = FALSE)
+      annotationListCsvProject <<- c(annotationListCsv, normalizePath(paste0(dirPath,"/",paste0('Project_', projectName,'.csv'))))
       shinyjs::hide("directory", anim = TRUE)
       shinyjs::addClass("projectInfo", "active-button")
       shinyjs::hide("project-info-container", anim = TRUE)
@@ -862,15 +870,25 @@ shinyServer(function(input, output, session) {
       if(bucket_exists(awsBucket)) {
         # Copy files to temp folder for zipping
         tempDir <- tempdir()
-        csvDir <- paste0(tempDir, "/deployment")
-        wavDir <- paste0(tempDir, "/project")
+        csvDir <- paste0(tempDir, "/project")
+        wavDir <- paste0(csvDir, "/deployment")
+        if(dir.exists(csvDir)) {
+          unlink(csvDir, recursive = TRUE)
+        }
         dir.create(csvDir)
         dir.create(wavDir)
-        file.copy(annotationListCsv, csvDir)
+        file.copy(annotationListCsv, wavDir)
+        file.copy(annotationListCsvProject, csvDir)
         file.copy(annotationListWav, wavDir)
-        dirToZip <- c(csvDir, wavDir)
+        dirToZip <- csvDir
         # Zip folder
-        zip(normalizePath(paste0(dirPath, "/test.zip")), dirToZip)
+        oldwd <- getwd()
+        setwd(tempDir)
+        zipName <- sub('_([^_]*)$', '', newFileName)
+        currDate <- format(Sys.time(), "%Y%m%d")
+        fullZipName <- paste0("/", zipName, "_", currDate)
+        zip(normalizePath(paste0(dirPath, fullZipName, ".zip")), "project/")
+        setwd(oldwd)
         # Upload to AWS
         put_object(file = normalizePath(paste0(dirPath, "/test.zip")), bucket = awsBucket)
         # Resetting annotationListWav to 0
@@ -886,7 +904,7 @@ shinyServer(function(input, output, session) {
     }
   })
 
-  removeAnnotationFromCSV <- function(clipCounts) {
+  removeAnnotationFromCSV <- function(annotationNumber) {
     browser()
   }
 
