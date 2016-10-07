@@ -365,6 +365,7 @@ shinyServer(function(input, output, session) {
       anottationCount <<- 0
       spectro(sound, osc = TRUE, scale = FALSE, tlim = c(spectroFromTime,spectroToTime))
       shinyjs::show("complete-deployment")
+      browser()
       # shinyjs::onclick("complete-deployment", increaseStatusBar())
       # spectroFromTime <<- spectroToTime
     })
@@ -815,8 +816,9 @@ shinyServer(function(input, output, session) {
           dataTable <- as.table(dataMatrix)
           siteDF <<- cbind(siteDF, dataTable)
         } else {
-          dataArray <- c(siteDF[1],siteDF[2],siteDF[3],siteDF[4],siteDF[5],siteDF[6],siteDF[7],siteDF[8],fileFullName, clipCount,dataSet[[1]],dataSet[[2]],durationSmall, dataSet[[3]],dataSet[[4]],dataSet[[5]])
+          dataArray <- c(siteDF[1,1],siteDF[1,2],siteDF[1,3],siteDF[1,4],siteDF[1,5],siteDF[1,6],siteDF[1,7],siteDF[1,8],fileFullName, clipCount,dataSet[[1]],dataSet[[2]],durationSmall, dataSet[[3]],dataSet[[4]],dataSet[[5]])
           siteDF <<- rbind(siteDF, dataArray)
+          browser()
         }
         increaseStatusBar()
         clipCount <<- clipCount + 1
