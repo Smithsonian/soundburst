@@ -23,12 +23,12 @@ library(shinyBS)
 library(audio)
 setWavPlayer("afplay")
 library(sound)
-library(V8)
+# library(V8)
 source("createDirectoryTree.r")
 source("playSound.r")
 
 # Initializing V8 for javascript interaction
-ctx <- V8::v8()
+# ctx <- V8::v8()
 # ctx$console()
 
 # Some global variables
@@ -336,6 +336,8 @@ shinyServer(function(input, output, session) {
       soundDuration <- round(l/sr,2)
       # TODO Maybe make a function out of this? Might make the code cleaner
       if (soundDuration > 59) {
+        minuteDuration <- round(soundDuration/60)
+        shinyjs::html("time-box-label", paste0("This file is ", minuteDuration, " minutes long. Would you like to increment the display?"))
         shinyjs::show("time-box-container", anim = TRUE)
           observeEvent(input$spectroTimeSubmit, {
           incrementAmount <<- (soundDuration / as.numeric(input$spectroEndTime))
@@ -840,7 +842,7 @@ shinyServer(function(input, output, session) {
         shinyjs::show("listCompleted")
         
         # Creating the element that will old the name of the completed annotation
-        listEl <- as.character(paste0(tags$div(class="annotations",id=paste0("clip", clipCount), tags$span(paste0(dataSet[[4]], " at " , dataSet[[1]])))))
+        listEl <- as.character(paste0(tags$div(class="annotations",id=paste0("clip", clipCount), tags$span(paste0(dataSet[[3]], " at " , dataSet[[1]])))))
         # Storing the element in a list that gets reset every time a new deployment is selected
         listCompleted <<- c(listCompleted, listEl)
         # Converting that list to a tagList
