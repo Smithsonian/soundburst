@@ -1,0 +1,6 @@
+console.r.eval('sessionInfo()')
+var out = console.r.call('removeAnnotationFromCSV', {annotationNumber: annotationNumber});
+var out = console.r.call('removeAnnotationFromCSV', {annotationNumber: 1});
+var out = console.r.call('removeAnnotationFromCSV()', {annotationNumber: 1});
+var t = 0
+t

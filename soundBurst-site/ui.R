@@ -161,6 +161,7 @@ dashboardPage(
              actionButton("speciesDropSubmit", "Submit")
       )
   ),
-  tags$head(tags$script(src="multiClip.js"))
+  tags$head(tags$script(src="multiClip.js")),
+  tags$head(tags$script(src="libraries/opencpu-0.5.js"))
 )
 )
