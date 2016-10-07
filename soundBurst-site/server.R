@@ -132,9 +132,20 @@ shinyServer(function(input, output, session) {
   shinyjs::hide("recid-name-warning")
   shinyjs::hide("type-name-warning")
   shinyjs::hide("species-name-warning")
+  shinyjs::hide("csv-info-modal-container")
+  shinyjs::onevent('mouseenter', "csvFile", showCSVModal())
+  shinyjs::onevent('mouseleave', "csvFile", hideCSVModal())
 
   shinyjs::onclick("sF-selectButton", toggleAfterProjectSelect())
 
+  showCSVModal = function() {
+    shinyjs::show("csv-info-modal-container")
+  }
+  
+  hideCSVModal = function() {
+    shinyjs::hide("csv-info-modal-container")
+  }
+  
   toggleProjectSelect = function() {
     shinyjs::toggle("directory", anim = TRUE)
     shinyjs::toggleClass("left-column-title", "open-accordian")
@@ -220,7 +231,7 @@ shinyServer(function(input, output, session) {
     projectName <<- gsub("^.*\\/", "", dirPath)
     # Updating the value of the project name input value
     updateTextInput(session, inputId = "projectName", label = NULL, value = projectName)
-    folders <- list.dirs(dirPath, full.names = F, recursive = TRUE)
+    # folders <- list.dirs(dirPath, full.names = F, recursive = TRUE)
     if(length(dirPath)) {
       shinyjs::show("progressOne")
       create_directory_tree(dirPath)
@@ -237,7 +248,7 @@ shinyServer(function(input, output, session) {
       depPath <<- parseDirPath(root=c(home=normalizePath(dirPath)), input$deployment)
       if(length(dirPath)) {
 
-        folders <- list.dirs(depPath, full.names = F, recursive = TRUE)
+        # folders <- list.dirs(depPath, full.names = F, recursive = TRUE)
         shinyjs::show("progressOne")
         create_directory_tree(depPath)
         load("www/dir_tree.Rdata")
@@ -560,34 +571,34 @@ shinyServer(function(input, output, session) {
   output$filetable <- renderTable({
     species()
   })
-
-  # This creates the oscillo clips after brush
-  output$spectroZoomClip <- renderPlot({
-    path <- getPath(get_selected(input$tree, "names"))
-    if(!is.null(newName)) {
-      currDir <- paste0(depPath, "/", path, newName)
-    }
-    else {
-      currDir <- paste0(depPath, "/", path, unlist(get_selected(input$tree)))
-    }
-    sound <- readWave(currDir)
-    if(!is.null(input$plotZoom$xmax)) {
-
-      spectro(sound, scale = FALSE, osc = FALSE, tlim = c(input$plotZoom$xmin,input$plotZoom$xmax), flim = c(input$plotZoom$ymin,input$plotZoom$ymax))
-
-      # Min and max values for the spectropClipZoom
-      xminZoom <<- input$plotZoom$xmin
-      xmaxZoom <<- input$plotZoom$xmax
-
-      # Min and max values for the spectroClip, not the spectroClipZoom
-      xmin <- input$plot_brush$xmin
-      xmax <- input$plot_brush$xmax
-      # shinyjs::html('remove',tags$div(class = "close-clip", "hello There"))
-      shinyjs::onclick("spectroClip",showSpeciesDropdown(xmin, xmax))
-      shinyjs::show("playButtonClipZoom",anim = FALSE)
-    }
-  })
-
+# 
+#   # This creates the oscillo clips after brush
+#   output$spectroZoomClip <- renderPlot({
+#     path <- getPath(get_selected(input$tree, "names"))
+#     if(!is.null(newName)) {
+#       currDir <- paste0(depPath, "/", path, newName)
+#     }
+#     else {
+#       currDir <- paste0(depPath, "/", path, unlist(get_selected(input$tree)))
+#     }
+#     sound <- readWave(currDir)
+#     if(!is.null(input$plotZoom$xmax)) {
+# 
+#       spectro(sound, scale = FALSE, osc = FALSE, tlim = c(input$plotZoom$xmin,input$plotZoom$xmax), flim = c(input$plotZoom$ymin,input$plotZoom$ymax))
+# 
+#       # Min and max values for the spectropClipZoom
+#       xminZoom <<- input$plotZoom$xmin
+#       xmaxZoom <<- input$plotZoom$xmax
+# 
+#       # Min and max values for the spectroClip, not the spectroClipZoom
+#       xmin <- input$plot_brush$xmin
+#       xmax <- input$plot_brush$xmax
+#       # shinyjs::html('remove',tags$div(class = "close-clip", "hello There"))
+#       shinyjs::onclick("spectroClip",showSpeciesDropdown(xmin, xmax))
+#       shinyjs::show("playButtonClipZoom",anim = FALSE)
+#     }
+#   })
+# 
   # This creates the oscillo clips after brush
   output$spectroClip <- renderPlot({
     path <- getPath(get_selected(input$tree, "names"))
@@ -806,7 +817,7 @@ shinyServer(function(input, output, session) {
         shinyjs::show("type-name-warning")
       } else {
         if (clipCount == 0) {
-          dataArray <- c(fileFullName,clipCount,dataSet[[1]],dataSet[[2]], durationSmall, dataSet[[3]],dataSet[[4]],dataSet[[5]])
+          dataArray <- c(fileFullName,clipCount,dataSet[[1]],dataSet[[2]], durationSmall, dataSet[[4]],dataSet[[3]],dataSet[[5]])
           dataMatrix <- matrix(dataArray,ncol = 8, byrow = TRUE)
           colnames(dataMatrix) <- c("File Name", "Annotation#","Time Min (s)", "Time Max (s)", "Duration", "Type", "Species", "Annotation Notes")
           dataTable <- as.table(dataMatrix)
@@ -827,7 +838,7 @@ shinyServer(function(input, output, session) {
         shinyjs::show("listCompleted")
         
         # Creating the element that will old the name of the completed annotation
-        listEl <- as.character(paste0(tags$div(class="annotations",id=paste0("clip", clipCount), tags$span(paste0(dataSet[[4]], " at " , dataSet[[1]])),tags$div(class='removeAnn', id=paste0("clipRemove", clipCount)))))
+        listEl <- as.character(paste0(tags$div(class="annotations",id=paste0("clip", clipCount), tags$span(paste0(dataSet[[4]], " at " , dataSet[[1]])))))
         # Storing the element in a list that gets reset every time a new deployment is selected
         listCompleted <<- c(listCompleted, listEl)
         # Converting that list to a tagList

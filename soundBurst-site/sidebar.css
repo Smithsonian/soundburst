@@ -11,12 +11,12 @@
   overflow: scroll !important;
 }
 
-.removeAnn:before {
+/*.removeAnn:before {
   font-family: 'FontAwesome';
   content:"\f00d";
-  padding:0 5px 0 15px;   
+  padding:0 5px 0 15px;
   display: inline;
-}
+}*/
 
 .removeAnn {
   display: inline-block;
