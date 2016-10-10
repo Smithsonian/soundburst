@@ -125,6 +125,7 @@ shinyServer(function(input, output, session) {
   shinyjs::hide("site-info-warning-container")
   shinyjs::hide("awsEmptyFieldsContainer")
   shinyjs::hide("aws-upload-button")
+  shinyjs::onclick("aws-upload-button", resetAwsCount())
   shinyjs::hide("deployment")
   shinyjs::disable("aws-upload-button")
   shinyjs::hide("proj-name-warning")
@@ -374,7 +375,7 @@ shinyServer(function(input, output, session) {
       anottationCount <<- 0
       spectro(sound, osc = TRUE, scale = FALSE, tlim = c(spectroFromTime,spectroToTime))
       shinyjs::show("complete-deployment")
-      browser()
+      
       # shinyjs::onclick("complete-deployment", increaseStatusBar())
       # spectroFromTime <<- spectroToTime
     })
@@ -851,6 +852,14 @@ shinyServer(function(input, output, session) {
         shinyjs::html('listCompleted', finalCompleted)
         # shinyjs::onclick(paste0("clipRemove", clipCount), removeAnnotationFromCSV(clipCount), add = TRUE)
         # tags$head(tags$script(src="removeAnnotation.js"))
+        
+        # Create some REACTIVE VALUES
+        awsProgressValue <<- reactiveValues()
+        awsProgressValue$one <<- 0
+        # Creating the progress bar for AWS upload
+        output$awsProgress <- renderUI({
+          progressGroup(text = "Status",    value = awsProgressValue$one,   min = 0, max = 3, color = "green")
+        })
       }
     }
   })
@@ -882,6 +891,7 @@ shinyServer(function(input, output, session) {
         file.copy(annotationListCsv, wavDir)
         file.copy(annotationListCsvProject, csvDir)
         file.copy(annotationListWav, wavDir)
+        incrementAwsCount()
         dirToZip <- csvDir
         # Zip folder
         oldwd <- getwd()
@@ -890,9 +900,18 @@ shinyServer(function(input, output, session) {
         currDate <- format(Sys.time(), "%Y%m%d")
         fullZipName <- paste0("/", zipName, "_", currDate)
         zip(normalizePath(paste0(dirPath, fullZipName, ".zip")), "project/")
+        incrementAwsCount()
         setwd(oldwd)
         # Upload to AWS
-        put_object(file = normalizePath(paste0(dirPath, "/test.zip")), bucket = awsBucket)
+        awsUpload <- put_object(file = normalizePath(paste0(dirPath, fullZipName, ".zip")), bucket = awsBucket)
+        
+        observeEvent(awsUpload, {
+          if(awsUpload[1] == TRUE)
+          {
+            browser()
+            incrementAwsCount();
+          }
+        })
         # Resetting annotationListWav to 0
         annotationListWav <<- vector();
         annotationListCsv <<- vector();
@@ -905,6 +924,8 @@ shinyServer(function(input, output, session) {
       }
     }
   })
+  
+
 
   removeAnnotationFromCSV <- function(annotationNumber) {
     browser()
@@ -947,6 +968,15 @@ shinyServer(function(input, output, session) {
     } else {
 
     }
+  }
+  
+  incrementAwsCount = function () {
+    awsProgressValue$one <<- awsProgressValue$one + 1
+  }
+  
+  resetAwsCount = function()
+  {
+    awsProgressValue$one <<- 0
   }
 
   findFileInfo = function() {

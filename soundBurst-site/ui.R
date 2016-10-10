@@ -122,6 +122,9 @@ dashboardPage(
             textInput(inputId = "awsSecretKey", label = "Secret key", value = NULL, placeholder = "Your AWS secret key"),
             textInput(inputId = "awsBucket", label = "AWS bucket", value = NULL, placeholder = "Your AWS bucket"),
             actionButton("awsUploadModal", "Upload to AWS"),
+            div(id = "uploadStatusContainer",
+                uiOutput(outputId = "awsProgress")
+            ),
             div(id = "awsEmptyFieldsContainer",
                 div(id = "awsEmptyFields", "All fields must be filled!")
             )
