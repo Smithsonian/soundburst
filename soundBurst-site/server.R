@@ -333,11 +333,14 @@ shinyServer(function(input, output, session) {
           shinyjs::html("time-box-label", paste0("This file is ", minuteDuration, " minutes long. Would you like to increment the display?"))
           shinyjs::show("time-box-container", anim = TRUE)
           observeEvent(input$spectroTimeSubmit, {
-            incrementAmount <<- (soundDuration / as.numeric(input$spectroEndTime))
+            # incrementAmount <<- (as.numeric(input$spectroEndTime)*60)
+            incrementAmount <<- (soundDuration/as.numeric(input$spectroEndTime))
             spectroToTime <<- incrementAmount
+            browser()
             renderSpectro(sound)
             if (soundDuration > incrementAmount) {
               shinyjs::show("spectro-increment-container")
+              shinyjs::show("next-spectro-increment")
             }
             shinyjs::show("playButton",anim = FALSE)
           })
@@ -414,6 +417,9 @@ shinyServer(function(input, output, session) {
     shinyjs::show("previous-spectro-increment")
     spectroToTime <<- spectroToTime + incrementAmount
     spectroFromTime <<- spectroFromTime + incrementAmount
+    # if (spectroToTime >soundDuration) {
+    #   spectroToTime <<- soundDuration
+    # }
     renderSpectro(sound)
     print('clicked')
     shinyjs::show("previous-spectro-increment")
@@ -776,7 +782,12 @@ shinyServer(function(input, output, session) {
       colnames(dataMatrix) <- c("Project Name", "Project Notes")
       projectData <<- as.table(dataMatrix)
       print(data)
+      oldProjectName <- projectName
       projectName <<- data[[1]]
+      newDirPath <- gsub(oldProjectName,projectName,dirPath)
+      file.rename(dirPath,newDirPath)
+      dirPath <<- newDirPath
+      browser()
       write.csv(projectData, paste0(dirPath,"/",paste0('Project_', projectName,'.csv')), row.names = FALSE)
       annotationListCsvProject <<- c(annotationListCsv, normalizePath(paste0(dirPath,"/",paste0('Project_', projectName,'.csv'))))
       shinyjs::hide("directory", anim = TRUE)
