@@ -238,39 +238,41 @@ shinyServer(function(input, output, session) {
     projectName <<- gsub("^.*\\/", "", dirPath)
     if(file.exists(paste0(dirPath, "/Project_", projectName, ".csv"))) { # CHANGE
       readProjectCSV(dirPath, projectName)
+      createProjectTree()
       return()
     }
     # Updating the value of the project name input value
     updateTextInput(session, inputId = "projectName", label = NULL, value = projectName)
     # folders <- list.dirs(dirPath, full.names = F, recursive = TRUE)
     if(length(dirPath)) {
-      shinyjs::show("progressOne")
-      create_directory_tree(dirPath)
-      # load("www/dir_tree.Rdata")
-      # output$tree <- renderTree(tree, quoted = FALSE)
-      shinyjs::addClass("directory", "active-button")
-      shinyjs::show("aws-upload-button")
-      deploymentSelect <- shinyDirChoose(input, 'deployment', updateFreq=60000, session=session, root=c(home=normalizePath(dirPath)), restrictions=system.file(package='base'), filetypes=c('', '.wav'))
+      createProjectTree()
     }
   })
+  
+  createProjectTree = function () {
+    shinyjs::show("progressOne")
+    create_directory_tree(dirPath)
+    # load("www/dir_tree.Rdata")
+    # output$tree <- renderTree(tree, quoted = FALSE)
+    shinyjs::addClass("directory", "active-button")
+    shinyjs::show("aws-upload-button")
+    deploymentSelect <- shinyDirChoose(input, 'deployment', updateFreq=60000, session=session, root=c(home=normalizePath(dirPath)), restrictions=system.file(package='base'), filetypes=c('', '.wav'))
+  }
 
-  output$deploymentpath <- renderPrint({
-    observeEvent(input$deployment, {
-      depPath <<- parseDirPath(root=c(home=normalizePath(dirPath)), input$deployment)
-      if(length(dirPath)) {
-
-        # folders <- list.dirs(depPath, full.names = F, recursive = TRUE)
-        shinyjs::show("progressOne")
-        create_directory_tree(depPath)
-        load("www/dir_tree.Rdata")
-        output$tree <- renderTree(tree, quoted = FALSE)
-        shinyjs::addClass("deployment", "active-button")
-        toggleAfterDeploymentSelect()
-        deploymentName <<- gsub("^.*\\/", "", depPath)
-        updateTextInput(session, inputId = "name", label = NULL, value = deploymentName)
-        findFileCount()
-      }
-    })
+  observeEvent(input$deployment, {
+    depPath <<- parseDirPath(root=c(home=normalizePath(dirPath)), input$deployment)
+    if(length(dirPath)) {
+      # folders <- list.dirs(depPath, full.names = F, recursive = TRUE)
+      shinyjs::show("progressOne")
+      create_directory_tree(depPath)
+      load("www/dir_tree.Rdata")
+      output$tree <- renderTree(tree, quoted = FALSE)
+      shinyjs::addClass("deployment", "active-button")
+      toggleAfterDeploymentSelect()
+      deploymentName <<- gsub("^.*\\/", "", depPath)
+      updateTextInput(session, inputId = "name", label = NULL, value = deploymentName)
+      findFileCount()
+    }
   })
 
   # Creating onclick event for each play and pause button
@@ -1000,6 +1002,10 @@ shinyServer(function(input, output, session) {
       updateTextInput(session, inputId = "projectName", label = NULL, value = projectCSV$Project.Name[[1]])
       toggleAfterProjectCsvLoaded()
     }
+  }
+  
+  readDeploymentCSV = function() {
+    
   }
 
   findFileInfo = function() {
