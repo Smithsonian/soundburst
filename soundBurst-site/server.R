@@ -203,6 +203,12 @@ shinyServer(function(input, output, session) {
     }
   }
   
+  toggleAfterProjectCsvLoaded = function() {
+    toggleProjectInfoDisplay()
+    shinyjs::addClass("enter-project-info-label", "completed-step")
+    toggleDeploymentSelectDisplay()
+  }
+  
   toggleAfterDeploymentSelect = function (){
     shinyjs::hide("deployment", anim = TRUE)
     shinyjs::addClass("select-dep-container", "completed-step")
@@ -225,11 +231,15 @@ shinyServer(function(input, output, session) {
   }
 
   test <- shinyDirChoose(input, 'directory', updateFreq=60000, session=session, root=c(home='~'), restrictions=system.file(package='base'), filetypes=c('', '.wav'))
-
-  output$directorypath <- renderPrint({
+  
+  observeEvent(input$directory, {
     dirPath <<- parseDirPath(roots=c(home='~'), input$directory)
     # Get folder name -> which is also the project name
     projectName <<- gsub("^.*\\/", "", dirPath)
+    if(file.exists(paste0(dirPath, "/Project_", projectName, ".csv"))) { # CHANGE
+      readProjectCSV(dirPath, projectName)
+      return()
+    }
     # Updating the value of the project name input value
     updateTextInput(session, inputId = "projectName", label = NULL, value = projectName)
     # folders <- list.dirs(dirPath, full.names = F, recursive = TRUE)
@@ -466,7 +476,6 @@ shinyServer(function(input, output, session) {
       # Use  from = 1, to = 5, units = "seconds" when playing from a certain time
       wave <- readWave(currDir, from = start, to = end, unit = "seconds")
       sound <- audioSample(wave@left, wave@samp.rate, wave@bit)
-
       if(chartType == "spectro")
       {
         spectroEnd <- currTime + end
@@ -977,6 +986,20 @@ shinyServer(function(input, output, session) {
   resetAwsCount = function()
   {
     awsProgressValue$one <<- 0
+  }
+
+  
+  ###############################
+  #### If there is a CSV with the same name as the project folder
+  #### Read it and fill in the input values in "Enter Project Info"
+  ##############################
+  readProjectCSV = function(projectDir, projectName) {
+    if(!is.null(projectName))
+    {
+      projectCSV <- read.csv(paste0(projectDir, "/Project_", projectName, ".csv"))
+      updateTextInput(session, inputId = "projectName", label = NULL, value = projectCSV$Project.Name[[1]])
+      toggleAfterProjectCsvLoaded()
+    }
   }
 
   findFileInfo = function() {
