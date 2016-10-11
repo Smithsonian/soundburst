@@ -430,3 +430,7 @@ textarea {
   text-align: left;
   float: left
 }
+
+#type-name-warning {
+  color: #d62d34;
+}

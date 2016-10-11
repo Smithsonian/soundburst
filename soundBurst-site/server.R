@@ -101,39 +101,15 @@ shinyServer(function(input, output, session) {
   shinyjs::onclick("right-column-title", toggledeploymentInfoContainer())
   shinyjs::onclick("completedDepContainer", toggleCompletedDeployment())
   shinyjs::onclick("select-dep-container", toggleDeploymentSelectDisplay())
-  # shinyjs::hide("csvFile")
   shinyjs::onclick("show-tree", toggleTree())
-  shinyjs::hide("pauseButton")
-  shinyjs::hide("pauseButtonClip")
-  shinyjs::hide("pauseButtonClipZoom")
-  shinyjs::hide("clipInfo-container")
-  # shinyjs::hide("spectroZoomClip")
-  shinyjs::hide("project-info-container")
-  shinyjs::hide("species-sidebox-container")
-  shinyjs::hide("complete-deployment")
   shinyjs::hide("progressOne")
-  # shinyjs::hide("spectro-clip-container")
-  shinyjs::hide("time-box-container")
-  shinyjs::hide("spectro-increment-container")
-  shinyjs::hide("previous-spectro-increment")
   shinyjs::hide("tree")
   shinyjs::hide("directorypath")
   shinyjs::hide(id = "playButton",anim = FALSE)
   shinyjs::hide(id = "playButtonClip",anim = FALSE)
   shinyjs::hide(id = "playButtonClipZoom", anim = FALSE)
-  shinyjs::hide("file-name-warning-container")
-  shinyjs::hide("site-info-warning-container")
-  shinyjs::hide("awsEmptyFieldsContainer")
-  shinyjs::hide("aws-upload-button")
   shinyjs::onclick("aws-upload-button", resetAwsCount())
-  shinyjs::hide("deployment")
   shinyjs::disable("aws-upload-button")
-  shinyjs::hide("proj-name-warning")
-  shinyjs::hide("dep-name-warning")
-  shinyjs::hide("recid-name-warning")
-  shinyjs::hide("type-name-warning")
-  shinyjs::hide("species-name-warning")
-  shinyjs::hide("csv-info-modal-container")
   shinyjs::onevent('mouseenter', "csvFile", showCSVModal())
   shinyjs::onevent('mouseleave', "csvFile", hideCSVModal())
 
@@ -336,47 +312,52 @@ shinyServer(function(input, output, session) {
       path <- getPath(get_selected(input$tree, "names"))
       # Full file path
       currDir <- paste0(depPath, "/", path, unlist(get_selected(input$tree)))
-      # Reading the sound file
-      sound <- readWave(currDir)
-      # Duration of the sound file
-      durationMain <<- seewave::duration(sound)
-      # Storing the start and end time of the wave file in seconds
-      waveDate <<- as.character(as.POSIXct(file.info(currDir)[[4]], origin="1970-01-01", format = "%m/%d/%y"), "%m/%d/%y")
-      waveStartTime <<- as.character(as.POSIXct(file.info(currDir)[[4]], origin="1970-01-01", format = "%H:%M:%S %p"), format = "%H:%M:%S %p")
-      waveEndTime <<- as.character(as.POSIXct((file.info(currDir)[[4]] + durationMain), origin="1970-01-01", format = "%H:%M:%S %p"), format = "%H:%M:%S %p")
-      l <- length(sound@left)
-      sr <- sound@samp.rate
-      soundDuration <- round(l/sr,2)
-      # TODO Maybe make a function out of this? Might make the code cleaner
-      if (soundDuration > 59) {
-        minuteDuration <- round(soundDuration/60)
-        shinyjs::html("time-box-label", paste0("This file is ", minuteDuration, " minutes long. Would you like to increment the display?"))
-        shinyjs::show("time-box-container", anim = TRUE)
+      fileType <- substrRight(currDir,4)
+      if (fileType != ".wav") {
+        return()
+      } else {
+        # Reading the sound file
+        sound <- readWave(currDir)
+        # Duration of the sound file
+        durationMain <<- seewave::duration(sound)
+        # Storing the start and end time of the wave file in seconds
+        waveDate <<- as.character(as.POSIXct(file.info(currDir)[[4]], origin="1970-01-01", format = "%m/%d/%y"), "%m/%d/%y")
+        waveStartTime <<- as.character(as.POSIXct(file.info(currDir)[[4]], origin="1970-01-01", format = "%H:%M:%S %p"), format = "%H:%M:%S %p")
+        waveEndTime <<- as.character(as.POSIXct((file.info(currDir)[[4]] + durationMain), origin="1970-01-01", format = "%H:%M:%S %p"), format = "%H:%M:%S %p")
+        l <- length(sound@left)
+        sr <- sound@samp.rate
+        soundDuration <- round(l/sr,2)
+        # TODO Maybe make a function out of this? Might make the code cleaner
+        if (soundDuration > 59) {
+          minuteDuration <- round(soundDuration/60)
+          shinyjs::html("time-box-label", paste0("This file is ", minuteDuration, " minutes long. Would you like to increment the display?"))
+          shinyjs::show("time-box-container", anim = TRUE)
           observeEvent(input$spectroTimeSubmit, {
-          incrementAmount <<- (soundDuration / as.numeric(input$spectroEndTime))
-          spectroToTime <<- incrementAmount
-          renderSpectro(sound)
-          if (soundDuration > incrementAmount) {
-            shinyjs::show("spectro-increment-container")
-          }
-          shinyjs::show("playButton",anim = FALSE)
-        })
+            incrementAmount <<- (soundDuration / as.numeric(input$spectroEndTime))
+            spectroToTime <<- incrementAmount
+            renderSpectro(sound)
+            if (soundDuration > incrementAmount) {
+              shinyjs::show("spectro-increment-container")
+            }
+            shinyjs::show("playButton",anim = FALSE)
+          })
           observeEvent(input$noTimeSubmission,{
             spectroToTime <<- soundDuration
             renderSpectro(sound)
             shinyjs::show("playButton",anim = FALSE)
           })
-      } else {
-        spectroToTime <<- soundDuration
-        renderSpectro(sound)
-        shinyjs::show("playButton",anim = FALSE)
-      }
-      shinyjs::show("content-id")
-      if(!is.null(newName)) {
-        shinyjs::html("titleHeader",newName)
-      }
-      else {
-        shinyjs::html("titleHeader",unlist(get_selected(input$tree)))
+        } else {
+          spectroToTime <<- soundDuration
+          renderSpectro(sound)
+          shinyjs::show("playButton",anim = FALSE)
+        }
+        shinyjs::show("content-id")
+        if(!is.null(newName)) {
+          shinyjs::html("titleHeader",newName)
+        }
+        else {
+          shinyjs::html("titleHeader",unlist(get_selected(input$tree)))
+        }
       }
     }
   })
@@ -840,7 +821,6 @@ shinyServer(function(input, output, session) {
         } else {
           dataArray <- c(siteDF[1,1],siteDF[1,2],siteDF[1,3],siteDF[1,4],siteDF[1,5],siteDF[1,6],siteDF[1,7],siteDF[1,8],fileFullName, clipCount,dataSet[[1]],dataSet[[2]],durationSmall, dataSet[[3]],dataSet[[4]],dataSet[[5]])
           siteDF <<- rbind(siteDF, dataArray)
-          browser()
         }
         increaseStatusBar()
         clipCount <<- clipCount + 1
@@ -919,7 +899,6 @@ shinyServer(function(input, output, session) {
         observeEvent(awsUpload, {
           if(awsUpload[1] == TRUE)
           {
-            browser()
             incrementAwsCount();
           }
         })
