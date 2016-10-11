@@ -1,7 +1,3 @@
-# install.packages("shinydashboard")
-# install_github("trestletech/shinyTree")
-# install.packages("shinyjs")
-
 ## ui.R ##
 library(shinydashboard)
 library(shinyTree)
