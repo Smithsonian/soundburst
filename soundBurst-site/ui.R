@@ -2,7 +2,7 @@
 library(shinydashboard)
 library(shinyTree)
 library(shinyjs)
-library(shinyFiles)
+# library(shinyFiles)
 library(shinyBS)
 # source("customHeader.r")
 
@@ -164,7 +164,8 @@ dashboardPage(
              actionButton("speciesDropSubmit", "Submit")
       ))
   ),
-  tags$head(tags$script(src="multiClip.js")),
-  tags$head(tags$script(src="libraries/opencpu-0.5.js"))
+  # Absolute need to load jquery before multiClip.js otherwise document is never ready
+  # tags$head(tags$script(src="shared/jquery.min.js")),
+  tags$head(tags$script(src="multiClip.js"))
 )
 )

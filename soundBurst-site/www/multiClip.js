@@ -1,17 +1,17 @@
-$(document).ready(function() {
+(function() {
   console.log('check');
-  $(".main-header").prepend("<span id='titleHeader'>Welcome to the Soundburst Application</span>");
+  jQuery(".main-header").prepend("<span id='titleHeader'>Welcome to the Soundburst Application</span>");
 
-  $("#speciesDropSubmit").click(function() {
-    var count = $(".completedBrush").length;
-    $("#spectrogram_brush").clone(true).prop("id", count + 1).prop("class", "completedBrush").css({'background-color':'green'}).appendTo("#spectrogram");
+  //jQuery("#speciesDropSubmit").click(function() {
+  jQuery(document).on('click', '#speciesDropSubmit', function(e) {
+    var count = jQuery(".completedBrush").length;
+    jQuery("#spectrogram_brush").clone(true).prop("id", count + 1).prop("class", "completedBrush").css({'background-color':'green'}).appendTo("#spectrogram");
   });
 
-  $(document).on('click', '.removeAnn', function(e) {
-    debugger;
-    var id = $(this).parent()[0].id;
-    $("#spectrogram #" + id).remove();
-    $("#listCompleted #" + id).remove();
+  jQuery(document).on('click', '.removeAnn', function(e) {
+    var id = jQuery(this).parent()[0].id;
+    jQuery("#spectrogram #" + id).remove();
+    jQuery("#listCompleted #" + id).remove();
     var annotationNumber = id.substr(id.length - 1);
     //var out = console.r.call('removeAnnotationFromCSV', {annotationNumber: annotationNumber});
     //perform the request
@@ -31,4 +31,4 @@ $(document).ready(function() {
     });
   });
 
-});
+})(jQuery);

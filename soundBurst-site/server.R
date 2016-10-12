@@ -14,11 +14,11 @@
 library(shiny)
 library(tools)
 library(devtools)
-# install_github("trestletech/shinyTree")
 # If using windows, use this line to install S3 package
 # install.packages("aws.s3", repos = c("cloudyr" = "http://cloudyr.github.io/drat"), INSTALL_opts = "--no-multiarch")
 # Otherwise use line below
 # install_github("cloudyr/aws.s3")
+# install_github("trestletech/shinyTree")
 library(stringr)
 library(shinyFiles)
 library("aws.s3")
