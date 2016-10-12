@@ -40,6 +40,7 @@ source("playSound.r")
 # ctx$console()
 
 # Some global variables
+mainDir <<- NULL
 clipCount <<- 0
 newName <- NULL
 annotationListWav <<- vector()
@@ -53,6 +54,22 @@ options(shiny.trace=TRUE)
 options(shiny.maxRequestSize=70*1024^2)
 volumes <- getVolumes()
 paused <<- FALSE
+
+getOS <- function() {
+  if (.Platform$OS.type == "windows") { 
+    mainDir <<- "C:/"
+    "win"
+  } else if (Sys.info()["sysname"] == "Darwin") {
+    mainDir <<- "~"
+    "mac" 
+  } else if (.Platform$OS.type == "unix") { 
+    mainDir <<- "~"
+    "unix"
+  } else {
+    stop("Unknown OS")
+  }
+}
+
 
 progressBar <- function(value = 0, label = FALSE, color = "aqua", size = NULL,
                         striped = FALSE, active = FALSE, vertical = FALSE) {
@@ -214,10 +231,12 @@ shinyServer(function(input, output, session) {
     shinyjs::toggle("tree", anim = TRUE)
   }
   
-  test <- shinyDirChoose(input, 'directory', updateFreq=60000, session=session, root=c(home='~'), restrictions=system.file(package='base'), filetypes=c('', '.wav'))
+  getOS()
+  test <- shinyDirChoose(input, 'directory', updateFreq=60000, session=session, root=c(home=mainDir), restrictions=system.file(package='base'), filetypes=c('', '.wav'))
   
   observeEvent(input$directory, {
-    dirPath <<- parseDirPath(roots=c(home='~'), input$directory)
+    getOS()
+    dirPath <<- parseDirPath(roots=c(home=mainDir), input$directory)
     # Get folder name -> which is also the project name
     projectName <<- gsub("^.*\\/", "", dirPath)
     if(file.exists(paste0(dirPath, "/Project_", projectName, ".csv"))) { # CHANGE
@@ -1033,5 +1052,5 @@ shinyServer(function(input, output, session) {
     output$minTime <- renderPrint({cat(as.character(minTimeVar))})
     output$maxTime <- renderPrint({cat(as.character(maxTimeVar))})
   }
-  
+
 })
