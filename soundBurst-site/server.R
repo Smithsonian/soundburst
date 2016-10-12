@@ -15,7 +15,10 @@ library(shiny)
 library(tools)
 library(devtools)
 # install_github("trestletech/shinyTree")
-install_github("cloudyr/aws.s3")
+# If using windows, use this line to install S3 package
+# install.packages("aws.s3", repos = c("cloudyr" = "http://cloudyr.github.io/drat"), INSTALL_opts = "--no-multiarch")
+# Otherwise use line below
+# install_github("cloudyr/aws.s3")
 library(stringr)
 library(shinyFiles)
 library("aws.s3")
@@ -92,14 +95,14 @@ progressGroup <- function(text, value, min = 0, max = value, color = "aqua") {
 }
 
 shinyServer(function(input, output, session) {
-
+  
   # HTML("nav",div(id="navbar-title-file-name", "Hello"))
-
+  
   projectName <<- NULL
   spectroFromTime <<- 0
   siteDF <<- NULL
   dirPath <<- NULL
-
+  
   shinyjs::onclick("left-column-title", toggleProjectSelect())
   # shinyjs::onclick("species-file-upload", togglecsvFileUploadButton())
   shinyjs::onclick("enter-project-info-label", toggleProjectInfoDisplay())
@@ -117,9 +120,9 @@ shinyServer(function(input, output, session) {
   shinyjs::disable("aws-upload-button")
   shinyjs::onevent('mouseenter', "csvFile", showCSVModal())
   shinyjs::onevent('mouseleave', "csvFile", hideCSVModal())
-
+  
   shinyjs::onclick("sF-selectButton", toggleAfterProjectSelect())
-
+  
   showCSVModal = function() {
     shinyjs::show("csv-info-modal-container")
   }
@@ -133,37 +136,37 @@ shinyServer(function(input, output, session) {
     shinyjs::toggleClass("left-column-title", "open-accordian")
     shinyjs::toggleClass("left-column-title", "closed-accordian")
   }
-
+  
   toggleProjectInfoDisplay = function() {
     shinyjs::toggle("project-info-container", anim = TRUE)
     shinyjs::toggleClass("enter-project-info-label", "open-accordian")
     shinyjs::toggleClass("enter-project-info-label", "closed-accordian")
   }
-
+  
   toggleDeploymentSelectDisplay = function() {
     shinyjs::toggle("deployment", anim = TRUE)
     shinyjs::toggleClass("select-dep-container", "open-accordian")
     shinyjs::toggleClass("select-dep-container", "closed-accordian")
   }
-
+  
   togglecsvFileUploadButton = function() {
     shinyjs::toggle("csvFile", anim = TRUE)
     shinyjs::toggleClass("species-file-upload", "open-accordian")
     shinyjs::toggleClass("species-file-upload", "closed-accordian")
   }
-
+  
   toggledeploymentInfoContainer = function() {
     shinyjs::toggle("species-sidebox-container", anim = TRUE)
     shinyjs::toggleClass("right-column-title", "open-accordian")
     shinyjs::toggleClass("right-column-title", "closed-accordian")
   }
-
+  
   toggleCompletedDeployment = function() {
     shinyjs::toggle("listCompleted", anim = TRUE)
     shinyjs::toggleClass("completedDepContainer", "open-accordian")
     shinyjs::toggleClass("completedDepContainer", "closed-accordian")
   }
-
+  
   #################################
   ##### This function runs right after the selection of a project is done
   ##### Mainly toggles classes and set the current directory
@@ -203,14 +206,14 @@ shinyServer(function(input, output, session) {
     shinyjs::show("tree", anim = TRUE)
     findFileInfo()
   }
-
+  
   toggleTree = function() {
     shinyjs::toggleClass("show-tree", "open-accordian")
     shinyjs::toggleClass("show-tree", "closed-accordian")
     shinyjs::toggle("directorypath", anim = TRUE)
     shinyjs::toggle("tree", anim = TRUE)
   }
-
+  
   test <- shinyDirChoose(input, 'directory', updateFreq=60000, session=session, root=c(home='~'), restrictions=system.file(package='base'), filetypes=c('', '.wav'))
   
   observeEvent(input$directory, {
@@ -239,7 +242,7 @@ shinyServer(function(input, output, session) {
     shinyjs::show("aws-upload-button")
     deploymentSelect <- shinyDirChoose(input, 'deployment', updateFreq=60000, session=session, root=c(home=normalizePath(dirPath)), restrictions=system.file(package='base'), filetypes=c('', '.wav'))
   }
-
+  
   observeEvent(input$deployment, {
     depPath <<- parseDirPath(root=c(home=normalizePath(dirPath)), input$deployment)
     if(length(dirPath)) {
@@ -255,7 +258,7 @@ shinyServer(function(input, output, session) {
       findFileCount()
     }
   })
-
+  
   # Creating onclick event for each play and pause button
   shinyjs::onclick("playButton", onPlay("spectro"))
   shinyjs::onclick("pauseButton", pauseSound("spectro"))
@@ -263,9 +266,9 @@ shinyServer(function(input, output, session) {
   shinyjs::onclick("pauseButtonClip", pauseSound("spectroClip"))
   shinyjs::onclick("playButtonClipZoom", onPlay("spectroClipZoom"))
   shinyjs::onclick("pauseButtonClipZoom", pauseSound("spectroClipZoom"))
-
-
-
+  
+  
+  
   # This is the function that actually calls the play sound function, as it was impossible to pass
   # in arguments in the above shinyjs function call.
   onPlay = function(chartType) {
@@ -281,7 +284,7 @@ shinyServer(function(input, output, session) {
       playSound(xmin, xmax, "spectroClip")
     }
   }
-
+  
   # This is the function that actually calls the pause sound function, as it was impossible to pass
   # in arguments in the above shinyjs function call.
   onPause = function(chartType) {
@@ -297,7 +300,7 @@ shinyServer(function(input, output, session) {
       pauseSound("spectroClip")
     }
   }
-
+  
   ###########################
   ##### Listener for file selection in "Select Sequence"
   ###########################
@@ -369,7 +372,7 @@ shinyServer(function(input, output, session) {
       }
     }
   })
-
+  
   renderSpectro = function (sound){
     output$spectrogram <- renderPlot({
       shinyjs::hide("time-box-container", anim = TRUE)
@@ -381,10 +384,10 @@ shinyServer(function(input, output, session) {
       # spectroFromTime <<- spectroToTime
     })
   }
-
+  
   shinyjs::onclick("previous-spectro-increment", showPreviousSpectroIncrement())
   shinyjs::onclick("next-spectro-increment", showNextSpectroIncrement())
-
+  
   showPreviousSpectroIncrement = function() {
     path <- getPath(get_selected(input$tree, "names"))
     if(!is.null(newName)) {
@@ -406,7 +409,7 @@ shinyServer(function(input, output, session) {
     }
     print('clicked')
   }
-
+  
   showNextSpectroIncrement = function() {
     path <- getPath(get_selected(input$tree, "names"))
     if(!is.null(newName)) {
@@ -432,7 +435,7 @@ shinyServer(function(input, output, session) {
       shinyjs::hide("next-spectro-increment")
     }
   }
-
+  
   ##############################
   ###### Function that plays the sound after clicking the play button
   ###### Arg    start       Start time of the sound
@@ -491,7 +494,7 @@ shinyServer(function(input, output, session) {
       # shinyjs::onclick("pauseButton",pause(a))
     }
   }
-
+  
   pauseSound = function (chartType) {
     paused <<- TRUE
     pause(audioSound)
@@ -509,7 +512,7 @@ shinyServer(function(input, output, session) {
       shinyjs::show(id = "playButtonClip", anim = FALSE)
     }
   }
-
+  
   getPath = function(folderList) {
     # names <- get_selected(input$tree, "names")
     one <- attr(folderList[[1L]], "ancestry", TRUE)
@@ -517,15 +520,15 @@ shinyServer(function(input, output, session) {
     path <- paste0(path, "/")
     return(path)
   }
-
+  
   # LOAD IN SPECIES DROPDOWN
   shinyFileChoose(input, 'csvFile', updateFreq=60000, session=session, roots=c(home='~'), restrictions=system.file(package='base'))
   shinyjs::onclick("csvFile",csvFileSubmitClick())
-
+  
   csvFileSubmitClick = function(){
     csvSumbit <- TRUE
   }
-
+  
   species <- reactive({
     if (is.null(input$csvFile)) {
       testCSV <- read.csv("www/species-short.csv", header = TRUE)
@@ -538,28 +541,28 @@ shinyServer(function(input, output, session) {
       read.csv(correctPath, header = TRUE)
     }
   })
-
+  
   output$commonName <- renderUI({
-
-      df <- species()
-
-
+    
+    df <- species()
+    
+    
     if (is.null(df)) return(NULL)
-
+    
     itemsSpecies <- c('Select Species',as.character(df[[1]]))
     selectInput("speciesDropdown", "Species*",itemsSpecies)
   })
-
+  
   output$speciesType <- renderUI({
-
-      df <- species()
-
+    
+    df <- species()
+    
     if (is.null(df)) return(NULL)
-
+    
     itemsSpecies <- c('Select Type',as.character(df[[3]]))
     selectInput("typeDropdown", "Type*",itemsSpecies)
   })
-
+  
   formulaText <- reactive({
     paste(input$speciesDropdown)
   })
@@ -573,39 +576,39 @@ shinyServer(function(input, output, session) {
       formulaText()
     }
   })
-
+  
   #This previews the CSV data file
   output$filetable <- renderTable({
     species()
   })
-# 
-#   # This creates the oscillo clips after brush
-#   output$spectroZoomClip <- renderPlot({
-#     path <- getPath(get_selected(input$tree, "names"))
-#     if(!is.null(newName)) {
-#       currDir <- paste0(depPath, "/", path, newName)
-#     }
-#     else {
-#       currDir <- paste0(depPath, "/", path, unlist(get_selected(input$tree)))
-#     }
-#     sound <- readWave(currDir)
-#     if(!is.null(input$plotZoom$xmax)) {
-# 
-#       spectro(sound, scale = FALSE, osc = FALSE, tlim = c(input$plotZoom$xmin,input$plotZoom$xmax), flim = c(input$plotZoom$ymin,input$plotZoom$ymax))
-# 
-#       # Min and max values for the spectropClipZoom
-#       xminZoom <<- input$plotZoom$xmin
-#       xmaxZoom <<- input$plotZoom$xmax
-# 
-#       # Min and max values for the spectroClip, not the spectroClipZoom
-#       xmin <- input$plot_brush$xmin
-#       xmax <- input$plot_brush$xmax
-#       # shinyjs::html('remove',tags$div(class = "close-clip", "hello There"))
-#       shinyjs::onclick("spectroClip",showSpeciesDropdown(xmin, xmax))
-#       shinyjs::show("playButtonClipZoom",anim = FALSE)
-#     }
-#   })
-# 
+  # 
+  #   # This creates the oscillo clips after brush
+  #   output$spectroZoomClip <- renderPlot({
+  #     path <- getPath(get_selected(input$tree, "names"))
+  #     if(!is.null(newName)) {
+  #       currDir <- paste0(depPath, "/", path, newName)
+  #     }
+  #     else {
+  #       currDir <- paste0(depPath, "/", path, unlist(get_selected(input$tree)))
+  #     }
+  #     sound <- readWave(currDir)
+  #     if(!is.null(input$plotZoom$xmax)) {
+  # 
+  #       spectro(sound, scale = FALSE, osc = FALSE, tlim = c(input$plotZoom$xmin,input$plotZoom$xmax), flim = c(input$plotZoom$ymin,input$plotZoom$ymax))
+  # 
+  #       # Min and max values for the spectropClipZoom
+  #       xminZoom <<- input$plotZoom$xmin
+  #       xmaxZoom <<- input$plotZoom$xmax
+  # 
+  #       # Min and max values for the spectroClip, not the spectroClipZoom
+  #       xmin <- input$plot_brush$xmin
+  #       xmax <- input$plot_brush$xmax
+  #       # shinyjs::html('remove',tags$div(class = "close-clip", "hello There"))
+  #       shinyjs::onclick("spectroClip",showSpeciesDropdown(xmin, xmax))
+  #       shinyjs::show("playButtonClipZoom",anim = FALSE)
+  #     }
+  #   })
+  # 
   # This creates the oscillo clips after brush
   output$spectroClip <- renderPlot({
     path <- getPath(get_selected(input$tree, "names"))
@@ -616,7 +619,7 @@ shinyServer(function(input, output, session) {
       currDir <- paste0(depPath, "/", path, unlist(get_selected(input$tree)))
     }
     sound <- readWave(currDir)
-
+    
     # shinyjs::show("spectro-clip-container")
     if(!is.null(input$plot_brush$xmax)) {
       spectro(sound, scale = FALSE, osc = FALSE, tlim = c(input$plot_brush$xmin,input$plot_brush$xmax))
@@ -631,7 +634,7 @@ shinyServer(function(input, output, session) {
     }
     showSpeciesDropdown(xmin, xmax)
   })
-
+  
   showSpeciesDropdown = function (xmin, xmax){
     shinyjs::show("clip-species-dropdown")
     if(!is.null(xmax)) {
@@ -646,18 +649,18 @@ shinyServer(function(input, output, session) {
       shinyjs::disable("timeMax")
     }
   }
-
+  
   shinyjs::onclick("close-species-drop",shinyjs::hide("clip-species-dropdown"))
   shinyjs::hide("clip-species-dropdown")
-
+  
   siteFields <- c("name", "lat", "lon", "recId", "siteNotes")
-
+  
   # Getting user input data from the deployment info
   formDataSite <- reactive({
     data <- sapply(siteFields, function(x) input[[x]])
     data
   })
-
+  
   createCSVFilePath = function(){
     if(!is.null(newName)) {
       fileName <- sub(".wav", "", newName)
@@ -668,7 +671,7 @@ shinyServer(function(input, output, session) {
       return(fileName)
     }
   }
-
+  
   ######################################
   ####### Observe event for the site information at the bottom right of the app
   ######################################
@@ -714,17 +717,17 @@ shinyServer(function(input, output, session) {
       # shinyjs::html("right-column-title",newFileName)
       # Creating the new file path
       newFullFilePath <- paste0(depPath,"/",newFileName)
-  
+      
       # Checking for file duplicate
       fileNameDuplicate <- 0
-  
+      
       # Checking for file duplicates within that folder
       for (i in 1:length(files)) {
         if (files[i] == paste0(newFileName,".csv")) {
           fileNameDuplicate <- as.numeric(fileNameDuplicate) + 1
         }
       }
-  
+      
       # Checking for file duplication, alert if any; otherwise create the file
       if (fileNameDuplicate == 0) {
         shinyjs::hide("file-name-warning-container")
@@ -741,12 +744,12 @@ shinyServer(function(input, output, session) {
         #   }
         # }
         # output$tree <- renderTree(tree, quoted = FALSE)
-  # 
-  #       file.rename(filePathFull, paste0(newFullFilePath,".wav"))
+        # 
+        #       file.rename(filePathFull, paste0(newFullFilePath,".wav"))
         
         # annotationListCsv <<- c(annotationListCsv, normalizePath(paste0(dirPath,"/",paste0(newFileName,'.csv'))))
         write.csv(siteDataTable, paste0(depPath,"/",paste0(newFileName,'.csv')), row.names = FALSE)
-  
+        
         if(!is.null(newName)) {
           shinyjs::html("titleHeader",newName)
         }
@@ -764,15 +767,15 @@ shinyServer(function(input, output, session) {
       }
     }
   })
-
+  
   projectFields <- c("projectName", "projectNotes")
-
+  
   formDataProject <- reactive({
     data <- sapply(projectFields, function(x) input[[x]])
     data
   })
-
-
+  
+  
   #####################################
   ###### Project info submit button listener
   #####################################
@@ -782,19 +785,7 @@ shinyServer(function(input, output, session) {
       shinyjs::show("proj-name-warning")
     } else {
       shinyjs::hide("proj-name-warning")
-      dataArray <- c(data[[1]],data[[2]])
-      dataMatrix <- matrix(dataArray,ncol = 2, byrow = TRUE)
-      colnames(dataMatrix) <- c("Project Name", "Project Notes")
-      projectData <<- as.table(dataMatrix)
-      print(data)
-      oldProjectName <- projectName
-      projectName <<- data[[1]]
-      newDirPath <- gsub(oldProjectName,projectName,dirPath)
-      file.rename(dirPath,newDirPath)
-      dirPath <<- newDirPath
-      browser()
-      write.csv(projectData, paste0(dirPath,"/",paste0('Project_', projectName,'.csv')), row.names = FALSE)
-      annotationListCsvProject <<- c(annotationListCsv, normalizePath(paste0(dirPath,"/",paste0('Project_', projectName,'.csv'))))
+      projectInfo(data[[1]], data[[2]])
       shinyjs::hide("directory", anim = TRUE)
       shinyjs::addClass("projectInfo", "active-button")
       shinyjs::hide("project-info-container", anim = TRUE)
@@ -805,14 +796,31 @@ shinyServer(function(input, output, session) {
       shinyjs::addClass("select-dep-container", "open-accordian")
     }
   })
-
+  
+  projectInfo = function(projectNameArg, projectNotesArg) {
+    Sys.sleep(1)
+    data <- formDataProject()
+    dataArray <- c(projectNameArg,projectNotesArg)
+    dataMatrix <- matrix(dataArray,ncol = 2, byrow = TRUE)
+    colnames(dataMatrix) <- c("Project Name", "Project Notes")
+    projectData <<- as.table(dataMatrix)
+    print(data)
+    oldProjectName <- projectName
+    projectName <<- projectNameArg
+    newDirPath <- gsub(oldProjectName,projectName,dirPath)
+    file.rename(dirPath,newDirPath)
+    dirPath <<- newDirPath
+    write.csv(projectData, paste0(dirPath,"/",paste0('Project_', projectName,'.csv')), row.names = FALSE)
+    annotationListCsvProject <<- c(annotationListCsv, normalizePath(paste0(dirPath,"/",paste0('Project_', projectName,'.csv'))))
+  }
+  
   speciesFields <- c("timeMin", "timeMax", "speciesDropdown", "typeDropdown", "annotNotes")
-
+  
   formDataSpecies <- reactive({
     data <- sapply(speciesFields, function(x) input[[x]])
     data
   })
-
+  
   # Adding the clip metadata to the spectrogram metadata
   # ClipCount -> If we have multiple clips on a given spectro, give a new column name to each clip
   observeEvent(input$speciesDropSubmit, {
@@ -870,11 +878,11 @@ shinyServer(function(input, output, session) {
       }
     }
   })
-
+  
   ################################
   ######## Modal UI
   ################################
-
+  
   observeEvent(input$awsUploadModal, {
     awsAccessKey <- input$awsAccessKey
     awsSecretKey <- input$awsSecretKey
@@ -888,7 +896,7 @@ shinyServer(function(input, output, session) {
       if(bucket_exists(awsBucket)) {
         # Copy files to temp folder for zipping
         tempDir <- tempdir()
-        csvDir <- paste0(tempDir, "/project")
+        csvDir <- paste0(tempDir, "/", projectName)
         wavDir <- paste0(csvDir, "/deployment")
         if(dir.exists(csvDir)) {
           unlink(csvDir, recursive = TRUE)
@@ -906,7 +914,7 @@ shinyServer(function(input, output, session) {
         zipName <- sub('_([^_]*)$', '', newFileName)
         currDate <- format(Sys.time(), "%Y%m%d")
         fullZipName <- paste0("/", zipName, "_", currDate)
-        zip(normalizePath(paste0(dirPath, fullZipName, ".zip")), "project/")
+        zip(normalizePath(paste0(dirPath, fullZipName, ".zip")), paste0(projectName, "/"))
         incrementAwsCount()
         setwd(oldwd)
         # Upload to AWS
@@ -931,16 +939,14 @@ shinyServer(function(input, output, session) {
     }
   })
   
-
-
   removeAnnotationFromCSV <- function(annotationNumber) {
     browser()
   }
-
+  
   substrRight <- function(x, n){
     substr(x, nchar(x)-n+1, nchar(x))
   }
-
+  
   findFileCount = function() {
     projectFileCount <- 0
     projectFileCountGlobal <<- 0
@@ -959,7 +965,7 @@ shinyServer(function(input, output, session) {
       progressGroup(text = "Status",    value = progressValue$one,   min = 0, max = projectFileCount, color = "aqua")
     })
   }
-
+  
   #################################
   ###### Function to increase the count of the status bar
   #################################
@@ -972,7 +978,7 @@ shinyServer(function(input, output, session) {
       shinyjs::addClass("show-tree", "completed-step")
       shinyjs::removeClass("show-tree", "open-accordian")
     } else {
-
+      
     }
   }
   
@@ -984,7 +990,7 @@ shinyServer(function(input, output, session) {
   {
     awsProgressValue$one <<- 0
   }
-
+  
   
   ###############################
   #### If there is a CSV with the same name as the project folder
@@ -995,14 +1001,16 @@ shinyServer(function(input, output, session) {
     {
       projectCSV <- read.csv(paste0(projectDir, "/Project_", projectName, ".csv"))
       updateTextInput(session, inputId = "projectName", label = NULL, value = projectCSV$Project.Name[[1]])
+      shinyjs::html("projectNotes", projectCSV$Project.Notes[[1]])
       toggleAfterProjectCsvLoaded()
+      projectInfo(projectCSV$Project.Name[[1]], projectCSV$Project.Notes[[1]])
     }
   }
   
   readDeploymentCSV = function() {
     
   }
-
+  
   findFileInfo = function() {
     files <- list.files(depPath, all.files=F, recursive=T, include.dirs=T)
     filesArray <<- 0
@@ -1014,7 +1022,7 @@ shinyServer(function(input, output, session) {
     }
     findMaxAndMinFileTimes(filesArray)
   }
-
+  
   findMaxAndMinFileTimes = function (filesArray){
     timeArray <<- NULL
     for (i in 2:length(filesArray)) {
@@ -1025,5 +1033,5 @@ shinyServer(function(input, output, session) {
     output$minTime <- renderPrint({cat(as.character(minTimeVar))})
     output$maxTime <- renderPrint({cat(as.character(maxTimeVar))})
   }
-
+  
 })
