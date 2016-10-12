@@ -1,4 +1,5 @@
 $(document).ready(function() {
+  console.log('check');
   $(".main-header").prepend("<span id='titleHeader'>Welcome to the Soundburst Application</span>");
 
   $("#speciesDropSubmit").click(function() {
@@ -19,12 +20,12 @@ $(document).ready(function() {
     }, function(output){
       console.log("it works!");
     });
-    
+
     req.fail(function(){
       alert("Server error: " + req.responseText);
     });
-    
-    //after request complete, re-enable the button 
+
+    //after request complete, re-enable the button
     req.always(function(){
       alert("works: " + req.responseText);
     });
