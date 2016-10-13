@@ -465,6 +465,7 @@ shinyServer(function(input, output, session) {
     currTime <- Sys.time()
     if(paused)
     {
+      paused <<- FALSE
       resume(audioSound)
       if(chartType == "spectro")
       {
@@ -509,6 +510,8 @@ shinyServer(function(input, output, session) {
       }
       audioSound <<- audio::play(sound)
       audioSound
+      # test <- wait(audioSound)
+      print("t")
       # pause(a)
       # shinyjs::onclick("pauseButton",pause(a))
     }
@@ -817,7 +820,6 @@ shinyServer(function(input, output, session) {
   })
   
   projectInfo = function(projectNameArg, projectNotesArg) {
-    Sys.sleep(1)
     data <- formDataProject()
     dataArray <- c(projectNameArg,projectNotesArg)
     dataMatrix <- matrix(dataArray,ncol = 2, byrow = TRUE)
