@@ -2,7 +2,7 @@
 library(shinydashboard)
 library(shinyTree)
 library(shinyjs)
-# library(shinyFiles)
+library(shinyFiles)
 library(shinyBS)
 # source("customHeader.r")
 
