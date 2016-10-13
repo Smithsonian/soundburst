@@ -711,7 +711,11 @@ shinyServer(function(input, output, session) {
     if (data[[1]] == "") {
       shinyjs::show("dep-name-warning")
     } else if (data[[4]] == "") {
-      shinyjs::show("recid-name-warning")
+      shinyjs::show("dep-name-warning")
+    } else if (data[[2]] == "") {
+      shinyjs::show("dep-name-warning")
+    } else if (data[[3]] == "") {
+      shinyjs::show("dep-name-warning")
     } else {
       shinyjs::hide("dep-name-warning")
       shinyjs::hide("recid-name-warning")

@@ -431,6 +431,6 @@ textarea {
   float: left
 }
 
-#type-name-warning {
+#dep-name-warning, #type-name-warning {
   color: #d62d34;
 }
