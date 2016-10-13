@@ -862,7 +862,7 @@ shinyServer(function(input, output, session) {
           dataTable <- as.table(dataMatrix)
           siteDF <<- cbind(siteDF, dataTable)
         } else {
-          dataArray <- c(siteDF[1,1],siteDF[1,2],siteDF[1,3],siteDF[1,4],siteDF[1,5],siteDF[1,6],siteDF[1,7],siteDF[1,8],fileFullName, clipCount,dataSet[[1]],dataSet[[2]],durationSmall, dataSet[[3]],dataSet[[4]],dataSet[[5]])
+          dataArray <- c(siteDF[1,1],siteDF[1,2],siteDF[1,3],siteDF[1,4],siteDF[1,5],siteDF[1,6],siteDF[1,7],siteDF[1,8],fileFullName, clipCount,dataSet[[1]],dataSet[[2]],durationSmall, dataSet[[4]],dataSet[[3]],dataSet[[5]])
           siteDF <<- rbind(siteDF, dataArray)
         }
         increaseStatusBar()
