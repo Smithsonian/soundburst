@@ -13,6 +13,7 @@ library(audio)
 library(sound)
 source("createDirectoryTree.r")
 source("playSound.r")
+# On a linux distribution, this will have to be changed to a media player that is installed. E.g., setWavPlayer("totem")
 setWavPlayer("afplay")
 
 # Initializing V8 for javascript interaction
