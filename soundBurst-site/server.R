@@ -282,11 +282,11 @@ shinyServer(function(input, output, session) {
       fileDate <- gsub(":", "-",fileDate, fixed = TRUE)
       depFileName <- paste0(projectName,"_",deploymentName,"_",fileDate)
       depFilePath <- paste0(depPath,"/", depFileName, ".csv")
+      updateTextInput(session, inputId = "name", label = NULL, value = deploymentName)
       if(file.exists(paste0(depPath,"/", depFileName, ".csv"))) { # CHANGE
         readDeploymentCSV(depPath, depFilePath)
         return()
       }
-      # updateTextInput(session, inputId = "name", label = NULL, value = deploymentName)
       findFileCount()
     }
   })
@@ -741,60 +741,60 @@ shinyServer(function(input, output, session) {
       googleMapsLink <- paste0("https://www.google.com/maps/@", data[[2]], ",", data[[3]], ",13z")
       # dataArray <- c(data[[1]],data[[2]],data[[3]],data[[4]],data[[5]],data[[6]],data[[7]], fileFullName, waveStartTime, waveEndTime, waveDate, googleMapsLink)
       dataArray <- c(data[[1]],data[[2]],data[[3]],data[[4]],data[[5]],data[[6]],data[[7]], googleMapsLink)
-      deploymentInfo(dataArray)
-    }
-  })
-  
-  deploymentInfo = function () {
-    dataMatrix <- matrix(dataArray,ncol = length(dataArray), byrow = TRUE)
-    # colnames(dataMatrix) <- c("Name", "Lat", "Lon", "Record ID", "Site Notes", "Start", "End", "File Name", "Wave Start", "Wave End", "Wave Date", "Google Maps")
-    colnames(dataMatrix) <- c("Name", "Lat", "Lon", "Record ID", "Site Notes", "Start", "End", "Google Maps")
-    siteDataTable <- as.table(dataMatrix)
-    siteDF <<- siteDataTable
-    # If we have multiple clips on a given spectro, give a new column name to each clip
-    clipCount <<- 0
-    # Reformating user input
-    fileDate <- gsub(" ", "-",data[[6]], fixed = TRUE)
-    fileDate <- gsub(":", "-",fileDate, fixed = TRUE)
-    # Creating a new filename out of the metadata
-    newFileName <<- paste0(projectName,"_",data[[1]],"_",fileDate)
-    # shinyjs::html("right-column-title",newFileName)
-    # Creating the new file path
-    newFullFilePath <- paste0(depPath,"/",newFileName)
-    
-    # Checking for file duplicate
-    fileNameDuplicate <- 0
-    
-    # Checking for file duplicates within that folder
-    for (i in 1:length(files)) {
-      if (files[i] == paste0(newFileName,".csv")) {
-        fileNameDuplicate <- as.numeric(fileNameDuplicate) + 1
+      dataMatrix <- matrix(dataArray,ncol = length(dataArray), byrow = TRUE)
+      # colnames(dataMatrix) <- c("Name", "Lat", "Lon", "Record ID", "Site Notes", "Start", "End", "File Name", "Wave Start", "Wave End", "Wave Date", "Google Maps")
+      colnames(dataMatrix) <- c("Name", "Lat", "Lon", "Record ID", "Site Notes", "Start", "End", "Google Maps")
+      siteDataTable <- as.table(dataMatrix)
+      siteDF <<- siteDataTable
+      # If we have multiple clips on a given spectro, give a new column name to each clip
+      clipCount <<- 0
+      # Reformating user input
+      fileDate <- gsub(" ", "-",data[[6]], fixed = TRUE)
+      fileDate <- gsub(":", "-",fileDate, fixed = TRUE)
+      # Creating a new filename out of the metadata
+      newFileName <<- paste0(projectName,"_",data[[1]],"_",fileDate)
+      # shinyjs::html("right-column-title",newFileName)
+      # Creating the new file path
+      newFullFilePath <- paste0(depPath,"/",newFileName)
+      
+      # Checking for file duplicate
+      fileNameDuplicate <- 0
+      
+      # Checking for file duplicates within that folder
+      for (i in 1:length(files)) {
+        if (files[i] == paste0(newFileName,".csv")) {
+          fileNameDuplicate <- as.numeric(fileNameDuplicate) + 1
+        }
       }
-    }
-    
-    # Checking for file duplication, alert if any; otherwise create the file
-    if (fileNameDuplicate == 0) {
-      shinyjs::hide("file-name-warning-container")
       
-      count <- 0
-      write.csv(siteDataTable, paste0(depPath,"/",paste0(newFileName,'.csv')), row.names = FALSE)
-      
-      if(!is.null(newName)) {
-        shinyjs::html("titleHeader",newName)
+      # Checking for file duplication, alert if any; otherwise create the file
+      if (fileNameDuplicate == 0) {
+        shinyjs::hide("file-name-warning-container")
+        
+        count <- 0
+        write.csv(siteDataTable, paste0(depPath,"/",paste0(newFileName,'.csv')), row.names = FALSE)
+        
+        if(!is.null(newName)) {
+          shinyjs::html("titleHeader",newName)
+        }
+        else {
+          shinyjs::html("titleHeader",unlist(get_selected(input$tree)))
+        }
+        shinyjs::addClass("deploymentInfo", "active-button")
+        shinyjs::hide("species-sidebox-container")
+        shinyjs::addClass("right-column-title", "completed-step")
+        shinyjs::toggleClass("right-column-title", "open-accordian")
+        shinyjs::toggleClass("right-column-title", "closed-accordian")
       }
       else {
-        shinyjs::html("titleHeader",unlist(get_selected(input$tree)))
+        shinyjs::show("file-name-warning-container")
       }
-      shinyjs::addClass("deploymentInfo", "active-button")
-      shinyjs::hide("species-sidebox-container")
-      shinyjs::addClass("right-column-title", "completed-step")
-      shinyjs::toggleClass("right-column-title", "open-accordian")
-      shinyjs::toggleClass("right-column-title", "closed-accordian")
     }
-    else {
-      shinyjs::show("file-name-warning-container")
-    }
-  }
+  })
+  # 
+  # deploymentInfo = function (dataArray) {
+  #   
+  # }
   
   projectFields <- c("projectName", "projectNotes")
   
@@ -1037,10 +1037,11 @@ shinyServer(function(input, output, session) {
   readDeploymentCSV = function(depPath, depFilePath) {
     deploymentCSV <- read.csv(paste0(depFilePath))
     browser()
-    updateTextInput(session, inputId = "name", label = 'Name*', value = deploymentCSV$Name[[1]])
-    updateTextInput(session, inputId = "Lat", label = "Lat*", value = deploymentCSV$Lat[[1]])
-    updateTextInput(session, inputId = "Lon", label = "Lon*", value = deploymentCSV$Lon[[1]])
-    updateTextInput(session, inputId = "recId", label = "Recorder ID*", value = deploymentCSV$Recorder.ID[[1]])
+    updateTextInput(session, inputId = "name", label = NULL, value = deploymentCSV$Name[[1]])
+    browser()
+    updateTextInput(session, inputId = "Lat", label = NULL, value = as.character(deploymentCSV$Lat[[1]]))
+    updateTextInput(session, inputId = "Lon", label = NULL, value = as.character(deploymentCSV$Lon[[1]]))
+    updateTextInput(session, inputId = "recId", label = NULL, value = as.character(deploymentCSV$Recorder.ID[[1]]))
     shinyjs::html("siteNotes", deploymentCSV$Site.Notes[[1]])
     browser()
     
@@ -1069,6 +1070,7 @@ shinyServer(function(input, output, session) {
     maxTimeVar <<- as.POSIXct(max(timeArray), origin="1970-01-01")
     output$minTime <- renderPrint({cat(as.character(minTimeVar))})
     output$maxTime <- renderPrint({cat(as.character(maxTimeVar))})
+    browser()
   }
 
 })
