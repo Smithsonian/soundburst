@@ -1036,15 +1036,11 @@ shinyServer(function(input, output, session) {
   
   readDeploymentCSV = function(depPath, depFilePath) {
     deploymentCSV <- read.csv(paste0(depFilePath))
-    browser()
     updateTextInput(session, inputId = "name", label = NULL, value = deploymentCSV$Name[[1]])
-    browser()
-    updateTextInput(session, inputId = "Lat", label = NULL, value = as.character(deploymentCSV$Lat[[1]]))
-    updateTextInput(session, inputId = "Lon", label = NULL, value = as.character(deploymentCSV$Lon[[1]]))
-    updateTextInput(session, inputId = "recId", label = NULL, value = as.character(deploymentCSV$Recorder.ID[[1]]))
+    updateTextInput(session, inputId = "lat", label = NULL, value = as.character(deploymentCSV$Lat[[1]]))
+    updateTextInput(session, inputId = "lon", label = NULL, value = as.character(deploymentCSV$Lon[[1]]))
+    updateTextInput(session, inputId = "recId", label = NULL, value = as.character(deploymentCSV$Record.ID[[1]]))
     shinyjs::html("siteNotes", deploymentCSV$Site.Notes[[1]])
-    browser()
-    
     toggleAfterDeploymentCsvLoaded()
     # deploymentInfo(projectCSV$Project.Name[[1]], projectCSV$Site.Notes[[1]])
   }
@@ -1070,7 +1066,6 @@ shinyServer(function(input, output, session) {
     maxTimeVar <<- as.POSIXct(max(timeArray), origin="1970-01-01")
     output$minTime <- renderPrint({cat(as.character(minTimeVar))})
     output$maxTime <- renderPrint({cat(as.character(maxTimeVar))})
-    browser()
   }
 
 })
