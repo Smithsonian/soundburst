@@ -1,6 +1,10 @@
 (function() {
   console.log(jQuery(".main-header"));
-  jQuery(".main-header").prepend("<span id='titleHeader'>Welcome to the Soundburst Application</span>");
+  setTimeout(
+  function() 
+  {
+  $(".main-header").prepend("<span id='titleHeader'>Welcome to the Soundburst Application</span>");
+  }, 100);
   console.log('check2');
 
   //jQuery("#speciesDropSubmit").click(function() {
