@@ -1,3 +1,7 @@
+#sound <- readWave("/Users/tgirgin/1/1/deployment/BLAN01_2015-05-16_073100_EDT.wav")
+#test <- meanspec(sound@left, f = sound@samp.rate)
+#ts <- spectru(test)
+
 # install.packages("shiny")
 # install.packages("devtools")
 # install.packages('shinyFiles')
