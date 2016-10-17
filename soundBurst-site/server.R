@@ -43,6 +43,7 @@ source("playSound.r")
 mainDir <<- NULL
 clipCount <<- 0
 newName <- NULL
+autoCSVLoad <<- TRUE
 annotationListWav <<- vector()
 annotationListCsv <<- vector()
 annotationListCsvProject <<- vector()
@@ -768,7 +769,7 @@ shinyServer(function(input, output, session) {
       }
       
       # Checking for file duplication, alert if any; otherwise create the file
-      if (fileNameDuplicate == 0) {
+      if (fileNameDuplicate == 0 || autoCSVLoad) {
         shinyjs::hide("file-name-warning-container")
         
         count <- 0
@@ -786,7 +787,7 @@ shinyServer(function(input, output, session) {
         shinyjs::toggleClass("right-column-title", "open-accordian")
         shinyjs::toggleClass("right-column-title", "closed-accordian")
       }
-      else {
+      else if(!autoCSVLoad) {
         shinyjs::show("file-name-warning-container")
       }
     }
@@ -1042,6 +1043,7 @@ shinyServer(function(input, output, session) {
     updateTextInput(session, inputId = "recId", label = NULL, value = as.character(deploymentCSV$Record.ID[[1]]))
     shinyjs::html("siteNotes", deploymentCSV$Site.Notes[[1]])
     toggleAfterDeploymentCsvLoaded()
+    autoCSVLoad <<- TRUE
     # deploymentInfo(projectCSV$Project.Name[[1]], projectCSV$Site.Notes[[1]])
   }
   
