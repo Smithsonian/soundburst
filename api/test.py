@@ -5,13 +5,13 @@ from panoptes_client import Project, Workflow, Panoptes, SubjectSet, Subject, Cl
 # emammal test project (id=2855)
 ##########################################
 
-myID = 3159;
-mySlug = 'sraby/blue-raster'
-# myID = 2855;
-# mySlug = 'sraby/emammal-species-identification';
+# myID = 3159;
+# mySlug = 'sraby/blue-raster'
+myID = 2855;
+mySlug = 'sraby/emammal-species-identification';
 
 ##########################################
-######### Get project title
+######### Get project title (working)
 ##########################################
 project = Project.find(id=myID)
 print "Project title: " + project.title
@@ -20,13 +20,13 @@ print "Subject sets"
 print "#########"
 
 ##########################################
-######### Get subject sets
+######### Get subject sets (working)
 ##########################################
 for project in SubjectSet.where(project_id=myID):
     print project.display_name
 
 print "#########"
-print "Workflow name by slug"
+print "Workflow name by slug (Not working)"
 print "#########"
 
 classification = Classification.find('17063588')
