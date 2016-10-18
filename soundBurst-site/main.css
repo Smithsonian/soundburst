@@ -1,3 +1,13 @@
+#playButton audio {
+  width: 600px;
+  margin-left: 29%;
+}
+
+#playButtonClip audio {
+  width: 600px;
+  margin-left: 23%;
+}
+
 #loadingContainer1 {
   position: relative;
 }
@@ -60,7 +70,7 @@ label {
   margin-top: 1%;
 }
 
-#playButton, #pauseButton {
+/*#playButton, #pauseButton {
   position: absolute;
   height: 20px;
   width: 20px;
@@ -90,7 +100,7 @@ label {
 #pauseButton, #pauseButtonClip, #pauseButtonClipZoom {
   background-image: url('pause.png');
   z-index: 1001;
-}
+}*/
 
 #spectrogram {
   width: 80%;

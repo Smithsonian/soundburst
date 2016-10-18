@@ -1,24 +1,10 @@
-# install.packages("shiny")
-# install.packages("devtools")
-# install.packages('shinyFiles')
-# install.packages("sound")
-# install.packages("audio")
-# install.packages("httr")
-# install.packages("shinyBS")
-# install.packages("seewave")
-# install.packages("stringr")
-# install.packages("shinydashboard")
-# install.packages("shinyjs")
-
+#sound <- readWave("/Users/tgirgin/1/1/deployment/BLAN01_2015-05-16_073100_EDT.wav")
+#test <- meanspec(sound, f = sound@samp.rate)
+#ts <- spectru(test)
 
 library(shiny)
 library(tools)
 library(devtools)
-# If using windows, use this line to install S3 package
-# install.packages("aws.s3", repos = c("cloudyr" = "http://cloudyr.github.io/drat"), INSTALL_opts = "--no-multiarch")
-# Otherwise use line below
-# install_github("cloudyr/aws.s3")
-# install_github("trestletech/shinyTree")
 library(stringr)
 library(shinyFiles)
 library("aws.s3")
@@ -27,26 +13,27 @@ library(seewave)
 library(tuneR)
 library(httr)
 library(shinyBS)
-# load_all('~/dev/emammal-soundBurst/soundBurst/R')
 library(audio)
-setWavPlayer("afplay")
 library(sound)
-# library(V8)
+library(stringr)
 source("createDirectoryTree.r")
 source("playSound.r")
+# On a linux distribution, this will have to be changed to a media player that is installed. E.g., setWavPlayer("aplay")
+setWavPlayer("aplay")
 
-# Initializing V8 for javascript interaction
-# ctx <- V8::v8()
-# ctx$console()
 
 # Some global variables
 mainDir <<- NULL
 clipCount <<- 0
 newName <- NULL
 autoCSVLoad <<- TRUE
+annotationListDrop <<- list()
 annotationListWav <<- vector()
 annotationListCsv <<- vector()
 annotationListCsvProject <<- vector()
+# Create some REACTIVE VALUES
+progressValue <<- reactiveValues()
+progressValue$one <<- 0
 
 # This is used to connect correctly with AWS
 set_config( config( ssl_verifypeer = 0L ) )
@@ -214,6 +201,8 @@ shinyServer(function(input, output, session) {
   toggleAfterDeploymentCsvLoaded = function() {
     toggleDeploymentSelectDisplay()
     shinyjs::addClass("right-column-title", "completed-step")
+    shinyjs::removeClass("right-column-title", "open-accordian")
+    shinyjs::addClass("right-column-title", "closed-accordian")
   }
   
   toggleAfterDeploymentSelect = function (){
@@ -240,6 +229,9 @@ shinyServer(function(input, output, session) {
   test <- shinyDirChoose(input, 'directory', updateFreq=60000, session=session, root=c(home=mainDir), restrictions=system.file(package='base'), filetypes=c('', '.wav'))
   
   observeEvent(input$directory, {
+    # Removing any .wav files that were copied in the /www folder for sound play
+    wavToRemove <-list.files(paste0(getwd(), "/www"), pattern='.wav', full.names = TRUE)
+    unlink(wavToRemove)
     getOS()
     dirPath <<- parseDirPath(roots=c(home=mainDir), input$directory)
     # Get folder name -> which is also the project name
@@ -286,9 +278,9 @@ shinyServer(function(input, output, session) {
       updateTextInput(session, inputId = "name", label = NULL, value = deploymentName)
       if(file.exists(paste0(depPath,"/", depFileName, ".csv"))) { # CHANGE
         readDeploymentCSV(depPath, depFilePath)
+        findFileCount()
         return()
       }
-      findFileCount()
     }
   })
   
@@ -365,7 +357,7 @@ shinyServer(function(input, output, session) {
         waveDate <<- as.character(as.POSIXct(file.info(currDir)[[4]], origin="1970-01-01", format = "%m/%d/%y"), "%m/%d/%y")
         waveStartTime <<- as.character(as.POSIXct(file.info(currDir)[[4]], origin="1970-01-01", format = "%H:%M:%S %p"), format = "%H:%M:%S %p")
         waveEndTime <<- as.character(as.POSIXct((file.info(currDir)[[4]] + durationMain), origin="1970-01-01", format = "%H:%M:%S %p"), format = "%H:%M:%S %p")
-        l <- length(sound@left)
+        l <- length(sound)
         sr <- sound@samp.rate
         soundDuration <- round(l/sr,2)
         # TODO Maybe make a function out of this? Might make the code cleaner
@@ -373,11 +365,14 @@ shinyServer(function(input, output, session) {
           minuteDuration <- round(soundDuration/60)
           shinyjs::html("time-box-label", paste0("This file is ", minuteDuration, " minutes long. Would you like to increment the display?"))
           shinyjs::show("time-box-container", anim = TRUE)
+          
+          # Listener for "Select a Sequence"
           observeEvent(input$spectroTimeSubmit, {
             # incrementAmount <<- (as.numeric(input$spectroEndTime)*60)
+            file.copy(currDir, paste0(getwd(), "/www"))
+            shinyjs::html(id = "playButton", paste0(html = '<audio controls preload="auto"><source src="', unlist(get_selected(input$tree)), '" type="audio/wav"></audio>'))
             incrementAmount <<- (soundDuration/as.numeric(input$spectroEndTime))
             spectroToTime <<- incrementAmount
-            browser()
             renderSpectro(sound)
             if (soundDuration > incrementAmount) {
               shinyjs::show("spectro-increment-container")
@@ -389,6 +384,8 @@ shinyServer(function(input, output, session) {
             spectroToTime <<- soundDuration
             renderSpectro(sound)
             shinyjs::show("playButton",anim = FALSE)
+            file.copy(currDir, paste0(getwd(), "/www"))
+            shinyjs::html(id = "playButton", paste0(html = '<audio controls preload="auto"><source src="', unlist(get_selected(input$tree)), '" type="audio/wav"></audio>'))
           })
         } else {
           spectroToTime <<- soundDuration
@@ -430,7 +427,7 @@ shinyServer(function(input, output, session) {
       currDir <- paste0(depPath, "/", path, unlist(get_selected(input$tree)))
     }
     sound <- readWave(currDir)
-    l <- length(sound@left)
+    l <- length(sound@stereo)
     sr <- sound@samp.rate
     soundDuration <- round(l/sr,2)
     spectroToTime <<- spectroToTime - incrementAmount
@@ -452,7 +449,7 @@ shinyServer(function(input, output, session) {
       currDir <- paste0(depPath, "/", path, unlist(get_selected(input$tree)))
     }
     sound <- readWave(currDir)
-    l <- length(sound@left)
+    l <- length(sound@stereo)
     sr <- sound@samp.rate
     soundDuration <- round(l/sr,2)
     shinyjs::show("previous-spectro-increment")
@@ -506,7 +503,7 @@ shinyServer(function(input, output, session) {
       }
       # Use  from = 1, to = 5, units = "seconds" when playing from a certain time
       wave <- readWave(currDir, from = start, to = end, unit = "seconds")
-      sound <- audioSample(wave@left, wave@samp.rate, wave@bit)
+      sound <- audioSample(wave@stereo, wave@samp.rate, wave@bit)
       if(chartType == "spectro")
       {
         spectroEnd <- currTime + end
@@ -585,8 +582,8 @@ shinyServer(function(input, output, session) {
     
     if (is.null(df)) return(NULL)
     
-    itemsSpecies <- c('Select Species',as.character(df[[1]]))
-    selectInput("speciesDropdown", "Species*",itemsSpecies)
+    itemsType <<- c('Select Species',as.character(df[[1]]))
+    selectInput("speciesDropdown", "Species*",itemsType)
   })
   
   output$speciesType <- renderUI({
@@ -595,7 +592,7 @@ shinyServer(function(input, output, session) {
     
     if (is.null(df)) return(NULL)
     
-    itemsSpecies <- c('Select Type',as.character(df[[3]]))
+    itemsSpecies <<- c('Select Type',as.character(df[[3]]))
     selectInput("typeDropdown", "Type*",itemsSpecies)
   })
   
@@ -658,7 +655,7 @@ shinyServer(function(input, output, session) {
     
     # shinyjs::show("spectro-clip-container")
     if(!is.null(input$plot_brush$xmax)) {
-      spectro(sound, scale = FALSE, osc = FALSE, tlim = c(input$plot_brush$xmin,input$plot_brush$xmax))
+      spectro(sound, f = sound@samp.rate, scale = FALSE, osc = FALSE, tlim = c(input$plot_brush$xmin,input$plot_brush$xmax))
       # oscillo(sound, from=input$plot_brush$xmin, to=input$plot_brush$xmax)
       # shinyjs::show("spectroClip")
       xmin <<- input$plot_brush$xmin
@@ -667,6 +664,12 @@ shinyServer(function(input, output, session) {
       durationSmall <<- round(xmax - xmin, digits = 1)
       shinyjs::show("clipInfo-container")
       shinyjs::show("playButtonClip",anim = FALSE)
+      # Creating a temp wav sound from xmin to xmax
+      temp <- extractWave(sound, from = xmin, to = xmax, xunit = "time")
+      # Writing it to a .wav file
+      writeWave(temp, paste0(getwd(), "/www/temp.wav"))
+      # Creating an audio tag holding that temp.wav file to be played
+      shinyjs::html(id = "playButtonClip", paste0(html = '<audio src="temp.wav" type="audio/wav" controls></audio>'))
     }
     showSpeciesDropdown(xmin, xmax)
   })
@@ -826,7 +829,7 @@ shinyServer(function(input, output, session) {
     }
   })
   
-  projectInfo = function(projectNameArg, projectNotesArg) {
+  projectInfo <- function(projectNameArg, projectNotesArg) {
     data <- formDataProject()
     dataArray <- c(projectNameArg,projectNotesArg)
     dataMatrix <- matrix(dataArray,ncol = 2, byrow = TRUE)
@@ -884,17 +887,23 @@ shinyServer(function(input, output, session) {
         annotationListCsv <<- c(annotationListCsv, normalizePath(paste0(depPath,"/",paste0(newFileName,'.csv'))))
         shinyjs::addClass('completedDepContainer', "open-accordian")
         shinyjs::show("listCompleted")
+        shinyjs::show("annotationDrop")
         
         # Creating the element that will old the name of the completed annotation
-        listEl <- as.character(paste0(tags$div(class="annotations",id=paste0("clip", clipCount), tags$span(paste0(dataSet[[3]], " at " , dataSet[[1]])))))
-        # Storing the element in a list that gets reset every time a new deployment is selected
-        listCompleted <<- c(listCompleted, listEl)
-        # Converting that list to a tagList
-        finalCompleted <- tagList(listCompleted)
-        # Display the list of tag in the UI
-        shinyjs::html('listCompleted', finalCompleted)
-        # shinyjs::onclick(paste0("clipRemove", clipCount), removeAnnotationFromCSV(clipCount), add = TRUE)
-        # tags$head(tags$script(src="removeAnnotation.js"))
+        # listEl <- as.character(paste0(tags$div(class="annotations",id=paste0("clip", clipCount), tags$span(paste0(dataSet[[3]], " at " , dataSet[[1]])))))
+        # # Storing the element in a list that gets reset every time a new deployment is selected
+        # listCompleted <<- c(listCompleted, listEl)
+        # # Converting that list to a tagList
+        # finalCompleted <- tagList(listCompleted)
+        # # Display the list of tag in the UI
+        # shinyjs::html('listCompleted', finalCompleted)
+        # # shinyjs::onclick(paste0("clipRemove", clipCount), removeAnnotationFromCSV(clipCount), add = TRUE)
+        # # tags$head(tags$script(src="removeAnnotation.js"))
+        # 
+        annotationList <- c(paste0(dataSet[[3]], " at " , dataSet[[1]]))
+        annotationListDrop <<- c(annotationListDrop, annotationList)
+        
+        updateSelectizeInput(session, "annotationDrop", label = "Select an annotation", choices =  annotationListDrop, selected = tail(annotationListDrop, 1))
         
         # Create some REACTIVE VALUES
         awsProgressValue <<- reactiveValues()
@@ -903,6 +912,41 @@ shinyServer(function(input, output, session) {
         output$awsProgress <- renderUI({
           progressGroup(text = "Status",    value = awsProgressValue$one,   min = 0, max = 3, color = "green")
         })
+      }
+    }
+  })
+  
+  observeEvent(input$annotationDrop, {
+    # Checking that we actually have an element in the dropdown
+    if(input$annotationDrop != "")
+    {        
+      annData <- read.csv(paste0(depPath,"/",paste0(newFileName,'.csv')))[ ,10:16]
+      # If current selection is last element in dropdown
+      if(str_detect(input$annotationDrop, as.character(tail(annData[[6]], 1))))
+      {
+        annCount <- length(annData[[1]])
+        annLast <- tail(annData, 1)
+        minLast <- tail(annData[[2]], 1)
+        maxLast <- tail(annData[[3]], 1)
+        updateTextInput(session, "timeMin",label = paste("Time Start: "), value = minLast)
+        updateTextInput(session, "timeMax",label = paste("Time End: "), value = maxLast)
+        updateSelectizeInput(session, "typeDropdown", label = "Type*", choices =  itemsSpecies, selected = tail(annData[[5]], 1))
+        updateSelectizeInput(session, "speciesDropdown", label = "Species*", choices =  itemsType, selected = tail(annData[[6]], 1))
+      } else {
+        currentSelectedMin <- trimws(head(strsplit(input$annotationDrop,split="at")[[1]],2)[2], which = "both")
+        currentSelectedSpecies <- trimws(head(strsplit(input$annotationDrop,split="at")[[1]],2)[1], which = "both")
+        df <- as.data.frame(annData)
+        selectedAnn <- df[which(df$Time.Min..s. == currentSelectedMin & df$Species == currentSelectedSpecies), ]
+        annCurr <- selectedAnn$Annotatiion.
+        minCurr <- selectedAnn$Time.Min..s.
+        maxCurr <- selectedAnn$Time.Max..s.
+        typeCurr <- selectedAnn$Type
+        speciesCurr <- selectedAnn$Species
+        updateTextInput(session, "timeMin",label = paste("Time Start: "), value = as.character(minCurr))
+        updateTextInput(session, "timeMax",label = paste("Time End: "), value = as.character(maxCurr))
+        updateSelectizeInput(session, "typeDropdown", label = "Type*", choices =  itemsSpecies, selected = as.character(typeCurr))
+        updateSelectizeInput(session, "speciesDropdown", label = "Species*", choices =  itemsType, selected = as.character(speciesCurr))
+        
       }
     }
   })
@@ -1069,5 +1113,5 @@ shinyServer(function(input, output, session) {
     output$minTime <- renderPrint({cat(as.character(minTimeVar))})
     output$maxTime <- renderPrint({cat(as.character(maxTimeVar))})
   }
-
+  
 })
