@@ -26,6 +26,7 @@ mainDir <<- NULL
 clipCount <<- 0
 newName <- NULL
 autoCSVLoad <<- TRUE
+annotationListDrop <<- list()
 annotationListWav <<- vector()
 annotationListCsv <<- vector()
 annotationListCsvProject <<- vector()
@@ -196,6 +197,8 @@ shinyServer(function(input, output, session) {
   toggleAfterDeploymentCsvLoaded = function() {
     toggleDeploymentSelectDisplay()
     shinyjs::addClass("right-column-title", "completed-step")
+    shinyjs::removeClass("right-column-title", "open-accordian")
+    shinyjs::addClass("right-column-title", "closed-accordian")
   }
   
   toggleAfterDeploymentSelect = function (){
@@ -420,7 +423,7 @@ shinyServer(function(input, output, session) {
       currDir <- paste0(depPath, "/", path, unlist(get_selected(input$tree)))
     }
     sound <- readWave(currDir)
-    l <- length(sound)
+    l <- length(sound@stereo)
     sr <- sound@samp.rate
     soundDuration <- round(l/sr,2)
     spectroToTime <<- spectroToTime - incrementAmount
@@ -442,7 +445,7 @@ shinyServer(function(input, output, session) {
       currDir <- paste0(depPath, "/", path, unlist(get_selected(input$tree)))
     }
     sound <- readWave(currDir)
-    l <- length(sound)
+    l <- length(sound@stereo)
     sr <- sound@samp.rate
     soundDuration <- round(l/sr,2)
     shinyjs::show("previous-spectro-increment")
@@ -496,7 +499,7 @@ shinyServer(function(input, output, session) {
       }
       # Use  from = 1, to = 5, units = "seconds" when playing from a certain time
       wave <- readWave(currDir, from = start, to = end, unit = "seconds")
-      sound <- audioSample(wave@left, wave@samp.rate, wave@bit)
+      sound <- audioSample(wave@stereo, wave@samp.rate, wave@bit)
       if(chartType == "spectro")
       {
         spectroEnd <- currTime + end
@@ -648,7 +651,7 @@ shinyServer(function(input, output, session) {
     
     # shinyjs::show("spectro-clip-container")
     if(!is.null(input$plot_brush$xmax)) {
-      spectro(sound, scale = FALSE, osc = FALSE, tlim = c(input$plot_brush$xmin,input$plot_brush$xmax))
+      spectro(sound, f = sound@samp.rate, scale = FALSE, osc = FALSE, tlim = c(input$plot_brush$xmin,input$plot_brush$xmax))
       # oscillo(sound, from=input$plot_brush$xmin, to=input$plot_brush$xmax)
       # shinyjs::show("spectroClip")
       xmin <<- input$plot_brush$xmin
@@ -880,17 +883,23 @@ shinyServer(function(input, output, session) {
         annotationListCsv <<- c(annotationListCsv, normalizePath(paste0(depPath,"/",paste0(newFileName,'.csv'))))
         shinyjs::addClass('completedDepContainer', "open-accordian")
         shinyjs::show("listCompleted")
+        shinyjs::show("annotationDrop")
         
         # Creating the element that will old the name of the completed annotation
-        listEl <- as.character(paste0(tags$div(class="annotations",id=paste0("clip", clipCount), tags$span(paste0(dataSet[[3]], " at " , dataSet[[1]])))))
-        # Storing the element in a list that gets reset every time a new deployment is selected
-        listCompleted <<- c(listCompleted, listEl)
-        # Converting that list to a tagList
-        finalCompleted <- tagList(listCompleted)
-        # Display the list of tag in the UI
-        shinyjs::html('listCompleted', finalCompleted)
-        # shinyjs::onclick(paste0("clipRemove", clipCount), removeAnnotationFromCSV(clipCount), add = TRUE)
-        # tags$head(tags$script(src="removeAnnotation.js"))
+        # listEl <- as.character(paste0(tags$div(class="annotations",id=paste0("clip", clipCount), tags$span(paste0(dataSet[[3]], " at " , dataSet[[1]])))))
+        # # Storing the element in a list that gets reset every time a new deployment is selected
+        # listCompleted <<- c(listCompleted, listEl)
+        # # Converting that list to a tagList
+        # finalCompleted <- tagList(listCompleted)
+        # # Display the list of tag in the UI
+        # shinyjs::html('listCompleted', finalCompleted)
+        # # shinyjs::onclick(paste0("clipRemove", clipCount), removeAnnotationFromCSV(clipCount), add = TRUE)
+        # # tags$head(tags$script(src="removeAnnotation.js"))
+        # 
+        annotationList <- c(paste0(dataSet[[3]], " at " , dataSet[[1]]))
+        annotationListDrop <<- c(annotationListDrop, annotationList)
+        
+        updateSelectizeInput(session, "annotationDrop", label = "Select an annotation", choices =  annotationListDrop, selected = tail(annotationListDrop, 1))
         
         # Create some REACTIVE VALUES
         awsProgressValue <<- reactiveValues()
@@ -902,6 +911,10 @@ shinyServer(function(input, output, session) {
       }
     }
   })
+  
+  # observeEvent(input$annotationDrop, {
+  #   browser()
+  # })
   
   ################################
   ######## Modal UI
