@@ -946,7 +946,6 @@ shinyServer(function(input, output, session) {
         updateTextInput(session, "timeMax",label = paste("Time End: "), value = as.character(maxCurr))
         updateSelectizeInput(session, "typeDropdown", label = "Type*", choices =  itemsSpecies, selected = as.character(typeCurr))
         updateSelectizeInput(session, "speciesDropdown", label = "Species*", choices =  itemsType, selected = as.character(speciesCurr))
-        
       }
     }
   })
