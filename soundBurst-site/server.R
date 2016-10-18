@@ -26,7 +26,7 @@ setWavPlayer("aplay")
 mainDir <<- NULL
 clipCount <<- 0
 newName <- NULL
-autoCSVLoad <<- TRUE
+autoCSVLoad <<- FALSE
 annotationListDrop <<- list()
 annotationListWav <<- vector()
 annotationListCsv <<- vector()
@@ -251,7 +251,7 @@ shinyServer(function(input, output, session) {
   
   createProjectTree = function () {
     shinyjs::show("progressOne")
-    create_directory_tree(dirPath)
+    # create_directory_tree(dirPath)
     # load("www/dir_tree.Rdata")
     # output$tree <- renderTree(tree, quoted = FALSE)
     shinyjs::addClass("directory", "active-button")
@@ -381,7 +381,9 @@ shinyServer(function(input, output, session) {
             shinyjs::show("playButton",anim = FALSE)
           })
           observeEvent(input$noTimeSubmission,{
-            readSequenceCSV(unlist(get_selected(input$tree)))
+            if (file.exists(unlist(get_selected(input$tree)))) {
+              readSequenceCSV(unlist(get_selected(input$tree)))  
+            }
             spectroToTime <<- soundDuration
             renderSpectro(sound)
             shinyjs::show("playButton",anim = FALSE)
@@ -656,7 +658,7 @@ shinyServer(function(input, output, session) {
     
     # shinyjs::show("spectro-clip-container")
     if(!is.null(input$plot_brush$xmax)) {
-      renderSpectroClip(input$plot_brush$xmin, input$plot_brush$xmax)
+      renderSpectroClip(sound, input$plot_brush$xmin, input$plot_brush$xmax)
       # oscillo(sound, from=input$plot_brush$xmin, to=input$plot_brush$xmax)
       # shinyjs::show("spectroClip")
       xmin <<- input$plot_brush$xmin
@@ -677,9 +679,9 @@ shinyServer(function(input, output, session) {
     showSpeciesDropdown(xmin, xmax)
   })
   
-  renderSpectroClip <- function(xmin, xmax)
+  renderSpectroClip <- function(sound, xmin, xmax)
   {
-    spectro(sound, f = sound@samp.rate, scale = FALSE, osc = FALSE, tlim = c(xmax,xmin))
+    spectro(sound, f = sound@samp.rate, scale = FALSE, osc = FALSE, tlim = c(xmin,xmax))
   }
   
   showSpeciesDropdown = function (xmin, xmax){
@@ -849,8 +851,10 @@ shinyServer(function(input, output, session) {
   # ClipCount -> If we have multiple clips on a given spectro, give a new column name to each clip
   observeEvent(input$speciesDropSubmit, {
     fileFullName <- unlist(get_selected(input$tree))
-    if (is.null(siteDF) || !autoCSVLoad) {
-      shinyjs::show("site-info-warning-container")
+    if (is.null(siteDF) ) {
+      if(!autoCSVLoad) {
+        shinyjs::show("site-info-warning-container") 
+      }
     } else {
       shinyjs::enable("aws-upload-button")
       dataSet <- formDataSpecies()
