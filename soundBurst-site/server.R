@@ -274,7 +274,7 @@ shinyServer(function(input, output, session) {
       fileDate <- gsub(" ", "-",minTimeVar, fixed = TRUE)
       fileDate <- gsub(":", "-",fileDate, fixed = TRUE)
       depFileName <- paste0(projectName,"_",deploymentName,"_",fileDate)
-      depFilePath <- paste0(depPath,"/", depFileName, ".csv")
+      depFilePath <<- paste0(depPath,"/", depFileName, ".csv")
       updateTextInput(session, inputId = "name", label = NULL, value = deploymentName)
       if(file.exists(paste0(depPath,"/", depFileName, ".csv"))) { # CHANGE
         readDeploymentCSV(depPath, depFilePath)
@@ -381,7 +381,7 @@ shinyServer(function(input, output, session) {
             shinyjs::show("playButton",anim = FALSE)
           })
           observeEvent(input$noTimeSubmission,{
-            if (file.exists(unlist(get_selected(input$tree)))) {
+            if (file.exists(depFilePath)) {
               readSequenceCSV(unlist(get_selected(input$tree)))  
             }
             spectroToTime <<- soundDuration
@@ -727,12 +727,6 @@ shinyServer(function(input, output, session) {
   observeEvent(input$deploymentInfo, {
     # Getting file list
     files <- list.files(depPath, all.files=F, recursive=T, include.dirs=T)
-    # Getting the file name
-    # fileFullName <- unlist(get_selected(input$tree))
-    # filePathFull <- paste0(depPath,"/",fileFullName)
-    # Creating the path with the file name
-    # Adding the file to the list of annotated files for later zipping and S3 upload
-    # annotationListWav <<- c(annotationListWav, normalizePath(filePathFull))
     # Getting the site data
     data <- formDataSite()
     if (data[[1]] == "") {
@@ -767,20 +761,16 @@ shinyServer(function(input, output, session) {
       fileDate <- gsub(":", "-",fileDate, fixed = TRUE)
       # Creating a new filename out of the metadata
       newFileName <<- paste0(projectName,"_",data[[1]],"_",fileDate)
-      # shinyjs::html("right-column-title",newFileName)
       # Creating the new file path
       newFullFilePath <- paste0(depPath,"/",newFileName)
-      
       # Checking for file duplicate
       fileNameDuplicate <- 0
-      
       # Checking for file duplicates within that folder
       for (i in 1:length(files)) {
         if (files[i] == paste0(newFileName,".csv")) {
           fileNameDuplicate <- as.numeric(fileNameDuplicate) + 1
         }
       }
-      
       # Checking for file duplication, alert if any; otherwise create the file
       if (fileNameDuplicate == 0 || autoCSVLoad) {
         writeDeploymentCSV(siteDataTable)
@@ -1114,7 +1104,7 @@ shinyServer(function(input, output, session) {
   
   readSequenceCSV <- function(wavFileName)
   { 
-    annData <- read.csv(paste0(depPath,"/",paste0(newFileName,'.csv')))
+    annData <- read.csv(depFilePath)
     # Check if we have annotation files
     if("File.Name" %in% colnames(annData)){
       annData <- annData[ ,9:16]
