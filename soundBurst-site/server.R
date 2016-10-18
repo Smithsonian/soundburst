@@ -30,6 +30,9 @@ annotationListDrop <<- list()
 annotationListWav <<- vector()
 annotationListCsv <<- vector()
 annotationListCsvProject <<- vector()
+# Create some REACTIVE VALUES
+progressValue <<- reactiveValues()
+progressValue$one <<- 0
 
 # This is used to connect correctly with AWS
 set_config( config( ssl_verifypeer = 0L ) )
@@ -274,9 +277,9 @@ shinyServer(function(input, output, session) {
       updateTextInput(session, inputId = "name", label = NULL, value = deploymentName)
       if(file.exists(paste0(depPath,"/", depFileName, ".csv"))) { # CHANGE
         readDeploymentCSV(depPath, depFilePath)
+        findFileCount()
         return()
       }
-      findFileCount()
     }
   })
   
