@@ -1,5 +1,5 @@
 #sound <- readWave("/Users/tgirgin/1/1/deployment/BLAN01_2015-05-16_073100_EDT.wav")
-#test <- meanspec(sound@left, f = sound@samp.rate)
+#test <- meanspec(sound, f = sound@samp.rate)
 #ts <- spectru(test)
 
 library(shiny)
@@ -17,12 +17,9 @@ library(audio)
 library(sound)
 source("createDirectoryTree.r")
 source("playSound.r")
-# On a linux distribution, this will have to be changed to a media player that is installed. E.g., setWavPlayer("totem")
-setWavPlayer("afplay")
+# On a linux distribution, this will have to be changed to a media player that is installed. E.g., setWavPlayer("aplay")
+setWavPlayer("aplay")
 
-# Initializing V8 for javascript interaction
-# ctx <- V8::v8()
-# ctx$console()
 
 # Some global variables
 mainDir <<- NULL
@@ -225,6 +222,9 @@ shinyServer(function(input, output, session) {
   test <- shinyDirChoose(input, 'directory', updateFreq=60000, session=session, root=c(home=mainDir), restrictions=system.file(package='base'), filetypes=c('', '.wav'))
   
   observeEvent(input$directory, {
+    # Removing any .wav files that were copied in the /www folder for sound play
+    wavToRemove <-list.files(paste0(getwd(), "/www"), pattern='.wav', full.names = TRUE)
+    unlink(wavToRemove)
     getOS()
     dirPath <<- parseDirPath(roots=c(home=mainDir), input$directory)
     # Get folder name -> which is also the project name
@@ -350,7 +350,7 @@ shinyServer(function(input, output, session) {
         waveDate <<- as.character(as.POSIXct(file.info(currDir)[[4]], origin="1970-01-01", format = "%m/%d/%y"), "%m/%d/%y")
         waveStartTime <<- as.character(as.POSIXct(file.info(currDir)[[4]], origin="1970-01-01", format = "%H:%M:%S %p"), format = "%H:%M:%S %p")
         waveEndTime <<- as.character(as.POSIXct((file.info(currDir)[[4]] + durationMain), origin="1970-01-01", format = "%H:%M:%S %p"), format = "%H:%M:%S %p")
-        l <- length(sound@left)
+        l <- length(sound)
         sr <- sound@samp.rate
         soundDuration <- round(l/sr,2)
         # TODO Maybe make a function out of this? Might make the code cleaner
@@ -358,11 +358,14 @@ shinyServer(function(input, output, session) {
           minuteDuration <- round(soundDuration/60)
           shinyjs::html("time-box-label", paste0("This file is ", minuteDuration, " minutes long. Would you like to increment the display?"))
           shinyjs::show("time-box-container", anim = TRUE)
+          
+          # Listener for "Select a Sequence"
           observeEvent(input$spectroTimeSubmit, {
             # incrementAmount <<- (as.numeric(input$spectroEndTime)*60)
+            file.copy(currDir, paste0(getwd(), "/www"))
+            shinyjs::html(id = "playButton", paste0(html = '<audio controls preload="auto"><source src="', unlist(get_selected(input$tree)), '" type="audio/wav"></audio>'))
             incrementAmount <<- (soundDuration/as.numeric(input$spectroEndTime))
             spectroToTime <<- incrementAmount
-            browser()
             renderSpectro(sound)
             if (soundDuration > incrementAmount) {
               shinyjs::show("spectro-increment-container")
@@ -374,6 +377,8 @@ shinyServer(function(input, output, session) {
             spectroToTime <<- soundDuration
             renderSpectro(sound)
             shinyjs::show("playButton",anim = FALSE)
+            file.copy(currDir, paste0(getwd(), "/www"))
+            shinyjs::html(id = "playButton", paste0(html = '<audio controls preload="auto"><source src="', unlist(get_selected(input$tree)), '" type="audio/wav"></audio>'))
           })
         } else {
           spectroToTime <<- soundDuration
@@ -415,7 +420,7 @@ shinyServer(function(input, output, session) {
       currDir <- paste0(depPath, "/", path, unlist(get_selected(input$tree)))
     }
     sound <- readWave(currDir)
-    l <- length(sound@left)
+    l <- length(sound)
     sr <- sound@samp.rate
     soundDuration <- round(l/sr,2)
     spectroToTime <<- spectroToTime - incrementAmount
@@ -437,7 +442,7 @@ shinyServer(function(input, output, session) {
       currDir <- paste0(depPath, "/", path, unlist(get_selected(input$tree)))
     }
     sound <- readWave(currDir)
-    l <- length(sound@left)
+    l <- length(sound)
     sr <- sound@samp.rate
     soundDuration <- round(l/sr,2)
     shinyjs::show("previous-spectro-increment")
@@ -652,6 +657,12 @@ shinyServer(function(input, output, session) {
       durationSmall <<- round(xmax - xmin, digits = 1)
       shinyjs::show("clipInfo-container")
       shinyjs::show("playButtonClip",anim = FALSE)
+      # Creating a temp wav sound from xmin to xmax
+      temp <- extractWave(sound, from = xmin, to = xmax, xunit = "time")
+      # Writing it to a .wav file
+      writeWave(temp, paste0(getwd(), "/www/temp.wav"))
+      # Creating an audio tag holding that temp.wav file to be played
+      shinyjs::html(id = "playButtonClip", paste0(html = '<audio src="temp.wav" type="audio/wav" controls></audio>'))
     }
     showSpeciesDropdown(xmin, xmax)
   })

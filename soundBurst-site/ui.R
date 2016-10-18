@@ -126,6 +126,7 @@ dashboardPage(
       ),
     bsModal(id = "warningBucket", trigger = "", title = "Error", uiOutput("warningBucket")),
     div(id = "playButton"),
+    # tags$audio(src = "sound.mp3", type = "audio/mp3", autoplay = NA, controls = T),
     hidden(div(id = "pauseButton")),
     div(id = "mainPlotContainer",
       # img(src = "ajax-loader.gif", id = "plotSpinner"),
