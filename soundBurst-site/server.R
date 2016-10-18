@@ -578,8 +578,8 @@ shinyServer(function(input, output, session) {
     
     if (is.null(df)) return(NULL)
     
-    itemsSpecies <- c('Select Species',as.character(df[[1]]))
-    selectInput("speciesDropdown", "Species*",itemsSpecies)
+    itemsType <<- c('Select Species',as.character(df[[1]]))
+    selectInput("speciesDropdown", "Species*",itemsType)
   })
   
   output$speciesType <- renderUI({
@@ -588,7 +588,7 @@ shinyServer(function(input, output, session) {
     
     if (is.null(df)) return(NULL)
     
-    itemsSpecies <- c('Select Type',as.character(df[[3]]))
+    itemsSpecies <<- c('Select Type',as.character(df[[3]]))
     selectInput("typeDropdown", "Type*",itemsSpecies)
   })
   
@@ -912,9 +912,21 @@ shinyServer(function(input, output, session) {
     }
   })
   
-  # observeEvent(input$annotationDrop, {
-  #   browser()
-  # })
+  observeEvent(input$annotationDrop, {
+    if(length(input$annotationDrop) > 1)
+    {
+      read.csv(paste0(depPath,"/",paste0(newFileName,'.csv')))[ ,10:16]
+      # if(input$annotationDrop == )
+      annCount <- length(test[[1]])
+      annLast <- tail(test, 1)
+      minLast <- tail(test[[2]], 1)
+      maxLast <- tail(test[[3]], 1)
+      updateTextInput(session, "timeMin",label = paste("Time Start: "), value = minLast)
+      updateTextInput(session, "timeMax",label = paste("Time End: "), value = maxLast)
+      updateSelectizeInput(session, "typeDropdown", label = "Type*", choices =  itemsType, selected = tail(test[[5]], 1))
+      updateSelectizeInput(session, "speciesDropdown", label = "Species*", choices =  itemsSpecies, selected = tail(test[[6]], 1))
+    }
+})
   
   ################################
   ######## Modal UI
