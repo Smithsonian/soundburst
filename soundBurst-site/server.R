@@ -418,6 +418,18 @@ shinyServer(function(input, output, session) {
     })
   }
   
+  renderSpectroClip = function(sound, xmin, xmax){
+    output$spectroClip <- renderPlot({
+      # shinyjs::hide("time-box-container", anim = TRUE)
+      # anottationCount <<- 0
+      spectro(sound, osc = TRUE, scale = FALSE, tlim = c(xmin,xmax))
+      # shinyjs::show("complete-deployment")
+      
+      # shinyjs::onclick("complete-deployment", increaseStatusBar())
+      # spectroFromTime <<- spectroToTime
+    })
+  }
+  
   shinyjs::onclick("previous-spectro-increment", showPreviousSpectroIncrement())
   shinyjs::onclick("next-spectro-increment", showNextSpectroIncrement())
   
@@ -645,7 +657,8 @@ shinyServer(function(input, output, session) {
   #     }
   #   })
   # 
-  # This creates the oscillo clips after brush
+  
+  # This creates the oscillo after brush
   output$spectroClip <- renderPlot({
     path <- getPath(get_selected(input$tree, "names"))
     if(!is.null(newName)) {
@@ -658,7 +671,7 @@ shinyServer(function(input, output, session) {
     
     # shinyjs::show("spectro-clip-container")
     if(!is.null(input$plot_brush$xmax)) {
-      renderSpectroClip(sound, input$plot_brush$xmin, input$plot_brush$xmax)
+      spectro(sound, osc = TRUE, scale = FALSE, tlim = c(input$plot_brush$xmin,input$plot_brush$xmax))
       # oscillo(sound, from=input$plot_brush$xmin, to=input$plot_brush$xmax)
       # shinyjs::show("spectroClip")
       xmin <<- input$plot_brush$xmin
@@ -678,11 +691,7 @@ shinyServer(function(input, output, session) {
     }
     showSpeciesDropdown(xmin, xmax)
   })
-  
-  renderSpectroClip <- function(sound, xmin, xmax)
-  {
-    spectro(sound, f = sound@samp.rate, scale = FALSE, osc = FALSE, tlim = c(xmin,xmax))
-  }
+
   
   showSpeciesDropdown = function (xmin, xmax){
     shinyjs::show("clip-species-dropdown")
@@ -907,7 +916,7 @@ shinyServer(function(input, output, session) {
     # Checking that we actually have an element in the dropdown
     if(input$annotationDrop != "")
     {        
-      annData <- read.csv(paste0(depPath,"/",paste0(newFileName,'.csv')))[ ,10:16]
+      annData <- read.csv(depFilePath)[ ,10:16]
       # If current selection is last element in dropdown
       if(str_detect(input$annotationDrop, as.character(tail(annData[[6]], 1))))
       {
@@ -1113,7 +1122,7 @@ shinyServer(function(input, output, session) {
       df <- as.data.frame(annData)
       selectedWav <- df[which(df$File.Name == wavFileName), ]
       # If there are no annotations for that sequence
-      if(length(selectedWav) == 0)
+      if(length(selectedWav$Annotation.) == 0)
       {
         return()
       }
@@ -1129,6 +1138,8 @@ shinyServer(function(input, output, session) {
       maxLast <- tail(selectedWav[[4]], 1)
       typeLast <- tail(selectedWav[[5]], 1)
       speciesLast <- tail(selectedWav[[6]], 1)
+      sound <- readWave(paste0(depPath, "/", wavFileName), from = minLast, to = maxLast, units = "seconds")
+      renderSpectroClip(sound, minLast, maxLast)
       
       shinyjs::show(id = "spectroClip", anim = FALSE)
       shinyjs::show(id = "clipInfo-container", anim = FALSE)
