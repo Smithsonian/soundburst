@@ -656,7 +656,7 @@ shinyServer(function(input, output, session) {
     
     # shinyjs::show("spectro-clip-container")
     if(!is.null(input$plot_brush$xmax)) {
-      spectro(sound, f = sound@samp.rate, scale = FALSE, osc = FALSE, tlim = c(input$plot_brush$xmin,input$plot_brush$xmax))
+      renderSpectroClip(input$plot_brush$xmin, input$plot_brush$xmax)
       # oscillo(sound, from=input$plot_brush$xmin, to=input$plot_brush$xmax)
       # shinyjs::show("spectroClip")
       xmin <<- input$plot_brush$xmin
@@ -671,9 +671,16 @@ shinyServer(function(input, output, session) {
       writeWave(temp, paste0(getwd(), "/www/temp.wav"))
       # Creating an audio tag holding that temp.wav file to be played
       shinyjs::html(id = "playButtonClip", paste0(html = '<audio src="temp.wav" type="audio/wav" controls></audio>'))
+    } else {
+      # browser()
     }
     showSpeciesDropdown(xmin, xmax)
   })
+  
+  renderSpectroClip <- function(xmin, xmax)
+  {
+    spectro(sound, f = sound@samp.rate, scale = FALSE, osc = FALSE, tlim = c(xmax,xmin))
+  }
   
   showSpeciesDropdown = function (xmin, xmax){
     shinyjs::show("clip-species-dropdown")
@@ -1129,6 +1136,8 @@ shinyServer(function(input, output, session) {
       typeLast <- tail(selectedWav[[5]], 1)
       speciesLast <- tail(selectedWav[[6]], 1)
       
+      shinyjs::show(id = "spectroClip", anim = FALSE)
+      shinyjs::show(id = "clipInfo-container", anim = FALSE)
       updateSelectizeInput(session, "annotationDrop", label = "Select an annotation", choices =  currAnnList, selected = tail(annotationListDrop, 1))
       updateTextInput(session, "timeMin",label = paste("Time Start: "), value = as.character(minLast))
       updateTextInput(session, "timeMax",label = paste("Time End: "), value = as.character(maxLast))
