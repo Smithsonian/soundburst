@@ -167,7 +167,7 @@ shinyServer(function(input, output, session) {
   }
   
   toggleCompletedDeployment = function() {
-    shinyjs::toggle("listCompleted", anim = TRUE)
+    shinyjs::toggle("annotationDrop", anim = TRUE)
     shinyjs::toggleClass("completedDepContainer", "open-accordian")
     shinyjs::toggleClass("completedDepContainer", "closed-accordian")
   }
@@ -872,7 +872,7 @@ shinyServer(function(input, output, session) {
         write.csv(siteDF, paste0(depPath,"/",paste0(newFileName,'.csv')), row.names = FALSE)
         annotationListCsv <<- c(annotationListCsv, normalizePath(paste0(depPath,"/",paste0(newFileName,'.csv'))))
         shinyjs::addClass('completedDepContainer', "open-accordian")
-        shinyjs::show("listCompleted")
+        shinyjs::removeClass('completedDepContainer', "closed-accordian")
         shinyjs::show("annotationDrop")
         
         # Creating the element that will old the name of the completed annotation
@@ -1065,6 +1065,9 @@ shinyServer(function(input, output, session) {
   }
   
   readDeploymentCSV <- function(depPath, depFilePath) {
+    shinyjs::hide("species-sidebox-container", anim = TRUE)
+    shinyjs::toggleClass("select-dep-container", "open-accordian")
+    shinyjs::toggleClass("select-dep-container", "closed-accordian")
     deploymentCSV <- read.csv(paste0(depFilePath))
     updateTextInput(session, inputId = "name", label = NULL, value = deploymentCSV$Name[[1]])
     updateTextInput(session, inputId = "lat", label = NULL, value = as.character(deploymentCSV$Lat[[1]]))

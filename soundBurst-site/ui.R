@@ -102,7 +102,7 @@ dashboardPage(
            ),
            div(id = "completed-container",
                div(id = "completedDepContainer", class = "closed-accordian unfinished-step", "View Annotations"),
-               selectizeInput("annotationDrop", "Select an annotation", choices = NULL)
+               hidden(selectizeInput("annotationDrop", "Select an annotation", choices = NULL))
                # div(id = "listCompleted")
            ),
            # div(id = "complete-deployment", "Complete Deployment"),
