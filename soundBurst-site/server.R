@@ -120,7 +120,6 @@ shinyServer(function(input, output, session) {
   shinyjs::hide("tree")
   shinyjs::hide("directorypath")
   shinyjs::hide(id = "playButton",anim = FALSE)
-  shinyjs::hide(id = "playButtonClip",anim = FALSE)
   shinyjs::hide(id = "playButtonClipZoom", anim = FALSE)
   shinyjs::onclick("aws-upload-button", resetAwsCount())
   shinyjs::disable("aws-upload-button")
@@ -506,7 +505,6 @@ shinyServer(function(input, output, session) {
       }
       else {
         shinyjs::show(id = "pauseButtonClip",anim = TRUE)
-        shinyjs::hide(id = "playButtonClip",anim = FALSE)
       }
     }
     else {
@@ -533,7 +531,6 @@ shinyServer(function(input, output, session) {
       }
       else {
         shinyjs::show(id = "pauseButtonClip",anim = TRUE)
-        shinyjs::hide(id = "playButtonClip",anim = FALSE)
       }
       audioSound <<- audio::play(sound)
       audioSound
@@ -659,6 +656,10 @@ shinyServer(function(input, output, session) {
   #   })
   # 
   
+  observeEvent(input$plot_brush$xmin, {
+    renderSpectroClip(NULL, input$plot_brush$xmin, input$plot_brush$xmax, FALSE)
+  });
+  
   # This creates the oscillo after brush
   renderSpectroClip = function(sound, xmin, xmax, readSequenceBool)
   {
@@ -679,12 +680,12 @@ shinyServer(function(input, output, session) {
       sound <- readWave(currDir)
       
       # shinyjs::show("spectro-clip-container")
-      if(!is.null(input$plot_brush$xmax)) {
-        spectro(sound, osc = TRUE, scale = FALSE, tlim = c(input$plot_brush$xmin,input$plot_brush$xmax))
+      if(!is.null(xmax)) {
+        spectro(sound, f = sound@samp.rate, osc = TRUE, scale = FALSE, tlim = c(floor(as.integer(xmin)),floor(as.integer(xmax))))
         # oscillo(sound, from=input$plot_brush$xmin, to=input$plot_brush$xmax)
         # shinyjs::show("spectroClip")
-        xmin <<- input$plot_brush$xmin
-        xmax <<- input$plot_brush$xmax
+        # xmin <<- input$plot_brush$xmin
+        # xmax <<- input$plot_brush$xmax
         # Getting the duration of the clipped graph
         durationSmall <<- round(xmax - xmin, digits = 1)
         shinyjs::show("clipInfo-container")
@@ -927,6 +928,7 @@ shinyServer(function(input, output, session) {
     if(input$annotationDrop != "")
     {        
       annData <- read.csv(depFilePath)[ ,10:16]
+      sound <- readWave(paste0(depPath, "/", unlist(get_selected(input$tree))))
       # If current selection is last element in dropdown
       if(str_detect(input$annotationDrop, as.character(tail(annData[[6]], 1))))
       {
@@ -938,6 +940,13 @@ shinyServer(function(input, output, session) {
         updateTextInput(session, "timeMax",label = paste("Time End: "), value = maxLast)
         updateSelectizeInput(session, "typeDropdown", label = "Type*", choices =  itemsSpecies, selected = tail(annData[[5]], 1))
         updateSelectizeInput(session, "speciesDropdown", label = "Species*", choices =  itemsType, selected = tail(annData[[6]], 1))
+        # Creating a temp wav sound from xmin to xmax
+        temp <- extractWave(sound, from = minLast, to = maxLast, xunit = "time")
+        # Writing it to a .wav file
+        writeWave(temp, paste0(getwd(), "/www/temp.wav"))
+        # Creating an audio tag holding that temp.wav file to be played
+        shinyjs::show("playButtonClip",anim = FALSE)
+        shinyjs::html(id = "playButtonClip", paste0(html = '<audio src="temp.wav" type="audio/wav" controls></audio>'))
       } else {
         currentSelectedMin <- trimws(head(strsplit(input$annotationDrop,split="at")[[1]],2)[2], which = "both")
         currentSelectedSpecies <- trimws(head(strsplit(input$annotationDrop,split="at")[[1]],2)[1], which = "both")
@@ -948,11 +957,20 @@ shinyServer(function(input, output, session) {
         maxCurr <- selectedAnn$Time.Max..s.
         typeCurr <- selectedAnn$Type
         speciesCurr <- selectedAnn$Species
+        renderSpectroClip(sound, minCurr, maxCurr, TRUE)
         updateTextInput(session, "timeMin",label = paste("Time Start: "), value = as.character(minCurr))
         updateTextInput(session, "timeMax",label = paste("Time End: "), value = as.character(maxCurr))
         updateSelectizeInput(session, "typeDropdown", label = "Type*", choices =  itemsSpecies, selected = as.character(typeCurr))
         updateSelectizeInput(session, "speciesDropdown", label = "Species*", choices =  itemsType, selected = as.character(speciesCurr))
+        # Creating a temp wav sound from xmin to xmax
+        temp <- extractWave(sound, from = minCurr, to = maxCurr, xunit = "time")
+        # Writing it to a .wav file
+        writeWave(temp, paste0(getwd(), "/www/temp.wav"))
+        # Creating an audio tag holding that temp.wav file to be played
+        shinyjs::show("playButtonClip",anim = FALSE)
+        shinyjs::html(id = "playButtonClip", paste0(html = '<audio src="temp.wav" type="audio/wav" controls></audio>'))
       }
+
     }
   })
   
@@ -1138,7 +1156,7 @@ shinyServer(function(input, output, session) {
       }
       currAnnSize <- length(selectedWav$Annotation.)
       currAnnList <- list()
-      for(i in currAnnSize) {
+      for(i in 1:currAnnSize) {
         currSpeciesList <- selectedWav$Species[i]
         currMinList <- selectedWav$Time.Min..s.[i]
         currList <- paste0(currSpeciesList, " at ", currMinList)
@@ -1151,6 +1169,13 @@ shinyServer(function(input, output, session) {
       sound <- readWave(paste0(depPath, "/", wavFileName))
       readSequenceBool <- TRUE
       renderSpectroClip(sound, minLast, maxLast, readSequenceBool)
+      # Creating a temp wav sound from xmin to xmax
+      temp <- extractWave(sound, from = minLast, to = maxLast, xunit = "time")
+      # Writing it to a .wav file
+      writeWave(temp, paste0(getwd(), "/www/temp.wav"))
+      # Creating an audio tag holding that temp.wav file to be played
+      shinyjs::show("playButtonClip",anim = FALSE)
+      shinyjs::html(id = "playButtonClip", paste0(html = '<audio src="temp.wav" type="audio/wav" controls></audio>'))
       
       shinyjs::show(id = "spectroClip", anim = FALSE)
       shinyjs::show(id = "clipInfo-container", anim = FALSE)

@@ -141,7 +141,7 @@ dashboardPage(
                 useShinyjs(),
                 fluidRow(
                   column(width = 8, id = "oscillo-clip-container",
-                         div(id = "playButtonClip"),
+                         hidden(div(id = "playButtonClip")),
                          hidden(div(id = "pauseButtonClip")),
                          plotOutput("spectroClip")
                   ),
