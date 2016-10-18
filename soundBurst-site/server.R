@@ -381,6 +381,7 @@ shinyServer(function(input, output, session) {
             shinyjs::show("playButton",anim = FALSE)
           })
           observeEvent(input$noTimeSubmission,{
+            readSequenceCSV(unlist(get_selected(input$tree)))
             spectroToTime <<- soundDuration
             renderSpectro(sound)
             shinyjs::show("playButton",anim = FALSE)
@@ -773,22 +774,7 @@ shinyServer(function(input, output, session) {
       
       # Checking for file duplication, alert if any; otherwise create the file
       if (fileNameDuplicate == 0 || autoCSVLoad) {
-        shinyjs::hide("file-name-warning-container")
-        
-        count <- 0
-        write.csv(siteDataTable, paste0(depPath,"/",paste0(newFileName,'.csv')), row.names = FALSE)
-        
-        if(!is.null(newName)) {
-          shinyjs::html("titleHeader",newName)
-        }
-        else {
-          shinyjs::html("titleHeader",unlist(get_selected(input$tree)))
-        }
-        shinyjs::addClass("deploymentInfo", "active-button")
-        shinyjs::hide("species-sidebox-container")
-        shinyjs::addClass("right-column-title", "completed-step")
-        shinyjs::toggleClass("right-column-title", "open-accordian")
-        shinyjs::toggleClass("right-column-title", "closed-accordian")
+        writeDeploymentCSV(siteDataTable)
       }
       else if(!autoCSVLoad) {
         shinyjs::show("file-name-warning-container")
@@ -1074,11 +1060,11 @@ shinyServer(function(input, output, session) {
       updateTextInput(session, inputId = "projectName", label = NULL, value = projectCSV$Project.Name[[1]])
       shinyjs::html("projectNotes", projectCSV$Project.Notes[[1]])
       toggleAfterProjectCsvLoaded()
-      projectInfo(projectCSV$Project.Name[[1]], projectCSV$Project.Notes[[1]])
+      # projectInfo(projectCSV$Project.Name[[1]], projectCSV$Project.Notes[[1]])
     }
   }
   
-  readDeploymentCSV = function(depPath, depFilePath) {
+  readDeploymentCSV <- function(depPath, depFilePath) {
     deploymentCSV <- read.csv(paste0(depFilePath))
     updateTextInput(session, inputId = "name", label = NULL, value = deploymentCSV$Name[[1]])
     updateTextInput(session, inputId = "lat", label = NULL, value = as.character(deploymentCSV$Lat[[1]]))
@@ -1088,6 +1074,44 @@ shinyServer(function(input, output, session) {
     toggleAfterDeploymentCsvLoaded()
     autoCSVLoad <<- TRUE
     # deploymentInfo(projectCSV$Project.Name[[1]], projectCSV$Site.Notes[[1]])
+  }
+  
+  writeDeploymentCSV <- function(siteDataTable) {
+    shinyjs::hide("file-name-warning-container")
+    
+    count <- 0
+    if(!autoCSVLoad)
+    {
+      write.csv(siteDataTable, paste0(depPath,"/",paste0(newFileName,'.csv')), row.names = FALSE)
+    }
+    
+    if(!is.null(newName)) {
+      shinyjs::html("titleHeader",newName)
+    }
+    else {
+      shinyjs::html("titleHeader",unlist(get_selected(input$tree)))
+    }
+    shinyjs::addClass("deploymentInfo", "active-button")
+    shinyjs::hide("species-sidebox-container")
+    shinyjs::addClass("right-column-title", "completed-step")
+    shinyjs::toggleClass("right-column-title", "open-accordian")
+    shinyjs::toggleClass("right-column-title", "closed-accordian")
+  }
+  
+  readSequenceCSV <- function(wavFileName)
+  { 
+    annData <- read.csv(paste0(depPath,"/",paste0(newFileName,'.csv')))
+    # Check if we have annotation files
+    if("File.Name" %in% colnames(annData)){
+      annData <- read.csv(paste0(depPath,"/",paste0(newFileName,'.csv')))[ ,9:16]
+      currentSelectedMin <- trimws(head(strsplit(input$annotationDrop,split="at")[[1]],2)[2], which = "both")
+      currentSelectedSpecies <- trimws(head(strsplit(input$annotationDrop,split="at")[[1]],2)[1], which = "both")
+      df <- as.data.frame(annData)
+      # selectedAnn <- df[which(df$ == currentSelectedMin & df$Species == currentSelectedSpecies), ]
+    }
+    else { # Otherwise just return since nothing to read
+      return()
+    }
   }
   
   findFileInfo = function() {
