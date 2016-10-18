@@ -27,6 +27,7 @@ mainDir <<- NULL
 clipCount <<- 0
 newName <- NULL
 autoCSVLoad <<- FALSE
+readSequenceBool <<- FALSE
 annotationListDrop <<- list()
 annotationListWav <<- vector()
 annotationListCsv <<- vector()
@@ -418,17 +419,17 @@ shinyServer(function(input, output, session) {
     })
   }
   
-  renderSpectroClip = function(sound, xmin, xmax){
-    output$spectroClip <- renderPlot({
-      # shinyjs::hide("time-box-container", anim = TRUE)
-      # anottationCount <<- 0
-      spectro(sound, osc = TRUE, scale = FALSE, tlim = c(xmin,xmax))
-      # shinyjs::show("complete-deployment")
-      
-      # shinyjs::onclick("complete-deployment", increaseStatusBar())
-      # spectroFromTime <<- spectroToTime
-    })
-  }
+  # renderSpectroClip = function(sound, xmin, xmax){
+  #   output$spectroClip <- renderPlot({
+  #     # shinyjs::hide("time-box-container", anim = TRUE)
+  #     # anottationCount <<- 0
+  #     spectro(sound, osc = TRUE, scale = FALSE, tlim = c(xmin,xmax))
+  #     # shinyjs::show("complete-deployment")
+  #     
+  #     # shinyjs::onclick("complete-deployment", increaseStatusBar())
+  #     # spectroFromTime <<- spectroToTime
+  #   })
+  # }
   
   shinyjs::onclick("previous-spectro-increment", showPreviousSpectroIncrement())
   shinyjs::onclick("next-spectro-increment", showNextSpectroIncrement())
@@ -659,38 +660,47 @@ shinyServer(function(input, output, session) {
   # 
   
   # This creates the oscillo after brush
-  output$spectroClip <- renderPlot({
-    path <- getPath(get_selected(input$tree, "names"))
-    if(!is.null(newName)) {
-      currDir <- paste0(depPath, "/", path, newName)
-    }
-    else {
-      currDir <- paste0(depPath, "/", path, unlist(get_selected(input$tree)))
-    }
-    sound <- readWave(currDir)
-    
-    # shinyjs::show("spectro-clip-container")
-    if(!is.null(input$plot_brush$xmax)) {
-      spectro(sound, osc = TRUE, scale = FALSE, tlim = c(input$plot_brush$xmin,input$plot_brush$xmax))
-      # oscillo(sound, from=input$plot_brush$xmin, to=input$plot_brush$xmax)
-      # shinyjs::show("spectroClip")
-      xmin <<- input$plot_brush$xmin
-      xmax <<- input$plot_brush$xmax
-      # Getting the duration of the clipped graph
-      durationSmall <<- round(xmax - xmin, digits = 1)
-      shinyjs::show("clipInfo-container")
-      shinyjs::show("playButtonClip",anim = FALSE)
-      # Creating a temp wav sound from xmin to xmax
-      temp <- extractWave(sound, from = xmin, to = xmax, xunit = "time")
-      # Writing it to a .wav file
-      writeWave(temp, paste0(getwd(), "/www/temp.wav"))
-      # Creating an audio tag holding that temp.wav file to be played
-      shinyjs::html(id = "playButtonClip", paste0(html = '<audio src="temp.wav" type="audio/wav" controls></audio>'))
-    } else {
-      # browser()
-    }
-    showSpeciesDropdown(xmin, xmax)
-  })
+  renderSpectroClip = function(sound, xmin, xmax, readSequenceBool)
+  {
+    output$spectroClip <- renderPlot({
+      if(readSequenceBool)
+      {
+        spectro(sound, osc = TRUE, scale = FALSE, tlim = c(xmin,xmax))
+        readSequenceBool <<- FALSE
+        return()
+      }
+      path <- getPath(get_selected(input$tree, "names"))
+      if(!is.null(newName)) {
+        currDir <- paste0(depPath, "/", path, newName)
+      }
+      else {
+        currDir <- paste0(depPath, "/", path, unlist(get_selected(input$tree)))
+      }
+      sound <- readWave(currDir)
+      
+      # shinyjs::show("spectro-clip-container")
+      if(!is.null(input$plot_brush$xmax)) {
+        spectro(sound, osc = TRUE, scale = FALSE, tlim = c(input$plot_brush$xmin,input$plot_brush$xmax))
+        # oscillo(sound, from=input$plot_brush$xmin, to=input$plot_brush$xmax)
+        # shinyjs::show("spectroClip")
+        xmin <<- input$plot_brush$xmin
+        xmax <<- input$plot_brush$xmax
+        # Getting the duration of the clipped graph
+        durationSmall <<- round(xmax - xmin, digits = 1)
+        shinyjs::show("clipInfo-container")
+        shinyjs::show("playButtonClip",anim = FALSE)
+        # Creating a temp wav sound from xmin to xmax
+        temp <- extractWave(sound, from = xmin, to = xmax, xunit = "time")
+        # Writing it to a .wav file
+        writeWave(temp, paste0(getwd(), "/www/temp.wav"))
+        # Creating an audio tag holding that temp.wav file to be played
+        shinyjs::html(id = "playButtonClip", paste0(html = '<audio src="temp.wav" type="audio/wav" controls></audio>'))
+      } else {
+        # browser()
+      }
+      showSpeciesDropdown(xmin, xmax)
+    })
+  }
 
   
   showSpeciesDropdown = function (xmin, xmax){
@@ -1138,8 +1148,9 @@ shinyServer(function(input, output, session) {
       maxLast <- tail(selectedWav[[4]], 1)
       typeLast <- tail(selectedWav[[5]], 1)
       speciesLast <- tail(selectedWav[[6]], 1)
-      sound <- readWave(paste0(depPath, "/", wavFileName), from = minLast, to = maxLast, units = "seconds")
-      renderSpectroClip(sound, minLast, maxLast)
+      sound <- readWave(paste0(depPath, "/", wavFileName))
+      readSequenceBool <- TRUE
+      renderSpectroClip(sound, minLast, maxLast, readSequenceBool)
       
       shinyjs::show(id = "spectroClip", anim = FALSE)
       shinyjs::show(id = "clipInfo-container", anim = FALSE)
