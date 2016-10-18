@@ -1040,7 +1040,7 @@ shinyServer(function(input, output, session) {
       updateTextInput(session, inputId = "projectName", label = NULL, value = projectCSV$Project.Name[[1]])
       shinyjs::html("projectNotes", projectCSV$Project.Notes[[1]])
       toggleAfterProjectCsvLoaded()
-      projectInfo(projectCSV$Project.Name[[1]], projectCSV$Project.Notes[[1]])
+      # projectInfo(projectCSV$Project.Name[[1]], projectCSV$Project.Notes[[1]])
     }
   }
   
