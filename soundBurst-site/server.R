@@ -15,6 +15,7 @@ library(httr)
 library(shinyBS)
 library(audio)
 library(sound)
+library(stringr)
 source("createDirectoryTree.r")
 source("playSound.r")
 # On a linux distribution, this will have to be changed to a media player that is installed. E.g., setWavPlayer("aplay")
@@ -30,6 +31,9 @@ annotationListDrop <<- list()
 annotationListWav <<- vector()
 annotationListCsv <<- vector()
 annotationListCsvProject <<- vector()
+# Create some REACTIVE VALUES
+progressValue <<- reactiveValues()
+progressValue$one <<- 0
 
 # This is used to connect correctly with AWS
 set_config( config( ssl_verifypeer = 0L ) )
@@ -274,9 +278,9 @@ shinyServer(function(input, output, session) {
       updateTextInput(session, inputId = "name", label = NULL, value = deploymentName)
       if(file.exists(paste0(depPath,"/", depFileName, ".csv"))) { # CHANGE
         readDeploymentCSV(depPath, depFilePath)
+        findFileCount()
         return()
       }
-      findFileCount()
     }
   })
   
@@ -578,8 +582,8 @@ shinyServer(function(input, output, session) {
     
     if (is.null(df)) return(NULL)
     
-    itemsSpecies <- c('Select Species',as.character(df[[1]]))
-    selectInput("speciesDropdown", "Species*",itemsSpecies)
+    itemsType <<- c('Select Species',as.character(df[[1]]))
+    selectInput("speciesDropdown", "Species*",itemsType)
   })
   
   output$speciesType <- renderUI({
@@ -588,7 +592,7 @@ shinyServer(function(input, output, session) {
     
     if (is.null(df)) return(NULL)
     
-    itemsSpecies <- c('Select Type',as.character(df[[3]]))
+    itemsSpecies <<- c('Select Type',as.character(df[[3]]))
     selectInput("typeDropdown", "Type*",itemsSpecies)
   })
   
@@ -912,9 +916,38 @@ shinyServer(function(input, output, session) {
     }
   })
   
-  # observeEvent(input$annotationDrop, {
-  #   browser()
-  # })
+  observeEvent(input$annotationDrop, {
+    # Checking that we actually have an element in the dropdown
+    if(input$annotationDrop != "")
+    {        
+      annData <- read.csv(paste0(depPath,"/",paste0(newFileName,'.csv')))[ ,10:16]
+      # If current selection is last element in dropdown
+      if(str_detect(input$annotationDrop, as.character(tail(annData[[6]], 1))))
+      {
+        annCount <- length(annData[[1]])
+        annLast <- tail(annData, 1)
+        minLast <- tail(annData[[2]], 1)
+        maxLast <- tail(annData[[3]], 1)
+        updateTextInput(session, "timeMin",label = paste("Time Start: "), value = minLast)
+        updateTextInput(session, "timeMax",label = paste("Time End: "), value = maxLast)
+        updateSelectizeInput(session, "typeDropdown", label = "Type*", choices =  itemsSpecies, selected = tail(annData[[5]], 1))
+        updateSelectizeInput(session, "speciesDropdown", label = "Species*", choices =  itemsType, selected = tail(annData[[6]], 1))
+      } else {
+        # Go through Time Min using time min of element selected tail(strsplit('frog at 34',split=" ")[[1]],1)
+        # When match, verifiy if type is same using above if statement
+        # If same, do below
+        annCount <- length(annData[[1]])
+        annLast <- tail(annData, 1)
+        minLast <- tail(annData[[2]], 1)
+        maxLast <- tail(annData[[3]], 1)
+        updateTextInput(session, "timeMin",label = paste("Time Start: "), value = minLast)
+        updateTextInput(session, "timeMax",label = paste("Time End: "), value = maxLast)
+        updateSelectizeInput(session, "typeDropdown", label = "Type*", choices =  itemsSpecies, selected = tail(annData[[5]], 1))
+        updateSelectizeInput(session, "speciesDropdown", label = "Species*", choices =  itemsType, selected = tail(annData[[6]], 1))
+        
+      }
+    }
+  })
   
   ################################
   ######## Modal UI
