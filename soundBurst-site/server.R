@@ -842,7 +842,7 @@ shinyServer(function(input, output, session) {
   # ClipCount -> If we have multiple clips on a given spectro, give a new column name to each clip
   observeEvent(input$speciesDropSubmit, {
     fileFullName <- unlist(get_selected(input$tree))
-    if (is.null(siteDF)) {
+    if (is.null(siteDF) || !autoCSVLoad) {
       shinyjs::show("site-info-warning-container")
     } else {
       shinyjs::enable("aws-upload-button")
@@ -1103,11 +1103,34 @@ shinyServer(function(input, output, session) {
     annData <- read.csv(paste0(depPath,"/",paste0(newFileName,'.csv')))
     # Check if we have annotation files
     if("File.Name" %in% colnames(annData)){
-      annData <- read.csv(paste0(depPath,"/",paste0(newFileName,'.csv')))[ ,9:16]
+      annData <- annData[ ,9:16]
       currentSelectedMin <- trimws(head(strsplit(input$annotationDrop,split="at")[[1]],2)[2], which = "both")
       currentSelectedSpecies <- trimws(head(strsplit(input$annotationDrop,split="at")[[1]],2)[1], which = "both")
       df <- as.data.frame(annData)
-      # selectedAnn <- df[which(df$ == currentSelectedMin & df$Species == currentSelectedSpecies), ]
+      selectedWav <- df[which(df$File.Name == wavFileName), ]
+      # If there are no annotations for that sequence
+      if(length(selectedWav) == 0)
+      {
+        return()
+      }
+      currAnnSize <- length(selectedWav$Annotation.)
+      currAnnList <- list()
+      for(i in currAnnSize) {
+        currSpeciesList <- selectedWav$Species[i]
+        currMinList <- selectedWav$Time.Min..s.[i]
+        currList <- paste0(currSpeciesList, " at ", currMinList)
+        currAnnList <- c(currAnnList, currList)
+      }
+      minLast <- tail(selectedWav[[3]], 1)
+      maxLast <- tail(selectedWav[[4]], 1)
+      typeLast <- tail(selectedWav[[5]], 1)
+      speciesLast <- tail(selectedWav[[6]], 1)
+      
+      updateSelectizeInput(session, "annotationDrop", label = "Select an annotation", choices =  currAnnList, selected = tail(annotationListDrop, 1))
+      updateTextInput(session, "timeMin",label = paste("Time Start: "), value = as.character(minLast))
+      updateTextInput(session, "timeMax",label = paste("Time End: "), value = as.character(maxLast))
+      updateSelectizeInput(session, "typeDropdown", label = "Type*", choices =  itemsSpecies, selected = as.character(typeLast))
+      updateSelectizeInput(session, "speciesDropdown", label = "Species*", choices =  itemsType, selected = as.character(speciesLast))
     }
     else { # Otherwise just return since nothing to read
       return()
