@@ -929,7 +929,6 @@ shinyServer(function(input, output, session) {
           if (autoDepCSVLoad) {
             write.csv(deploymentCSVDataTable, paste0(depPath,"/",paste0(csvFileName,'.csv')), row.names = FALSE)
             annotationListCsv <<- normalizePath(paste0(depPath,"/",paste0(csvFileName,'.csv')))
-            
           } else {
             write.csv(deploymentCSVDataTable, paste0(depPath,"/",paste0(newFileName,'.csv')), row.names = FALSE)
             annotationListCsv <<- normalizePath(paste0(depPath,"/",paste0(newFileName,'.csv')))
@@ -960,8 +959,10 @@ shinyServer(function(input, output, session) {
     {        
       annData <- read.csv(depFilePath)[ ,10:20]
       sound <- readWave(paste0(depPath, "/", unlist(get_selected(input$tree))))
+      currentSelectedMin <- trimws(head(strsplit(input$annotationDrop,split="at")[[1]],2)[2], which = "both")
+      minLast <- tail(annData[[2]], 1)
       # If current selection is last element in dropdown
-      if(str_detect(input$annotationDrop, as.character(tail(annData[[6]], 1))))
+      if(str_detect(input$annotationDrop, as.character(tail(annData[[6]], 1))) && as.character(currentSelectedMin) == as.character(minLast))
       {
         annCount <- length(annData[[1]])
         annLast <- tail(annData, 1)
@@ -1204,7 +1205,7 @@ shinyServer(function(input, output, session) {
   { 
     annDataFull <- read.csv(depFilePath)
     # Check if we have annotation files
-    if("File.Name" %in% colnames(annData)){
+    if("File.Name" %in% colnames(annDataFull)){
       annData <- annDataFull[ ,9:16]
       currentSelectedMin <- trimws(head(strsplit(input$annotationDrop,split="at")[[1]],2)[2], which = "both")
       currentSelectedSpecies <- trimws(head(strsplit(input$annotationDrop,split="at")[[1]],2)[1], which = "both")
@@ -1245,7 +1246,7 @@ shinyServer(function(input, output, session) {
 
       shinyjs::show(id = "spectroClip", anim = FALSE)
       shinyjs::show(id = "clipInfo-container", anim = FALSE)
-      updateSelectizeInput(session, "annotationDrop", label = "Select an annotation", choices =  currAnnList, selected = tail(annotationListDrop, 1))
+      updateSelectizeInput(session, "annotationDrop", label = "Select an annotation", choices =  currAnnList, selected = tail(currAnnList, 1))
       updateTextInput(session, "timeMin",label = paste("Time Start: "), value = as.character(minLast))
       updateTextInput(session, "timeMax",label = paste("Time End: "), value = as.character(maxLast))
       updateSelectizeInput(session, "typeDropdown", label = "Type*", choices =  itemsSpecies, selected = as.character(typeLast))
