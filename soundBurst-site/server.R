@@ -27,7 +27,8 @@ mainDir <<- NULL
 clipCount <<- 0
 newName <- NULL
 depPath <<- NULL
-autoCSVLoad <<- FALSE
+autoProjectCSVLoad <<- FALSE
+autoDepCSVLoad <<- FALSE
 annData <<- list()
 readSequenceBool <<- FALSE
 annotationListDrop <<- list()
@@ -264,7 +265,6 @@ shinyServer(function(input, output, session) {
   
   observeEvent(input$deployment, {
     depPath <<- parseDirPath(root=c(home=normalizePath(dirPath)), input$deployment)
-    browser();
     if(!is.null(depPath)) {
       # folders <- list.dirs(depPath, full.names = F, recursive = TRUE)
       shinyjs::show("progressOne")
@@ -796,10 +796,10 @@ shinyServer(function(input, output, session) {
         }
       }
       # Checking for file duplication, alert if any; otherwise create the file
-      if (fileNameDuplicate == 0 || autoCSVLoad) {
+      if (fileNameDuplicate == 0 || !autoProjectCSVLoad) { # VERIFIY
         writeDeploymentCSV(siteDataTable)
       }
-      else if(!autoCSVLoad) {
+      else if(!autoProjectCSVLoad) {
         shinyjs::show("file-name-warning-container")
       }
     }
@@ -864,59 +864,63 @@ shinyServer(function(input, output, session) {
   # Adding the clip metadata to the spectrogram metadata
   # ClipCount -> If we have multiple clips on a given spectro, give a new column name to each clip
   observeEvent(input$speciesDropSubmit, {
-    brwoser()
-    # fileFullName <- unlist(get_selected(input$tree))
-    if (is.null(siteDF) ) {
-      if(!autoCSVLoad) {
-        shinyjs::show("site-info-warning-container") 
-      }
-      else {
-        shinyjs::enable("aws-upload-button")
-        dataSet <- formDataSpecies()
-        shinyjs::hide("site-info-warning-container")
-        if (dataSet[[3]] == "Select Species") {
-          shinyjs::show("type-name-warning")
-        } 
-        else if (dataSet[[4]] == "Select Type") {
-          shinyjs::show("type-name-warning")
-        } 
-        else {
-          if (clipCount == 0) {
-            dataArray <- c(fileFullName,clipCount,dataSet[[1]],dataSet[[2]], durationSmall, dataSet[[4]],dataSet[[3]],dataSet[[5]])
-            dataMatrix <- matrix(dataArray,ncol = 8, byrow = TRUE)
-            colnames(dataMatrix) <- c("File Name", "Annotation#","Time Min (s)", "Time Max (s)", "Duration", "Type", "Species", "Annotation Notes")
-            dataTable <- as.table(dataMatrix)
-            siteDF <<- cbind(siteDF, dataTable)
-          } 
-          else {
-            dataArray <- c(siteDF[1,1],siteDF[1,2],siteDF[1,3],siteDF[1,4],siteDF[1,5],siteDF[1,6],siteDF[1,7],siteDF[1,8],fileFullName, clipCount,dataSet[[1]],dataSet[[2]],durationSmall, dataSet[[4]],dataSet[[3]],dataSet[[5]])
-            siteDF <<- rbind(siteDF, dataArray)
-          }
-          increaseStatusBar()
-          clipCount <<- clipCount + 1
-          # Creating the path with the file name
-          filePathFull <- paste0(depPath,"/",fileFullName)
-          # Adding the file to the list of annotated files for later zipping and S3 upload
-          annotationListWav <<- c(annotationListWav, normalizePath(filePathFull))
-          write.csv(siteDF, paste0(depPath,"/",paste0(newFileName,'.csv')), row.names = FALSE)
-          annotationListCsv <<- c(annotationListCsv, normalizePath(paste0(depPath,"/",paste0(newFileName,'.csv'))))
-          shinyjs::addClass('completedDepContainer', "open-accordian")
-          shinyjs::removeClass('completedDepContainer', "closed-accordian")
-          shinyjs::show("annotationDrop")
-          
-          annotationList <- c(paste0(dataSet[[3]], " at " , dataSet[[1]]))
-          annotationListDrop <<- c(annotationListDrop, annotationList)
-          
-          updateSelectizeInput(session, "annotationDrop", label = "Select an annotation", choices =  annotationListDrop, selected = tail(annotationListDrop, 1))
-          
-          # Create some REACTIVE VALUES
-          awsProgressValue <<- reactiveValues()
-          awsProgressValue$one <<- 0
-          # Creating the progress bar for AWS upload
-          output$awsProgress <- renderUI({
-            progressGroup(text = "Status",    value = awsProgressValue$one,   min = 0, max = 3, color = "green")
-          })
+    fileFullName <- unlist(get_selected(input$tree))
+    if (is.null(siteDF)) {
+      shinyjs::show("site-info-warning-container")
+    } else {
+      shinyjs::enable("aws-upload-button")
+      dataSet <- formDataSpecies()
+      shinyjs::hide("site-info-warning-container")
+      if (dataSet[[3]] == "Select Species") {
+        shinyjs::show("type-name-warning")
+      } else if (dataSet[[4]] == "Select Type") {
+        shinyjs::show("type-name-warning")
+      } else {
+        if (clipCount == 0) {
+          dataArray <- c(fileFullName,clipCount,dataSet[[1]],dataSet[[2]], durationSmall, dataSet[[4]],dataSet[[3]],dataSet[[5]])
+          dataMatrix <- matrix(dataArray,ncol = 8, byrow = TRUE)
+          colnames(dataMatrix) <- c("File Name", "Annotation#","Time Min (s)", "Time Max (s)", "Duration", "Type", "Species", "Annotation Notes")
+          dataTable <- as.table(dataMatrix)
+          siteDF <<- cbind(siteDF, dataTable)
+        } else {
+          dataArray <- c(siteDF[1,1],siteDF[1,2],siteDF[1,3],siteDF[1,4],siteDF[1,5],siteDF[1,6],siteDF[1,7],siteDF[1,8],fileFullName, clipCount,dataSet[[1]],dataSet[[2]],durationSmall, dataSet[[4]],dataSet[[3]],dataSet[[5]])
+          siteDF <<- rbind(siteDF, dataArray)
         }
+        increaseStatusBar()
+        clipCount <<- clipCount + 1
+        # Creating the path with the file name
+        filePathFull <- paste0(depPath,"/",fileFullName)
+        # Adding the file to the list of annotated files for later zipping and S3 upload
+        annotationListWav <<- c(annotationListWav, normalizePath(filePathFull))
+        write.csv(siteDF, paste0(depPath,"/",paste0(newFileName,'.csv')), row.names = FALSE)
+        annotationListCsv <<- c(annotationListCsv, normalizePath(paste0(depPath,"/",paste0(newFileName,'.csv'))))
+        shinyjs::addClass('completedDepContainer', "open-accordian")
+        shinyjs::show("listCompleted")
+        shinyjs::show("annotationDrop")
+        
+        # Creating the element that will old the name of the completed annotation
+        # listEl <- as.character(paste0(tags$div(class="annotations",id=paste0("clip", clipCount), tags$span(paste0(dataSet[[3]], " at " , dataSet[[1]])))))
+        # # Storing the element in a list that gets reset every time a new deployment is selected
+        # listCompleted <<- c(listCompleted, listEl)
+        # # Converting that list to a tagList
+        # finalCompleted <- tagList(listCompleted)
+        # # Display the list of tag in the UI
+        # shinyjs::html('listCompleted', finalCompleted)
+        # # shinyjs::onclick(paste0("clipRemove", clipCount), removeAnnotationFromCSV(clipCount), add = TRUE)
+        # # tags$head(tags$script(src="removeAnnotation.js"))
+        # 
+        annotationList <- c(paste0(dataSet[[3]], " at " , dataSet[[1]]))
+        annotationListDrop <<- c(annotationListDrop, annotationList)
+        
+        updateSelectizeInput(session, "annotationDrop", label = "Select an annotation", choices =  annotationListDrop, selected = tail(annotationListDrop, 1))
+        
+        # Create some REACTIVE VALUES
+        awsProgressValue <<- reactiveValues()
+        awsProgressValue$one <<- 0
+        # Creating the progress bar for AWS upload
+        output$awsProgress <- renderUI({
+          progressGroup(text = "Status",    value = awsProgressValue$one,   min = 0, max = 3, color = "green")
+        })
       }
     }
   })
@@ -1112,7 +1116,7 @@ shinyServer(function(input, output, session) {
       updateTextInput(session, inputId = "recId", label = NULL, value = as.character(deploymentCSV$Record.ID[[1]]))
       shinyjs::html("siteNotes", deploymentCSV$Site.Notes[[1]])
       toggleAfterDeploymentCsvLoaded()
-      # autoCSVLoad <<- TRUE
+      autoDepCSVLoad <<- TRUE
       # deploymentInfo(projectCSV$Project.Name[[1]], projectCSV$Site.Notes[[1]])
     }
   }
@@ -1121,7 +1125,7 @@ shinyServer(function(input, output, session) {
     shinyjs::hide("file-name-warning-container")
     
     count <- 0
-    if(!autoCSVLoad)
+    if(!autoDepCSVLoad)
     {
       write.csv(siteDataTable, paste0(depPath,"/",paste0(newFileName,'.csv')), row.names = FALSE)
     }
