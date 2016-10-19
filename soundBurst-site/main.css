@@ -165,10 +165,11 @@ label {
   border: solid 1px #f39c12;
 }
 
-#timeMin, #timeMax {
-  width: 30%;
-  display:inline-block;
+#timeMin, #timeMax, #maxFreq, #minFreq, #meanFreq, #bandwidth {
+  width: 5em;
+  display: inline-block;
   margin-top: 4%;
+  text-align: center;
 }
 
 #timeMax {

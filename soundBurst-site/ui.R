@@ -156,6 +156,7 @@ dashboardPage(
                                 )),
                                 textInput("timeMin", "Time Start", 1),
                                 textInput("timeMax", "Time End", 2),
+                                # HTML('<span>Max Frequency: </span><textarea id="maxFreq" rows="1" cols="40"></textarea>'),
                                 textInput("maxFreq", "Max Frequency", 1),
                                 textInput("minFreq", "Min Frequency", 1),
                                 textInput("meanFreq", "Mean Frequency", 1),

@@ -18,6 +18,7 @@ library(sound)
 library(stringr)
 source("createDirectoryTree.r")
 source("playSound.r")
+library("fftw")
 # On a linux distribution, this will have to be changed to a media player that is installed. E.g., setWavPlayer("aplay")
 setWavPlayer("aplay")
 
@@ -700,7 +701,7 @@ shinyServer(function(input, output, session) {
       } else {
         # browser()
       }
-      freqSound <- readWave(currDir, from = xmin, to = xmax)
+      freqSound <- readWave(currDir, from = xmin, to = xmax, units = c("seconds"))
       filteredSound <- ffilter(freqSound, from = 1000, to = 6000, output = "Wave", fftw = T)
       finalFreq <- dfreq(filteredSound, fftw = T, clip = 0.11, plot = F)
       df <- as.data.frame(finalFreq)
@@ -708,23 +709,40 @@ shinyServer(function(input, output, session) {
       minFreq <- min(df$y, na.rm = T)
       meanFreq <- mean(df$y, na.rm = T)
       bandwidth <- maxFreq - minFreq
-      showSpeciesDropdown(xmin, xmax)
+      showSpeciesDropdown(xmin, xmax, maxFreq, minFreq, meanFreq, bandwidth)
     })
   }
 
   
-  showSpeciesDropdown = function (xmin, xmax){
+  showSpeciesDropdown = function (xmin, xmax, maxFreq, minFreq, meanFreq, bandwidth){
     shinyjs::show("clip-species-dropdown")
     if(!is.null(xmax)) {
       updateTextInput(session, "timeMin",label = paste("Time Start: "), value = paste(round(xmin,digits=1)))
       updateTextInput(session, "timeMax",label = paste("Time End: "), value = paste(round(xmax,digits=1)))
+      # shinyjs::html("maxFreq", maxFreq)
+      updateTextInput(session, "maxFreq",label = paste("Max Frequency: "), value = paste(round(maxFreq,digits=1)))
+      updateTextInput(session, "minFreq",label = paste("Min Frequecy: "), value = paste(round(minFreq,digits=1)))
+      updateTextInput(session, "meanFreq",label = paste("Mean Frequecy: "), value = paste(round(meanFreq,digits=1)))
+      updateTextInput(session, "bandwidth",label = paste("Bandwidth: "), value = paste(round(bandwidth,digits=1)))
       shinyjs::disable("timeMin")
       shinyjs::disable("timeMax")
+      shinyjs::disable("maxFreq")
+      shinyjs::disable("minFreq")
+      shinyjs::disable("meanFreq")
+      shinyjs::disable("bandwidth")
     } else {
       updateTextInput(session, "timeMin",label = paste("Time Start: "), value = paste(0))
       updateTextInput(session, "timeMax",label = paste("Time End: "), value = paste(0))
+      updateTextInput(session, "maxFreq",label = paste("Max Frequency: "), value = paste(0))
+      updateTextInput(session, "minFreq",label = paste("Min Frequency: "), value = paste(0))
+      updateTextInput(session, "meanFreq",label = paste("Mean Frequency: "), value = paste(0))
+      updateTextInput(session, "bandwidth",label = paste("Bandwidth: "), value = paste(0))
       shinyjs::disable("timeMin")
       shinyjs::disable("timeMax")
+      shinyjs::disable("maxFreq")
+      shinyjs::disable("minFreq")
+      shinyjs::disable("meanFreq")
+      shinyjs::disable("bandwidth")
     }
   }
   
@@ -859,7 +877,7 @@ shinyServer(function(input, output, session) {
     annotationListCsvProject <<- c(annotationListCsv, normalizePath(paste0(dirPath,"/",paste0('Project_', projectName,'.csv'))))
   }
   
-  speciesFields <- c("timeMin", "timeMax", "speciesDropdown", "typeDropdown", "annotNotes")
+  speciesFields <- c("timeMin", "timeMax", "speciesDropdown", "typeDropdown", "maxFreq", "minFreq", "meanFreq", "bandwidth", "annotNotes")
   
   formDataSpecies <- reactive({
     data <- sapply(speciesFields, function(x) input[[x]])
@@ -869,11 +887,12 @@ shinyServer(function(input, output, session) {
   # Adding the clip metadata to the spectrogram metadata
   # ClipCount -> If we have multiple clips on a given spectro, give a new column name to each clip
   observeEvent(input$speciesDropSubmit, {
-    # fileFullName <- unlist(get_selected(input$tree))
+    fileFullName <- unlist(get_selected(input$tree))
     if (is.null(siteDF) ) {
       if(!autoCSVLoad) {
         shinyjs::show("site-info-warning-container") 
       }
+    }
       else {
         shinyjs::enable("aws-upload-button")
         dataSet <- formDataSpecies()
@@ -886,14 +905,14 @@ shinyServer(function(input, output, session) {
         } 
         else {
           if (clipCount == 0) {
-            dataArray <- c(fileFullName,clipCount,dataSet[[1]],dataSet[[2]], durationSmall, dataSet[[4]],dataSet[[3]],dataSet[[5]])
-            dataMatrix <- matrix(dataArray,ncol = 8, byrow = TRUE)
-            colnames(dataMatrix) <- c("File Name", "Annotation#","Time Min (s)", "Time Max (s)", "Duration", "Type", "Species", "Annotation Notes")
+            dataArray <- c(fileFullName,clipCount,dataSet[[1]],dataSet[[2]], durationSmall, dataSet[[4]],dataSet[[3]],dataSet[[5]],dataSet[[6]],dataSet[[7]],dataSet[[8]],dataSet[[9]])
+            dataMatrix <- matrix(dataArray,ncol = 12, byrow = TRUE)
+            colnames(dataMatrix) <- c("File Name", "Annotation#","Time Min (s)", "Time Max (s)", "Duration", "Type", "Species", "Max Freq", "Min Freq", "Mean Freq", "Bandwidth", "Annotation Notes")
             dataTable <- as.table(dataMatrix)
             siteDF <<- cbind(siteDF, dataTable)
           } 
           else {
-            dataArray <- c(siteDF[1,1],siteDF[1,2],siteDF[1,3],siteDF[1,4],siteDF[1,5],siteDF[1,6],siteDF[1,7],siteDF[1,8],fileFullName, clipCount,dataSet[[1]],dataSet[[2]],durationSmall, dataSet[[4]],dataSet[[3]],dataSet[[5]])
+            dataArray <- c(siteDF[1,1],siteDF[1,2],siteDF[1,3],siteDF[1,4],siteDF[1,5],siteDF[1,6],siteDF[1,7],siteDF[1,8],fileFullName, clipCount,dataSet[[1]],dataSet[[2]],durationSmall, dataSet[[4]],dataSet[[3]],dataSet[[5]],dataSet[[6]],dataSet[[7]],dataSet[[8]],dataSet[[9]])
             siteDF <<- rbind(siteDF, dataArray)
           }
           increaseStatusBar()
@@ -922,14 +941,13 @@ shinyServer(function(input, output, session) {
           })
         }
       }
-    }
   })
   
   observeEvent(input$annotationDrop, {
     # Checking that we actually have an element in the dropdown
     if(input$annotationDrop != "")
     {        
-      annData <- read.csv(depFilePath)[ ,10:16]
+      annData <- read.csv(depFilePath)[ ,10:20]
       sound <- readWave(paste0(depPath, "/", unlist(get_selected(input$tree))))
       # If current selection is last element in dropdown
       if(str_detect(input$annotationDrop, as.character(tail(annData[[6]], 1))))
@@ -938,8 +956,16 @@ shinyServer(function(input, output, session) {
         annLast <- tail(annData, 1)
         minLast <- tail(annData[[2]], 1)
         maxLast <- tail(annData[[3]], 1)
+        maxFreqLast <- tail(annData[[7]], 1)
+        minFreqLast <- tail(annData[[8]], 1)
+        meanFreqLast <- tail(annData[[9]], 1)
+        bandwidthLast <- tail(annData[[10]], 1)
         updateTextInput(session, "timeMin",label = paste("Time Start: "), value = minLast)
         updateTextInput(session, "timeMax",label = paste("Time End: "), value = maxLast)
+        updateTextInput(session, "maxFreq",label = paste("Time End: "), value = maxFreqLast)
+        updateTextInput(session, "minFreq",label = paste("Time End: "), value = minFreqLast)
+        updateTextInput(session, "meanFreq",label = paste("Time End: "), value = meanFreqLast)
+        updateTextInput(session, "bandwidth",label = paste("Time End: "), value = bandwidthLast)
         updateSelectizeInput(session, "typeDropdown", label = "Type*", choices =  itemsSpecies, selected = tail(annData[[5]], 1))
         updateSelectizeInput(session, "speciesDropdown", label = "Species*", choices =  itemsType, selected = tail(annData[[6]], 1))
         # Creating a temp wav sound from xmin to xmax
