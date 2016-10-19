@@ -27,7 +27,10 @@ setWavPlayer("aplay")
 mainDir <<- NULL
 clipCount <<- 0
 newName <- NULL
-autoCSVLoad <<- FALSE
+depPath <<- NULL
+autoProjectCSVLoad <<- FALSE
+autoDepCSVLoad <<- FALSE
+annData <<- list()
 readSequenceBool <<- FALSE
 annotationListDrop <<- list()
 annotationListWav <<- vector()
@@ -263,7 +266,7 @@ shinyServer(function(input, output, session) {
   
   observeEvent(input$deployment, {
     depPath <<- parseDirPath(root=c(home=normalizePath(dirPath)), input$deployment)
-    if(length(dirPath)) {
+    if(!is.null(depPath)) {
       # folders <- list.dirs(depPath, full.names = F, recursive = TRUE)
       shinyjs::show("progressOne")
       create_directory_tree(depPath)
@@ -819,10 +822,10 @@ shinyServer(function(input, output, session) {
         }
       }
       # Checking for file duplication, alert if any; otherwise create the file
-      if (fileNameDuplicate == 0 || autoCSVLoad) {
+      if (fileNameDuplicate == 0 || !autoDepCSVLoad) { # VERIFIY
         writeDeploymentCSV(siteDataTable)
       }
-      else if(!autoCSVLoad) {
+      else if(!autoDepCSVLoad) {
         shinyjs::show("file-name-warning-container")
       }
     }
@@ -1130,25 +1133,28 @@ shinyServer(function(input, output, session) {
   }
   
   readDeploymentCSV <- function(depPath, depFilePath) {
-    shinyjs::hide("species-sidebox-container", anim = TRUE)
-    shinyjs::toggleClass("select-dep-container", "open-accordian")
-    shinyjs::toggleClass("select-dep-container", "closed-accordian")
-    deploymentCSV <- read.csv(paste0(depFilePath))
-    updateTextInput(session, inputId = "name", label = NULL, value = deploymentCSV$Name[[1]])
-    updateTextInput(session, inputId = "lat", label = NULL, value = as.character(deploymentCSV$Lat[[1]]))
-    updateTextInput(session, inputId = "lon", label = NULL, value = as.character(deploymentCSV$Lon[[1]]))
-    updateTextInput(session, inputId = "recId", label = NULL, value = as.character(deploymentCSV$Record.ID[[1]]))
-    shinyjs::html("siteNotes", deploymentCSV$Site.Notes[[1]])
-    toggleAfterDeploymentCsvLoaded()
-    autoCSVLoad <<- TRUE
-    # deploymentInfo(projectCSV$Project.Name[[1]], projectCSV$Site.Notes[[1]])
+    if(!is.null(depPath))
+    {
+      shinyjs::hide("species-sidebox-container", anim = TRUE)
+      shinyjs::toggleClass("select-dep-container", "open-accordian")
+      shinyjs::toggleClass("select-dep-container", "closed-accordian")
+      deploymentCSV <- read.csv(paste0(depFilePath))
+      updateTextInput(session, inputId = "name", label = NULL, value = deploymentCSV$Name[[1]])
+      updateTextInput(session, inputId = "lat", label = NULL, value = as.character(deploymentCSV$Lat[[1]]))
+      updateTextInput(session, inputId = "lon", label = NULL, value = as.character(deploymentCSV$Lon[[1]]))
+      updateTextInput(session, inputId = "recId", label = NULL, value = as.character(deploymentCSV$Record.ID[[1]]))
+      shinyjs::html("siteNotes", deploymentCSV$Site.Notes[[1]])
+      toggleAfterDeploymentCsvLoaded()
+      autoDepCSVLoad <<- TRUE
+      # deploymentInfo(projectCSV$Project.Name[[1]], projectCSV$Site.Notes[[1]])
+    }
   }
   
   writeDeploymentCSV <- function(siteDataTable) {
     shinyjs::hide("file-name-warning-container")
     
     count <- 0
-    if(!autoCSVLoad)
+    if(!autoDepCSVLoad)
     {
       write.csv(siteDataTable, paste0(depPath,"/",paste0(newFileName,'.csv')), row.names = FALSE)
     }
@@ -1168,10 +1174,10 @@ shinyServer(function(input, output, session) {
   
   readSequenceCSV <- function(wavFileName)
   { 
-    annData <- read.csv(depFilePath)
+    annDataFull <- read.csv(depFilePath)
     # Check if we have annotation files
     if("File.Name" %in% colnames(annData)){
-      annData <- annData[ ,9:16]
+      annData <- annDataFull[ ,9:16]
       currentSelectedMin <- trimws(head(strsplit(input$annotationDrop,split="at")[[1]],2)[2], which = "both")
       currentSelectedSpecies <- trimws(head(strsplit(input$annotationDrop,split="at")[[1]],2)[1], which = "both")
       df <- as.data.frame(annData)
