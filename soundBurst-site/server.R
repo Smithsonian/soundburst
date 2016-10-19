@@ -111,7 +111,7 @@ shinyServer(function(input, output, session) {
   
   projectName <<- NULL
   spectroFromTime <<- 0
-  siteDF <<- NULL
+  deploymentCSVDataTable <<- NULL
   dirPath <<- NULL
   
   shinyjs::onclick("left-column-title", toggleProjectSelect())
@@ -204,7 +204,9 @@ shinyServer(function(input, output, session) {
   }
   
   toggleAfterDeploymentCsvLoaded = function() {
-    toggleDeploymentSelectDisplay()
+    shinyjs::hide("deployment", anim = TRUE)
+    shinyjs::removeClass("select-dep-container", "open-accordian")
+    shinyjs::addClass("select-dep-container", "closed-accordian")
     shinyjs::addClass("right-column-title", "completed-step")
     shinyjs::removeClass("right-column-title", "open-accordian")
     shinyjs::addClass("right-column-title", "closed-accordian")
@@ -803,7 +805,7 @@ shinyServer(function(input, output, session) {
       # colnames(dataMatrix) <- c("Name", "Lat", "Lon", "Record ID", "Site Notes", "Start", "End", "File Name", "Wave Start", "Wave End", "Wave Date", "Google Maps")
       colnames(dataMatrix) <- c("Name", "Lat", "Lon", "Record ID", "Site Notes", "Start", "End", "Google Maps")
       siteDataTable <- as.table(dataMatrix)
-      siteDF <<- siteDataTable
+      deploymentCSVDataTable <<- siteDataTable
       # If we have multiple clips on a given spectro, give a new column name to each clip
       clipCount <<- 0
       # Reformating user input
@@ -891,7 +893,7 @@ shinyServer(function(input, output, session) {
   # ClipCount -> If we have multiple clips on a given spectro, give a new column name to each clip
   observeEvent(input$speciesDropSubmit, {
     fileFullName <- unlist(get_selected(input$tree))
-    if (is.null(siteDF) ) {
+    if (is.null(deploymentCSVDataTable) ) {
       if(!autoCSVLoad) {
         shinyjs::show("site-info-warning-container") 
       }
@@ -912,11 +914,11 @@ shinyServer(function(input, output, session) {
             dataMatrix <- matrix(dataArray,ncol = 12, byrow = TRUE)
             colnames(dataMatrix) <- c("File Name", "Annotation#","Time Min (s)", "Time Max (s)", "Duration", "Type", "Species", "Max Freq", "Min Freq", "Mean Freq", "Bandwidth", "Annotation Notes")
             dataTable <- as.table(dataMatrix)
-            siteDF <<- cbind(siteDF, dataTable)
+            deploymentCSVDataTable <<- cbind(deploymentCSVDataTable, dataTable)
           } 
           else {
-            dataArray <- c(siteDF[1,1],siteDF[1,2],siteDF[1,3],siteDF[1,4],siteDF[1,5],siteDF[1,6],siteDF[1,7],siteDF[1,8],fileFullName, clipCount,dataSet[[1]],dataSet[[2]],durationSmall, dataSet[[4]],dataSet[[3]],dataSet[[5]],dataSet[[6]],dataSet[[7]],dataSet[[8]],dataSet[[9]])
-            siteDF <<- rbind(siteDF, dataArray)
+            dataArray <- c(deploymentCSVDataTable[1,1],deploymentCSVDataTable[1,2],deploymentCSVDataTable[1,3],deploymentCSVDataTable[1,4],deploymentCSVDataTable[1,5],deploymentCSVDataTable[1,6],deploymentCSVDataTable[1,7],deploymentCSVDataTable[1,8],fileFullName, clipCount,dataSet[[1]],dataSet[[2]],durationSmall, dataSet[[4]],dataSet[[3]],dataSet[[5]],dataSet[[6]],dataSet[[7]],dataSet[[8]],dataSet[[9]])
+            deploymentCSVDataTable <<- rbind(deploymentCSVDataTable, dataArray)
           }
           increaseStatusBar()
           clipCount <<- clipCount + 1
@@ -924,7 +926,11 @@ shinyServer(function(input, output, session) {
           filePathFull <- paste0(depPath,"/",fileFullName)
           # Adding the file to the list of annotated files for later zipping and S3 upload
           annotationListWav <<- c(annotationListWav, normalizePath(filePathFull))
-          write.csv(siteDF, paste0(depPath,"/",paste0(newFileName,'.csv')), row.names = FALSE)
+          if (autoDepCSVLoad) {
+            write.csv(deploymentCSVDataTable, paste0(depPath,"/",paste0(csvFileName,'.csv')), row.names = FALSE)
+          } else {
+            write.csv(deploymentCSVDataTable, paste0(depPath,"/",paste0(newFileName,'.csv')), row.names = FALSE)
+          }
           annotationListCsv <<- c(annotationListCsv, normalizePath(paste0(depPath,"/",paste0(newFileName,'.csv'))))
           shinyjs::addClass('completedDepContainer', "open-accordian")
           shinyjs::removeClass('completedDepContainer', "closed-accordian")
@@ -965,10 +971,10 @@ shinyServer(function(input, output, session) {
         bandwidthLast <- tail(annData[[10]], 1)
         updateTextInput(session, "timeMin",label = paste("Time Start: "), value = minLast)
         updateTextInput(session, "timeMax",label = paste("Time End: "), value = maxLast)
-        updateTextInput(session, "maxFreq",label = paste("Time End: "), value = maxFreqLast)
-        updateTextInput(session, "minFreq",label = paste("Time End: "), value = minFreqLast)
-        updateTextInput(session, "meanFreq",label = paste("Time End: "), value = meanFreqLast)
-        updateTextInput(session, "bandwidth",label = paste("Time End: "), value = bandwidthLast)
+        updateTextInput(session, "maxFreq",label = paste("Max Frequency: "), value = maxFreqLast)
+        updateTextInput(session, "minFreq",label = paste("Min Frequency: "), value = minFreqLast)
+        updateTextInput(session, "meanFreq",label = paste("Mean Frequency: "), value = meanFreqLast)
+        updateTextInput(session, "bandwidth",label = paste("Bandwidth: "), value = bandwidthLast)
         updateSelectizeInput(session, "typeDropdown", label = "Type*", choices =  itemsSpecies, selected = tail(annData[[5]], 1))
         updateSelectizeInput(session, "speciesDropdown", label = "Species*", choices =  itemsType, selected = tail(annData[[6]], 1))
         # Creating a temp wav sound from xmin to xmax
@@ -986,6 +992,10 @@ shinyServer(function(input, output, session) {
         annCurr <- selectedAnn$Annotatiion.
         minCurr <- selectedAnn$Time.Min..s.
         maxCurr <- selectedAnn$Time.Max..s.
+        maxFreqCurr <- selectedAnn$Max.Freq
+        minFreqCurr <- selectedAnn$Min
+        meanFreqCurr <- selectedAnn$Mean.Freq
+        bandwidthCurr <- selectedAnn$Bandwidth
         typeCurr <- selectedAnn$Type
         speciesCurr <- selectedAnn$Species
         renderSpectroClip(sound, minCurr, maxCurr, TRUE)
@@ -1138,7 +1148,9 @@ shinyServer(function(input, output, session) {
       shinyjs::hide("species-sidebox-container", anim = TRUE)
       shinyjs::toggleClass("select-dep-container", "open-accordian")
       shinyjs::toggleClass("select-dep-container", "closed-accordian")
+      csvFileName <<- gsub("^.*\\/", "", depPath)
       deploymentCSV <- read.csv(paste0(depFilePath))
+      createDataVarFromCSV(deploymentCSV)
       updateTextInput(session, inputId = "name", label = NULL, value = deploymentCSV$Name[[1]])
       updateTextInput(session, inputId = "lat", label = NULL, value = as.character(deploymentCSV$Lat[[1]]))
       updateTextInput(session, inputId = "lon", label = NULL, value = as.character(deploymentCSV$Lon[[1]]))
@@ -1148,6 +1160,21 @@ shinyServer(function(input, output, session) {
       autoDepCSVLoad <<- TRUE
       # deploymentInfo(projectCSV$Project.Name[[1]], projectCSV$Site.Notes[[1]])
     }
+  }
+  
+  createDataVarFromCSV = function (deploymentCSV) {
+    csvLength <- length(deploymentCSV$Name)
+    if (length(deploymentCSV$Annotation.) > 0) {
+      for(i in 1:csvLength) {
+        dataArray <- c(as.character(deploymentCSV$Name[[i]]),as.character(deploymentCSV$Lat[[i]]),as.character(deploymentCSV$Lon[[i]]),as.character(deploymentCSV$Record.ID[[i]]), as.character(deploymentCSV$Site.Notes[[i]]), as.character(deploymentCSV$Start[[i]]),as.character(deploymentCSV$End[[i]]),as.character(deploymentCSV$Google.Maps[[i]]),as.character(deploymentCSV$File.Name[[i]]),as.character(deploymentCSV$Annotation.[[i]]),as.character(deploymentCSV$Time.Min..s.[[i]]),as.character(deploymentCSV$Time.Max..s.[[i]]),as.character(deploymentCSV$Duration[[i]]),as.character(deploymentCSV$Type[[i]]),as.character(deploymentCSV$Species[[i]]),as.character(deploymentCSV$Max.Freq[[i]]),as.character(deploymentCSV$Min.Freq[[i]]),as.character(deploymentCSV$Mean.Freq[[i]]),as.character(deploymentCSV$Bandwidth[[i]]),as.character(deploymentCSV$Annotation.Notes[[i]]))
+        dataMatrix <- matrix(dataArray,ncol = 20, byrow = TRUE)
+        colnames(dataMatrix) <- c("Name", "Lat", "Lon", "Record ID", "Site Notes", "Start", "End", "Google Maps", "File Name", "Annotation#","Time Min (s)", "Time Max (s)", "Duration", "Type", "Species", "Max Freq", "Min Freq", "Mean Freq", "Bandwidth", "Annotation Notes")
+        dataTable <- as.table(dataMatrix)
+        deploymentCSVDataTable <<- rbind(deploymentCSVDataTable, dataTable)
+        clipCount <<- clipCount + 1
+      }
+    }
+    browser()
   }
   
   writeDeploymentCSV <- function(siteDataTable) {
