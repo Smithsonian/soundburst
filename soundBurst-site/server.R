@@ -26,7 +26,9 @@ setWavPlayer("aplay")
 mainDir <<- NULL
 clipCount <<- 0
 newName <- NULL
+depPath <<- NULL
 autoCSVLoad <<- FALSE
+annData <<- list()
 readSequenceBool <<- FALSE
 annotationListDrop <<- list()
 annotationListWav <<- vector()
@@ -262,7 +264,8 @@ shinyServer(function(input, output, session) {
   
   observeEvent(input$deployment, {
     depPath <<- parseDirPath(root=c(home=normalizePath(dirPath)), input$deployment)
-    if(length(dirPath)) {
+    browser();
+    if(!is.null(depPath)) {
       # folders <- list.dirs(depPath, full.names = F, recursive = TRUE)
       shinyjs::show("progressOne")
       create_directory_tree(depPath)
@@ -861,6 +864,7 @@ shinyServer(function(input, output, session) {
   # Adding the clip metadata to the spectrogram metadata
   # ClipCount -> If we have multiple clips on a given spectro, give a new column name to each clip
   observeEvent(input$speciesDropSubmit, {
+    brwoser()
     # fileFullName <- unlist(get_selected(input$tree))
     if (is.null(siteDF) ) {
       if(!autoCSVLoad) {
@@ -1096,18 +1100,21 @@ shinyServer(function(input, output, session) {
   }
   
   readDeploymentCSV <- function(depPath, depFilePath) {
-    shinyjs::hide("species-sidebox-container", anim = TRUE)
-    shinyjs::toggleClass("select-dep-container", "open-accordian")
-    shinyjs::toggleClass("select-dep-container", "closed-accordian")
-    deploymentCSV <- read.csv(paste0(depFilePath))
-    updateTextInput(session, inputId = "name", label = NULL, value = deploymentCSV$Name[[1]])
-    updateTextInput(session, inputId = "lat", label = NULL, value = as.character(deploymentCSV$Lat[[1]]))
-    updateTextInput(session, inputId = "lon", label = NULL, value = as.character(deploymentCSV$Lon[[1]]))
-    updateTextInput(session, inputId = "recId", label = NULL, value = as.character(deploymentCSV$Record.ID[[1]]))
-    shinyjs::html("siteNotes", deploymentCSV$Site.Notes[[1]])
-    toggleAfterDeploymentCsvLoaded()
-    autoCSVLoad <<- TRUE
-    # deploymentInfo(projectCSV$Project.Name[[1]], projectCSV$Site.Notes[[1]])
+    if(!is.null(depPath))
+    {
+      shinyjs::hide("species-sidebox-container", anim = TRUE)
+      shinyjs::toggleClass("select-dep-container", "open-accordian")
+      shinyjs::toggleClass("select-dep-container", "closed-accordian")
+      deploymentCSV <- read.csv(paste0(depFilePath))
+      updateTextInput(session, inputId = "name", label = NULL, value = deploymentCSV$Name[[1]])
+      updateTextInput(session, inputId = "lat", label = NULL, value = as.character(deploymentCSV$Lat[[1]]))
+      updateTextInput(session, inputId = "lon", label = NULL, value = as.character(deploymentCSV$Lon[[1]]))
+      updateTextInput(session, inputId = "recId", label = NULL, value = as.character(deploymentCSV$Record.ID[[1]]))
+      shinyjs::html("siteNotes", deploymentCSV$Site.Notes[[1]])
+      toggleAfterDeploymentCsvLoaded()
+      # autoCSVLoad <<- TRUE
+      # deploymentInfo(projectCSV$Project.Name[[1]], projectCSV$Site.Notes[[1]])
+    }
   }
   
   writeDeploymentCSV <- function(siteDataTable) {
