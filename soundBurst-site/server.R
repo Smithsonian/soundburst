@@ -796,10 +796,10 @@ shinyServer(function(input, output, session) {
         }
       }
       # Checking for file duplication, alert if any; otherwise create the file
-      if (fileNameDuplicate == 0 || !autoProjectCSVLoad) { # VERIFIY
+      if (fileNameDuplicate == 0 || !autoDepCSVLoad) { # VERIFIY
         writeDeploymentCSV(siteDataTable)
       }
-      else if(!autoProjectCSVLoad) {
+      else if(!autoDepCSVLoad) {
         shinyjs::show("file-name-warning-container")
       }
     }
@@ -1145,10 +1145,10 @@ shinyServer(function(input, output, session) {
   
   readSequenceCSV <- function(wavFileName)
   { 
-    annData <- read.csv(depFilePath)
+    annDataFull <- read.csv(depFilePath)
     # Check if we have annotation files
     if("File.Name" %in% colnames(annData)){
-      annData <- annData[ ,9:16]
+      annData <- annDataFull[ ,9:16]
       currentSelectedMin <- trimws(head(strsplit(input$annotationDrop,split="at")[[1]],2)[2], which = "both")
       currentSelectedSpecies <- trimws(head(strsplit(input$annotationDrop,split="at")[[1]],2)[1], which = "both")
       df <- as.data.frame(annData)
