@@ -699,6 +699,14 @@ shinyServer(function(input, output, session) {
       } else {
         # browser()
       }
+      freqSound <- readWave(currDir, from = xmin, to = xmax)
+      filteredSound <- ffilter(freqSound, from = 1000, to = 6000, output = "Wave", fftw = T)
+      finalFreq <- dfreq(filteredSound, fftw = T, clip = 0.11, plot = F)
+      df <- as.data.frame(finalFreq)
+      maxFreq <- max(df$y, na.rm = T)
+      minFreq <- min(df$y, na.rm = T)
+      meanFreq <- mean(df$y, na.rm = T)
+      bandwidth <- maxFreq - minFreq
       showSpeciesDropdown(xmin, xmax)
     })
   }

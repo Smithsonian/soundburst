@@ -156,6 +156,10 @@ dashboardPage(
                                 )),
                                 textInput("timeMin", "Time Start", 1),
                                 textInput("timeMax", "Time End", 2),
+                                textInput("maxFreq", "Max Frequency", 1),
+                                textInput("minFreq", "Min Frequency", 1),
+                                textInput("meanFreq", "Mean Frequency", 1),
+                                textInput("bandwidth", "Bandwidth", 1),
                                 #These column selectors are dynamically created when the file is loaded
                                 hidden(div(id = "type-name-warning", "Attention: Please make sure all required fields (*) are filled out.")),
                                 uiOutput("speciesType"),
