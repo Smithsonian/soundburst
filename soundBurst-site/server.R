@@ -35,6 +35,7 @@ annotationListCsvProject <<- vector()
 # Create some REACTIVE VALUES
 progressValue <<- reactiveValues()
 progressValue$one <<- 0
+projectFileCountGlobal <<- 0
 
 # This is used to connect correctly with AWS
 set_config( config( ssl_verifypeer = 0L ) )
@@ -1044,7 +1045,6 @@ shinyServer(function(input, output, session) {
   
   findFileCount = function() {
     projectFileCount <- 0
-    projectFileCountGlobal <<- 0
     files <- list.files(depPath, all.files=F, recursive=T, include.dirs=T)
     for (i in 1:length(files)) {
       if (substrRight(files[i],4) == ".wav") {
@@ -1176,7 +1176,11 @@ shinyServer(function(input, output, session) {
       # Creating an audio tag holding that temp.wav file to be played
       shinyjs::show("playButtonClip",anim = FALSE)
       shinyjs::html(id = "playButtonClip", paste0(html = '<audio src="temp.wav" type="audio/wav" controls></audio>'))
-      
+      df <- species()
+      if (is.null(df)) return(NULL)
+      itemsType <<- c('Select Species',as.character(df[[1]]))
+      itemsSpecies <<- c('Select Type',as.character(df[[3]]))
+
       shinyjs::show(id = "spectroClip", anim = FALSE)
       shinyjs::show(id = "clipInfo-container", anim = FALSE)
       updateSelectizeInput(session, "annotationDrop", label = "Select an annotation", choices =  currAnnList, selected = tail(annotationListDrop, 1))

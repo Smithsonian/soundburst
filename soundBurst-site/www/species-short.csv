@@ -1,4 +1,4 @@
-CommonName,ScientificName,Type
+Common Name,Scientific Name,Type
 American Bullfrog,Lithobates catesbeianus,Frog
 Atlantic Coast Leopard Frog,Lithobates kauffeldi,Frog
 Green Frog,Lithobates clamitans,Frog
@@ -39,3 +39,118 @@ Southeastern Big-eared Bat ,Corynorhinus rafinesquii macrotis,Bat
 Silver-haired Bat,Lasionycteris noctivagans,Bat
 Eastern Red Bat,Lasiurus borealis,Bat
 Hoary Bat,Lasiurus cinereus,Bat
+Seminole Bat,Lasiurus seminolus ,Bat
+Southeastern Bat,Myotis austroriparius,Bat
+Evening Bat,Nycticeius humeralis,Bat
+Acadian Flycatcher,Empidonax virescens,Bird
+Alder Flycatcher,Empidonax alnorum,Bird
+American Crow,Corvus brachyrhynchos,Bird
+American Goldfinch,Carduelis tristis,Bird
+American Kestrel,Falco sparverius,Bird
+American Redstart,Setophaga ruticilla,Bird
+American Robin,Turdus migratorius,Bird
+American Woodcock,Scolopax minor,Bird
+Barn Swallow,Hirrundo rustica,Bird
+Barred Owl,Strix varia,Bird
+Belted Kingfisher,Ceryle alcyon,Bird
+Black-and-white Warbler,Mniotilta varia,Bird
+Black-billed Cuckoo,Coccyzus erthrophthalmus,Bird
+Black-capped Chickadee,Poecile atricapillus,Bird
+Blackpoll Warbler,Dendroica striata,Bird
+Black-throated Blue Warbler,Setophaga caerulescens,Bird
+Black-throated Green Warbler,Dendroica virens,Bird
+Blue Grosbeak,Guiraca caerulea,Bird
+Blue Jay,Cyanocitta cristata,Bird
+Blue-grey Gnatcatcher,Poliotila caerulea,Bird
+Blue-headed Vireo,Vireo solitarius,Bird
+Blue-winged Warbler,Vermivora pinus,Bird
+Broad-winged Hawk,Buteo platypterus,Bird
+Brown Creeper,Certhia americana,Bird
+Brown-Headed Cowbird,Molothrus ater,Bird
+Brown Thrasher,Toxostoma rufum,Bird
+Carolina Chickadee,Parus carolinensis,Bird
+Carolina Wren,Thryothorus ludovicianus,Bird
+Canada Goose,Branta canadensis,Bird
+Cedar Waxwing,Bombycilla cedrorum,Bird
+Cerulean Warbler,Dendroica cerulea,Bird
+Chestnut-sided Warbler,Dendroica pensylvanica,Bird
+Chimney Swift,Chaetura pelagica,Bird
+Chipping Sparrow,Spizella passerina,Bird
+Common (Red-shafted) Flicker,Colaptes cafer,Bird
+Common Grackle,Quiscalus quiscula,Bird
+Common Nighthawk,Chordeiles minor,Bird
+Common Raven,Corvus corax,Bird
+Common Yellowthroat,Geothlypis trichas,Bird
+Cooper's Hawk,Accipiter cooperii,Bird
+Dark-eyed (Slate-colored) Junco,Junco hyemalis,Bird
+Downy Woodpecker,Picoides pubescens,Bird
+Eastern Bluebird,Sialia sialis,Bird
+Eastern Kingbird,Tyrannus tyrannus,Bird
+Eastern Meadowlark,Sturnella magna,Bird
+Eastern Phoebe,Sayornis phoebe,Bird
+Eastern Screech-Owl,Otus asio,Bird
+Eastern Towhee,Pipilo erythrophthalmus,Bird
+Eastern Tufted Titmouse,Parus bicolor,Bird
+Eastern Wood-Pewee,Contopus virens,Bird
+European Starling,Sturnus vulgaris,Bird
+Field Sparrow,Spizella pusilla,Bird
+Fish Crow,Corvus ossifragus,Bird
+Golden-Winged Warbler,Vermivora chrysoptera,Bird
+Grasshopper Sparrow,Ammodramus savannarum,Bird
+Gray Catbird,Dumetella carolinensis,Bird
+Great Blue Heron,Ardea herodias ,Bird
+Great Crested Flycatcher,Myiarchus crinitus,Bird
+Great-Horned Owl,Bubo virginianus,Bird
+Green Heron,Butorides virescens ,Bird
+Hairy Woodpecker,Picoides villosus,Bird
+Hooded Warbler,Wilsonia citrina,Bird
+Horned Lark,Eremophila alpestris,Bird
+House Finch,Carodacus mexicanus,Bird
+House Sparrow,Passer domesticus,Bird
+House Wren,Troglodytes aedon,Bird
+Indigo Bunting,Passerina cyanea,Bird
+Kentucky Warbler,Oporornis formosus,Bird
+Least Flycatcher,Empidonax minimus,Bird
+Loggerhead Shrike,Lanius ludovicianus,Bird
+Louisiana Waterthrush,Seiurus motacilla,Bird
+Mourning Dove,Zenaida macroura,Bird
+Northern (Baltimore) Oriole,Icterus galbula,Bird
+Northern Bobwhite,Colinus virginianus,Bird
+Northern Cardinal,Cardinalis cardinalis,Bird
+Northern Mockingbird,Mimus polyglottos,Bird
+Northern Parula,Parula americana,Bird
+Northern Rough-Winged Swallow,Stelgidopteryx serripennis,Bird
+Olive-sided Flycatcher,Contopus cooperi,Bird
+Orchard Oriole,Icterus spurius,Bird
+Ovenbird,Seiurus aurocapillus,Bird
+Pileated Woodpecker,Dryocopus pileatus,Bird
+Pine Warbler,Setophaga pinus,Bird
+Prairie Warbler,Dendroica discolor,Bird
+Prothonotary Warbler,Protonotaria citrea,Bird
+Purple Martin,Progne subis ,Bird
+Red-bellied Woodpecker,Melanerpes carolinus,Bird
+Red-eyed Vireo,Vireo olivaceus,Bird
+Red-Headed Woodpecker,Melanerpes erythrocephalus,Bird
+Red-shouldered Hawk,Buteo lineatus,Bird
+Red-Tailed Hawk,Buteo jamaicensis,Bird
+Red-winged Blackbird,Agelaius phoeniceus,Bird
+Rose-breasted Grosbeak,Pheucticus ludovicianus,Bird
+Ruffed Grouse,Bonasa umbellus,Bird
+Scarlet Tanager,Piranga olivacea,Bird
+Song Sparrow,Melospiza melodia,Bird
+Summer Tanager,Piranga rubra,Bird
+Tree Swallow,Tachycineta bicolor,Bird
+Vesper Sparrow,Pooecetes gramineus,Bird
+Warbling Vireo,Vireo gilvus,Bird
+Whip-poor-will,Caprimulgus vociferus,Bird
+White-breasted Nuthatch,Sitta carolinensis,Bird
+White-eyed Vireo,Vireo griseus,Bird
+Wild Turkey,Meleagris gallopavo,Bird
+Willow Flycatcher,Empidonax traillii,Bird
+Wood Thrush,Hylocichla mustelina,Bird
+Worm-eating Warbler,Helmitheros vermivorus,Bird
+Yellow Warbler,Dendroica petechia,Bird
+Yellow-billed Cuckoo,Coccyzus americanus,Bird
+Yellow-breasted Chat,Icteria virens,Bird
+Yellow-throated Vireo,Vireo flavifrons,Bird
+Yellow-throated Warbler,Dendroica dominica,Bird
