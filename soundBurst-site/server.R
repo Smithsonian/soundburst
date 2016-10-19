@@ -894,7 +894,7 @@ shinyServer(function(input, output, session) {
   observeEvent(input$speciesDropSubmit, {
     fileFullName <- unlist(get_selected(input$tree))
     if (is.null(deploymentCSVDataTable) ) {
-      if(!autoCSVLoad) {
+      if(!autoDepCSVLoad) {
         shinyjs::show("site-info-warning-container") 
       }
     }
@@ -928,10 +928,12 @@ shinyServer(function(input, output, session) {
           annotationListWav <<- c(annotationListWav, normalizePath(filePathFull))
           if (autoDepCSVLoad) {
             write.csv(deploymentCSVDataTable, paste0(depPath,"/",paste0(csvFileName,'.csv')), row.names = FALSE)
+            annotationListCsv <<- normalizePath(paste0(depPath,"/",paste0(csvFileName,'.csv')))
+            
           } else {
             write.csv(deploymentCSVDataTable, paste0(depPath,"/",paste0(newFileName,'.csv')), row.names = FALSE)
+            annotationListCsv <<- normalizePath(paste0(depPath,"/",paste0(newFileName,'.csv')))
           }
-          annotationListCsv <<- c(annotationListCsv, normalizePath(paste0(depPath,"/",paste0(newFileName,'.csv'))))
           shinyjs::addClass('completedDepContainer', "open-accordian")
           shinyjs::removeClass('completedDepContainer', "closed-accordian")
           shinyjs::show("annotationDrop")
@@ -1174,7 +1176,6 @@ shinyServer(function(input, output, session) {
         clipCount <<- clipCount + 1
       }
     }
-    browser()
   }
   
   writeDeploymentCSV <- function(siteDataTable) {
