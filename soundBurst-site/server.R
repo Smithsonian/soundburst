@@ -375,7 +375,9 @@ shinyServer(function(input, output, session) {
           
           # Listener for "Select a Sequence"
           observeEvent(input$spectroTimeSubmit, {
-            # incrementAmount <<- (as.numeric(input$spectroEndTime)*60)
+            if (file.exists(depFilePath)) {
+              readSequenceCSV(unlist(get_selected(input$tree)))  
+            }
             file.copy(currDir, paste0(getwd(), "/www"))
             shinyjs::html(id = "playButton", paste0(html = '<audio controls preload="auto"><source src="', unlist(get_selected(input$tree)), '" type="audio/wav"></audio>'))
             incrementAmount <<- (soundDuration/as.numeric(input$spectroEndTime))
