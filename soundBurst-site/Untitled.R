@@ -1,0 +1,7 @@
+test <- readWave("www/Frog31_2016-04-27_211200_EDT.wav")
+test2 <- ffilter(test, from = 1000, to = 6000, output = "Wave", fftw = T)
+test3 <- dfreq(test2, fftw = T, clip = 0.11)
+df <- as.data.frame(test3)
+max(df$y, na.rm = T)
+min(df$y, na.rm = T)
+mean(df$y, na.rm = T)
