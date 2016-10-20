@@ -35,6 +35,12 @@ annotationListCsvProject <<- vector()
 progressValue <<- reactiveValues()
 progressValue$one <<- 0
 projectFileCountGlobal <<- 0
+xmin <<- 0
+xmax <<- 0
+maxFreq <<- 0
+minFreq <<- 0
+meanFreq <<- 0
+bandwidth <<- 0
 
 # This is used to connect correctly with AWS
 set_config( config( ssl_verifypeer = 0L ) )
@@ -664,6 +670,12 @@ shinyServer(function(input, output, session) {
   # 
   
   observeEvent(input$plot_brush$xmin, {
+    xmin <<- 0
+    xmax <<- 0
+    maxFreq <<- 0
+    minFreq <<- 0
+    meanFreq <<- 0
+    bandwidth <<- 0
     renderSpectroClip(NULL, input$plot_brush$xmin, input$plot_brush$xmax, FALSE)
   });
   
@@ -710,10 +722,12 @@ shinyServer(function(input, output, session) {
       filteredSound <- ffilter(freqSound, from = 1000, to = 6000, output = "Wave", fftw = T)
       finalFreq <- dfreq(filteredSound, fftw = T, clip = 0.11, plot = F)
       df <- as.data.frame(finalFreq)
-      maxFreq <- max(df$y, na.rm = T)
-      minFreq <- min(df$y, na.rm = T)
-      meanFreq <- mean(df$y, na.rm = T)
-      bandwidth <- maxFreq - minFreq
+      xmin <<- xmin
+      xmax <<- xmax
+      maxFreq <<- max(df$y, na.rm = T)
+      minFreq <<- min(df$y, na.rm = T)
+      meanFreq <<- mean(df$y, na.rm = T)
+      bandwidth <<- maxFreq - minFreq
       showSpeciesDropdown(xmin, xmax, maxFreq, minFreq, meanFreq, bandwidth)
     })
   }
@@ -722,32 +736,43 @@ shinyServer(function(input, output, session) {
   showSpeciesDropdown = function (xmin, xmax, maxFreq, minFreq, meanFreq, bandwidth){
     shinyjs::show("clip-species-dropdown")
     if(!is.null(xmax)) {
-      updateTextInput(session, "timeMin",label = paste("Time Start: "), value = paste(round(xmin,digits=1)))
-      updateTextInput(session, "timeMax",label = paste("Time End: "), value = paste(round(xmax,digits=1)))
-      # shinyjs::html("maxFreq", maxFreq)
-      updateTextInput(session, "maxFreq",label = paste("Max Frequency: "), value = paste(round(maxFreq,digits=1)))
-      updateTextInput(session, "minFreq",label = paste("Min Frequecy: "), value = paste(round(minFreq,digits=1)))
-      updateTextInput(session, "meanFreq",label = paste("Mean Frequecy: "), value = paste(round(meanFreq,digits=1)))
-      updateTextInput(session, "bandwidth",label = paste("Bandwidth: "), value = paste(round(bandwidth,digits=1)))
-      shinyjs::disable("timeMin")
-      shinyjs::disable("timeMax")
-      shinyjs::disable("maxFreq")
-      shinyjs::disable("minFreq")
-      shinyjs::disable("meanFreq")
-      shinyjs::disable("bandwidth")
+      # updateTextInput(session, "timeMin",label = paste("Time Start: "), value = paste(round(xmin,digits=1)))
+      # updateTextInput(session, "timeMax",label = paste("Time End: "), value = paste(round(xmax,digits=1)))
+      shinyjs::html("timeMin", paste0("Min Time: ",round(xmin, digits = 2)))
+      shinyjs::html("timeMax", paste0("Max Time: ",round(xmax, digits = 2)))
+      shinyjs::html("maxFreq", paste0("Max Frequency: ",round(maxFreq, digits = 2)))
+      shinyjs::html("minFreq", paste0("Min Frequency: ",round(minFreq, digits = 2)))
+      shinyjs::html("meanFreq", paste0("Mean Frequency: ",round(meanFreq, digits = 2)))
+      shinyjs::html("bandwidth", paste0("Bandwidth: ",round(bandwidth, digits = 2)))
+      # updateTextInput(session, "maxFreq",label = paste("Max Frequency: "), value = paste(round(maxFreq,digits=1)))
+      # updateTextInput(session, "minFreq",label = paste("Min Frequecy: "), value = paste(round(minFreq,digits=1)))
+      # updateTextInput(session, "meanFreq",label = paste("Mean Frequecy: "), value = paste(round(meanFreq,digits=1)))
+      # updateTextInput(session, "bandwidth",label = paste("Bandwidth: "), value = paste(round(bandwidth,digits=1)))
+      # shinyjs::disable("timeMin")
+      # shinyjs::disable("timeMax")
+      # shinyjs::disable("maxFreq")
+      # shinyjs::disable("minFreq")
+      # shinyjs::disable("meanFreq")
+      # shinyjs::disable("bandwidth")
     } else {
-      updateTextInput(session, "timeMin",label = paste("Time Start: "), value = paste(0))
-      updateTextInput(session, "timeMax",label = paste("Time End: "), value = paste(0))
-      updateTextInput(session, "maxFreq",label = paste("Max Frequency: "), value = paste(0))
-      updateTextInput(session, "minFreq",label = paste("Min Frequency: "), value = paste(0))
-      updateTextInput(session, "meanFreq",label = paste("Mean Frequency: "), value = paste(0))
-      updateTextInput(session, "bandwidth",label = paste("Bandwidth: "), value = paste(0))
-      shinyjs::disable("timeMin")
-      shinyjs::disable("timeMax")
-      shinyjs::disable("maxFreq")
-      shinyjs::disable("minFreq")
-      shinyjs::disable("meanFreq")
-      shinyjs::disable("bandwidth")
+      # updateTextInput(session, "timeMin",label = paste("Time Start: "), value = paste(0))
+      # updateTextInput(session, "timeMax",label = paste("Time End: "), value = paste(0))
+      shinyjs::html("timeMin", c("Min Time: ",paste(0)))
+      shinyjs::html("timeMax", c("Max Time: ",paste(0)))
+      shinyjs::html("maxFreq", c("Max Frequency: ",paste(0)))
+      shinyjs::html("minFreq", c("Min Frequency: ",paste(0)))
+      shinyjs::html("meanFreq", c("Mean Frequency: ",paste(0)))
+      shinyjs::html("bandwidth", c("Bandwidth: ",paste(0)))
+      # updateTextInput(session, "maxFreq",label = paste("Max Frequency: "), value = paste(0))
+      # updateTextInput(session, "minFreq",label = paste("Min Frequency: "), value = paste(0))
+      # updateTextInput(session, "meanFreq",label = paste("Mean Frequency: "), value = paste(0))
+      # updateTextInput(session, "bandwidth",label = paste("Bandwidth: "), value = paste(0))
+      # shinyjs::disable("timeMin")
+      # shinyjs::disable("timeMax")
+      # shinyjs::disable("maxFreq")
+      # shinyjs::disable("minFreq")
+      # shinyjs::disable("meanFreq")
+      # shinyjs::disable("bandwidth")
     }
   }
   
@@ -882,7 +907,7 @@ shinyServer(function(input, output, session) {
     annotationListCsvProject <<- c(annotationListCsv, normalizePath(paste0(dirPath,"/",paste0('Project_', projectName,'.csv'))))
   }
   
-  speciesFields <- c("timeMin", "timeMax", "speciesDropdown", "typeDropdown", "maxFreq", "minFreq", "meanFreq", "bandwidth", "annotNotes")
+  speciesFields <- c("timeMin", "timeMax", "speciesDropdown", "typeDropdown", "annotNotes")
   
   formDataSpecies <- reactive({
     data <- sapply(speciesFields, function(x) input[[x]])
@@ -910,14 +935,14 @@ shinyServer(function(input, output, session) {
         } 
         else {
           if (clipCount == 0) {
-            dataArray <- c(fileFullName,clipCount,dataSet[[1]],dataSet[[2]], durationSmall, dataSet[[4]],dataSet[[3]],dataSet[[5]],dataSet[[6]],dataSet[[7]],dataSet[[8]],dataSet[[9]])
+            dataArray <- c(fileFullName,clipCount,dataSet[[1]],dataSet[[2]], durationSmall, dataSet[[4]],dataSet[[3]],maxFreq,minFreq,meanFreq,bandwidth,dataSet[[5]])
             dataMatrix <- matrix(dataArray,ncol = 12, byrow = TRUE)
             colnames(dataMatrix) <- c("File Name", "Annotation#","Time Min (s)", "Time Max (s)", "Duration", "Type", "Species", "Max Freq", "Min Freq", "Mean Freq", "Bandwidth", "Annotation Notes")
             dataTable <- as.table(dataMatrix)
             deploymentCSVDataTable <<- cbind(deploymentCSVDataTable, dataTable)
           } 
           else {
-            dataArray <- c(deploymentCSVDataTable[1,1],deploymentCSVDataTable[1,2],deploymentCSVDataTable[1,3],deploymentCSVDataTable[1,4],deploymentCSVDataTable[1,5],deploymentCSVDataTable[1,6],deploymentCSVDataTable[1,7],deploymentCSVDataTable[1,8],fileFullName, clipCount,dataSet[[1]],dataSet[[2]],durationSmall, dataSet[[4]],dataSet[[3]],dataSet[[5]],dataSet[[6]],dataSet[[7]],dataSet[[8]],dataSet[[9]])
+            dataArray <- c(deploymentCSVDataTable[1,1],deploymentCSVDataTable[1,2],deploymentCSVDataTable[1,3],deploymentCSVDataTable[1,4],deploymentCSVDataTable[1,5],deploymentCSVDataTable[1,6],deploymentCSVDataTable[1,7],deploymentCSVDataTable[1,8],fileFullName,clipCount,dataSet[[1]],dataSet[[2]], durationSmall, dataSet[[4]],dataSet[[3]],maxFreq,minFreq,meanFreq,bandwidth,dataSet[[5]])
             deploymentCSVDataTable <<- rbind(deploymentCSVDataTable, dataArray)
           }
           increaseStatusBar()
@@ -972,12 +997,20 @@ shinyServer(function(input, output, session) {
         minFreqLast <- tail(annData[[8]], 1)
         meanFreqLast <- tail(annData[[9]], 1)
         bandwidthLast <- tail(annData[[10]], 1)
-        updateTextInput(session, "timeMin",label = paste("Time Start: "), value = minLast)
-        updateTextInput(session, "timeMax",label = paste("Time End: "), value = maxLast)
-        updateTextInput(session, "maxFreq",label = paste("Max Frequency: "), value = maxFreqLast)
-        updateTextInput(session, "minFreq",label = paste("Min Frequency: "), value = minFreqLast)
-        updateTextInput(session, "meanFreq",label = paste("Mean Frequency: "), value = meanFreqLast)
-        updateTextInput(session, "bandwidth",label = paste("Bandwidth: "), value = bandwidthLast)
+        # updateTextInput(session, "timeMin",label = paste("Time Start: "), value = minLast)
+        # updateTextInput(session, "timeMax",label = paste("Time End: "), value = maxLast)
+        # updateTextInput(session, "maxFreq",label = paste("Max Frequency: "), value = maxFreqLast)
+        # updateTextInput(session, "minFreq",label = paste("Min Frequency: "), value = minFreqLast)
+        # updateTextInput(session, "meanFreq",label = paste("Mean Frequency: "), value = meanFreqLast)
+        # updateTextInput(session, "bandwidth",label = paste("Bandwidth: "), value = bandwidthLast)
+        
+        shinyjs::html("timeMin", paste0("Min Time: ",round(minLast, digits = 2)))
+        shinyjs::html("timeMax", paste0("Max Time: ",round(maxLast, digits = 2)))
+        shinyjs::html("maxFreq", paste0("Max Frequency: ",round(maxFrewLast, digits = 2)))
+        shinyjs::html("minFreq", paste0("Min Frequency: ",round(minFreqLast, digits = 2)))
+        shinyjs::html("meanFreq", paste0("Mean Frequency: ",round(meanFreqLast, digits = 2)))
+        shinyjs::html("bandwidth", paste0("Bandwidth: ",round(bandwidthLast, digits = 2)))
+        
         updateSelectizeInput(session, "typeDropdown", label = "Type*", choices =  itemsSpecies, selected = tail(annData[[5]], 1))
         updateSelectizeInput(session, "speciesDropdown", label = "Species*", choices =  itemsType, selected = tail(annData[[6]], 1))
         # Creating a temp wav sound from xmin to xmax
@@ -1002,8 +1035,16 @@ shinyServer(function(input, output, session) {
         typeCurr <- selectedAnn$Type
         speciesCurr <- selectedAnn$Species
         renderSpectroClip(sound, minCurr, maxCurr, TRUE)
-        updateTextInput(session, "timeMin",label = paste("Time Start: "), value = as.character(minCurr))
-        updateTextInput(session, "timeMax",label = paste("Time End: "), value = as.character(maxCurr))
+        # updateTextInput(session, "timeMin",label = paste("Time Start: "), value = as.character(minCurr))
+        # updateTextInput(session, "timeMax",label = paste("Time End: "), value = as.character(maxCurr))
+        
+        shinyjs::html("timeMin", paste0("Min Time: ",round(minCurr, digits = 2)))
+        shinyjs::html("timeMax", paste0("Max Time: ",round(maxCurr, digits = 2)))
+        shinyjs::html("maxFreq", paste0("Max Frequency: ",round(maxFreqCurr, digits = 2)))
+        shinyjs::html("minFreq", paste0("Min Frequency: ",round(minFreqCurr, digits = 2)))
+        shinyjs::html("meanFreq", paste0("Mean Frequency: ",round(meanFreqCurr, digits = 2)))
+        shinyjs::html("bandwidth", paste0("Bandwidth: ",round(bandwidthCurr, digits = 2)))
+        
         updateSelectizeInput(session, "typeDropdown", label = "Type*", choices =  itemsSpecies, selected = as.character(typeCurr))
         updateSelectizeInput(session, "speciesDropdown", label = "Species*", choices =  itemsType, selected = as.character(speciesCurr))
         # Creating a temp wav sound from xmin to xmax
@@ -1206,7 +1247,7 @@ shinyServer(function(input, output, session) {
     annDataFull <- read.csv(depFilePath)
     # Check if we have annotation files
     if("File.Name" %in% colnames(annDataFull)){
-      annData <- annDataFull[ ,9:16]
+      annData <- annDataFull[ ,9:19]
       currentSelectedMin <- trimws(head(strsplit(input$annotationDrop,split="at")[[1]],2)[2], which = "both")
       currentSelectedSpecies <- trimws(head(strsplit(input$annotationDrop,split="at")[[1]],2)[1], which = "both")
       df <- as.data.frame(annData)
@@ -1227,6 +1268,11 @@ shinyServer(function(input, output, session) {
       }
       minLast <- tail(selectedWav[[3]], 1)
       maxLast <- tail(selectedWav[[4]], 1)
+      maxFreqLast <- tail(selectedWav[[8]], 1)
+      minFreqLast <- tail(selectedWav[[9]], 1)
+      meanFreqLast <- tail(selectedWav[[10]], 1)
+      bandwidthLast <- tail(selectedWav[[11]], 1)
+      
       typeLast <- tail(selectedWav[[5]], 1)
       speciesLast <- tail(selectedWav[[6]], 1)
       sound <- readWave(paste0(depPath, "/", wavFileName))
@@ -1247,8 +1293,14 @@ shinyServer(function(input, output, session) {
       shinyjs::show(id = "spectroClip", anim = FALSE)
       shinyjs::show(id = "clipInfo-container", anim = FALSE)
       updateSelectizeInput(session, "annotationDrop", label = "Select an annotation", choices =  currAnnList, selected = tail(currAnnList, 1))
-      updateTextInput(session, "timeMin",label = paste("Time Start: "), value = as.character(minLast))
-      updateTextInput(session, "timeMax",label = paste("Time End: "), value = as.character(maxLast))
+      # updateTextInput(session, "timeMin",label = paste("Time Start: "), value = as.character(minLast))
+      # updateTextInput(session, "timeMax",label = paste("Time End: "), value = as.character(maxLast))
+      shinyjs::html("timeMin", paste0("Min Time: ",round(minLast, digits = 2)))
+      shinyjs::html("timeMax", paste0("Max Time: ",round(maxLast, digits = 2)))
+      shinyjs::html("maxFreq", paste0("Max Frequency: ",round(maxFreqLast, digits = 2)))
+      shinyjs::html("minFreq", paste0("Min Frequency: ",round(minFreqLast, digits = 2)))
+      shinyjs::html("meanFreq", paste0("Mean Frequency: ",round(meanFreqLast, digits = 2)))
+      shinyjs::html("bandwidth", paste0("Bandwidth: ",round(bandwidthLast, digits = 2)))
       updateSelectizeInput(session, "typeDropdown", label = "Type*", choices =  itemsSpecies, selected = as.character(typeLast))
       updateSelectizeInput(session, "speciesDropdown", label = "Species*", choices =  itemsType, selected = as.character(speciesLast))
     }
