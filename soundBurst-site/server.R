@@ -29,6 +29,7 @@ autoDepCSVLoad <<- FALSE
 annData <<- list()
 readSequenceBool <<- FALSE
 annotationListDrop <<- list()
+currAnnListGlobal <<- list()
 annotationListWav <<- vector()
 annotationListCsv <<- vector()
 annotationListCsvProject <<- vector()
@@ -418,27 +419,17 @@ shinyServer(function(input, output, session) {
   
   renderSpectro = function (sound){
     output$spectrogram <- renderPlot({
+      # path to the sound file
+      currDir <- paste0(depPath, "/", unlist(get_selected(input$tree)))
+      frequencyDF <- get_frequency(currDir, 0, durationMain)
       shinyjs::hide("time-box-container", anim = TRUE)
       anottationCount <<- 0
       spectro(sound, osc = TRUE, scale = FALSE, tlim = c(spectroFromTime,spectroToTime))
+      abline(lm(formula = frequencyDF$y ~ frequencyDF$x), col = "red", lty = 1, lwd = 1)
       shinyjs::show("complete-deployment")
-      
-      # shinyjs::onclick("complete-deployment", increaseStatusBar())
-      # spectroFromTime <<- spectroToTime
+      shinyjs::removeClass("loadingContainer1", "loader")
     })
   }
-  
-  # renderSpectroClip = function(sound, xmin, xmax){
-  #   output$spectroClip <- renderPlot({
-  #     # shinyjs::hide("time-box-container", anim = TRUE)
-  #     # anottationCount <<- 0
-  #     spectro(sound, osc = TRUE, scale = FALSE, tlim = c(xmin,xmax))
-  #     # shinyjs::show("complete-deployment")
-  #     
-  #     # shinyjs::onclick("complete-deployment", increaseStatusBar())
-  #     # spectroFromTime <<- spectroToTime
-  #   })
-  # }
   
   shinyjs::onclick("previous-spectro-increment", showPreviousSpectroIncrement())
   shinyjs::onclick("next-spectro-increment", showNextSpectroIncrement())
@@ -712,20 +703,27 @@ shinyServer(function(input, output, session) {
         # Creating an audio tag holding that temp.wav file to be played
         shinyjs::html(id = "playButtonClip", paste0(html = '<audio src="temp.wav" type="audio/wav" controls></audio>'))
       }
-      freqSound <- readWave(currDir, from = xMinLocal, to = xMaxLocal, units = c("seconds"))
-      filteredSound <- ffilter(freqSound, from = 1000, to = 6000, output = "Wave", fftw = T)
-      finalFreq <- dfreq(filteredSound, fftw = T, clip = 0.11, plot = F)
-      df <- as.data.frame(finalFreq)
       xmin <<- xMinLocal
       xmax <<- xMaxLocal
-      maxFreq <<- round(max(df$y, na.rm = T), digits = 2)
-      minFreq <<- round(min(df$y, na.rm = T), digits = 2)
-      meanFreq <<- round(mean(df$y, na.rm = T), digits = 2)
+      frequencyDF <- get_frequency(currDir, xMinLocal, xMaxLocal);
+      # Storing some variables used for calculating the abline
+      ablineY <<- frequencyDF$y
+      ablineX <<- frequencyDF$x
+      # Storing the frequencies globaly
+      maxFreq <<- round(max(frequencyDF$y, na.rm = T), digits = 2)
+      minFreq <<- round(min(frequencyDF$y, na.rm = T), digits = 2)
+      meanFreq <<- round(mean(frequencyDF$y, na.rm = T), digits = 2)
       bandwidth <<- round((maxFreq - minFreq), digits = 2)
       showSpeciesDropdown(xMinLocal, xMaxLocal, maxFreq, minFreq, meanFreq, bandwidth)
     })
   }
-
+  
+  get_frequency <- function(currDir, xMinLocal, xMaxLocal) {
+    freqSound <- readWave(currDir, from = xMinLocal, to = xMaxLocal, units = c("seconds"))
+    filteredSound <- ffilter(freqSound, from = 1000, to = 6000, output = "Wave", fftw = T)
+    finalFreq <- dfreq(filteredSound, fftw = T, clip = 0.11, plot = F)
+    df <- as.data.frame(finalFreq)
+  }
   
   showSpeciesDropdown = function (xmin, xmax, maxFreq, minFreq, meanFreq, bandwidth){
     shinyjs::show("clip-species-dropdown")
