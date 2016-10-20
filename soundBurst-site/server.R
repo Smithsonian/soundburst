@@ -374,6 +374,7 @@ shinyServer(function(input, output, session) {
           # Listener for "Select a Sequence"
           observeEvent(input$spectroTimeSubmit, {
             if (file.exists(depFilePath)) {
+              shinyjs::addClass("loadingContainer1", "loader")
               readSequenceCSV(unlist(get_selected(input$tree)))  
             }
             file.copy(currDir, paste0(getwd(), "/www"))
@@ -389,6 +390,7 @@ shinyServer(function(input, output, session) {
           })
           observeEvent(input$noTimeSubmission,{
             if (file.exists(depFilePath)) {
+              shinyjs::addClass("loadingContainer1", "loader")
               readSequenceCSV(unlist(get_selected(input$tree)))  
             }
             spectroToTime <<- soundDuration
@@ -396,7 +398,8 @@ shinyServer(function(input, output, session) {
             shinyjs::show("playButton",anim = FALSE)
             file.copy(currDir, paste0(getwd(), "/www"))
             shinyjs::html(id = "playButton", paste0(html = '<audio controls preload="auto"><source src="', unlist(get_selected(input$tree)), '" type="audio/wav"></audio>'))
-          })
+            shinyjs::removeClass("loadingContainer1", "loader")
+            })
         } else {
           spectroToTime <<- soundDuration
           renderSpectro(sound)
@@ -673,7 +676,8 @@ shinyServer(function(input, output, session) {
     output$spectroClip <- renderPlot({
       if(readSequenceBool)
       {
-        spectro(sound, osc = TRUE, scale = FALSE, tlim = c(xmin,xmax))
+        spectroClip$redraw <- TRUE
+        spectro(sound, osc = TRUE, scale = FALSE, tlim = c(xmin,xmax), fftw = TRUE)
         readSequenceBool <<- FALSE
         return()
       }
@@ -688,7 +692,7 @@ shinyServer(function(input, output, session) {
       
       # shinyjs::show("spectro-clip-container")
       if(!is.null(xmax)) {
-        spectro(sound, f = sound@samp.rate, osc = TRUE, scale = FALSE, tlim = c(floor(as.integer(xmin)),floor(as.integer(xmax))))
+        spectro(sound, f = sound@samp.rate, osc = TRUE, scale = FALSE, tlim = c(floor(as.integer(xmin)),ceiling(as.integer(xmax))), fftw = TRUE)
         # oscillo(sound, from=input$plot_brush$xmin, to=input$plot_brush$xmax)
         # shinyjs::show("spectroClip")
         # xmin <<- input$plot_brush$xmin
@@ -703,8 +707,6 @@ shinyServer(function(input, output, session) {
         writeWave(temp, paste0(getwd(), "/www/temp.wav"))
         # Creating an audio tag holding that temp.wav file to be played
         shinyjs::html(id = "playButtonClip", paste0(html = '<audio src="temp.wav" type="audio/wav" controls></audio>'))
-      } else {
-        # browser()
       }
       freqSound <- readWave(currDir, from = xmin, to = xmax, units = c("seconds"))
       filteredSound <- ffilter(freqSound, from = 1000, to = 6000, output = "Wave", fftw = T)
@@ -987,6 +989,7 @@ shinyServer(function(input, output, session) {
         # Creating an audio tag holding that temp.wav file to be played
         shinyjs::show("playButtonClip",anim = FALSE)
         shinyjs::html(id = "playButtonClip", paste0(html = '<audio src="temp.wav" type="audio/wav" controls></audio>'))
+        shinyjs::removeClass("loadingContainer1", "loader")
       } else {
         currentSelectedMin <- trimws(head(strsplit(input$annotationDrop,split="at")[[1]],2)[2], which = "both")
         currentSelectedSpecies <- trimws(head(strsplit(input$annotationDrop,split="at")[[1]],2)[1], which = "both")
@@ -1214,6 +1217,8 @@ shinyServer(function(input, output, session) {
       # If there are no annotations for that sequence
       if(length(selectedWav$Annotation.) == 0)
       {
+        currAnnList <- list()
+        updateSelectizeInput(session, "annotationDrop", label = "Select an annotation", choices =  currAnnList)
         return()
       }
       currAnnSize <- length(selectedWav$Annotation.)

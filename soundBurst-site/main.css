@@ -445,3 +445,7 @@ textarea {
 #dep-name-warning, #type-name-warning {
   color: #d62d34;
 }
+
+.loader {
+  z-index: 1000;
+}
