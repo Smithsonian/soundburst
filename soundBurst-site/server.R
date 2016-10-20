@@ -1,7 +1,3 @@
-#sound <- readWave("/Users/tgirgin/1/1/deployment/BLAN01_2015-05-16_073100_EDT.wav")
-#test <- meanspec(sound, f = sound@samp.rate)
-#ts <- spectru(test)
-
 library(shiny)
 library(tools)
 library(devtools)
@@ -19,11 +15,11 @@ library(stringr)
 source("createDirectoryTree.r")
 source("playSound.r")
 library("fftw")
-# On a linux distribution, this will have to be changed to a media player that is installed. E.g., setWavPlayer("aplay")
-setWavPlayer("aplay")
 
+# Removing previously loaded global environment, if any
+rm(list=ls())
 
-# Some global variables
+# Global variables
 mainDir <<- NULL
 clipCount <<- 0
 newName <- NULL
@@ -36,7 +32,6 @@ annotationListDrop <<- list()
 annotationListWav <<- vector()
 annotationListCsv <<- vector()
 annotationListCsvProject <<- vector()
-# Create some REACTIVE VALUES
 progressValue <<- reactiveValues()
 progressValue$one <<- 0
 projectFileCountGlobal <<- 0
@@ -51,12 +46,15 @@ paused <<- FALSE
 
 getOS <- function() {
   if (.Platform$OS.type == "windows") { 
+    setWavPlayer("afplay")
     mainDir <<- "C:/"
     "win"
   } else if (Sys.info()["sysname"] == "Darwin") {
+    setWavPlayer("afplay")
     mainDir <<- "~"
     "mac" 
-  } else if (.Platform$OS.type == "unix") { 
+  } else if (.Platform$OS.type == "unix") {
+    setWavPlayer("aplay")
     mainDir <<- "~"
     "unix"
   } else {
