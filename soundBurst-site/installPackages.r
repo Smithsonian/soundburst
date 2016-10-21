@@ -18,3 +18,4 @@ install.packages("shinyjs")
 install.packages("aws.s3", repos = c("cloudyr" = "http://cloudyr.github.io/drat"), INSTALL_opts = "--no-multiarch")
 # Otherwise use line below
 install_github("cloudyr/aws.s3")
+install.packages("rlist")

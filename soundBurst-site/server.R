@@ -376,7 +376,12 @@ shinyServer(function(input, output, session) {
           observeEvent(input$spectroTimeSubmit, {
             if (file.exists(depFilePath)) {
               shinyjs::addClass("loadingContainer1", "loader")
-              readSequenceCSV(unlist(get_selected(input$tree)))  
+              readSequenceCSV(unlist(get_selected(input$tree)))
+              df <- species()
+              itemsType <<- c('Select Species',as.character(df[[1]]))
+              itemsSpecies <<- c('Select Type',as.character(df[[3]]))
+              updateSelectizeInput(session, "typeDropdown", label = "Type*", choices =  itemsSpecies)
+              updateSelectizeInput(session, "speciesDropdown", label = "Species*", choices =  itemsType)
             }
             file.copy(currDir, paste0(getwd(), "/www"))
             shinyjs::html(id = "playButton", paste0(html = '<audio controls preload="auto"><source src="', unlist(get_selected(input$tree)), '" type="audio/wav"></audio>'))
@@ -392,6 +397,11 @@ shinyServer(function(input, output, session) {
           observeEvent(input$noTimeSubmission,{
             if (file.exists(depFilePath)) {
               shinyjs::addClass("loadingContainer1", "loader")
+              df <- species()
+              itemsType <<- c('Select Species',as.character(df[[1]]))
+              itemsSpecies <<- c('Select Type',as.character(df[[3]]))
+              updateSelectizeInput(session, "typeDropdown", label = "Type*", choices =  itemsSpecies)
+              updateSelectizeInput(session, "speciesDropdown", label = "Species*", choices =  itemsType)
               readSequenceCSV(unlist(get_selected(input$tree)))  
             }
             spectroToTime <<- soundDuration
@@ -578,7 +588,6 @@ shinyServer(function(input, output, session) {
   
   species <- reactive({
     if (is.null(input$csvFile)) {
-      testCSV <- read.csv("www/species-short.csv", header = TRUE)
       read.csv("www/species-short.csv", header = TRUE)
     } else {
       req(input$csvFile)
@@ -587,6 +596,16 @@ shinyServer(function(input, output, session) {
       print(correctPath)
       read.csv(correctPath, header = TRUE)
     }
+  })
+  
+  output$speciesType <- renderUI({
+    
+    df <- species()
+    
+    if (is.null(df)) return(NULL)
+    
+    itemsSpecies <<- c('Select Type',as.character(df[[3]]))
+    selectInput("typeDropdown", "Type*",itemsSpecies)
   })
   
   output$commonName <- renderUI({
@@ -598,16 +617,6 @@ shinyServer(function(input, output, session) {
     
     itemsType <<- c('Select Species',as.character(df[[1]]))
     selectInput("speciesDropdown", "Species*",itemsType)
-  })
-  
-  output$speciesType <- renderUI({
-    
-    df <- species()
-    
-    if (is.null(df)) return(NULL)
-    
-    itemsSpecies <<- c('Select Type',as.character(df[[3]]))
-    selectInput("typeDropdown", "Type*",itemsSpecies)
   })
   
   formulaText <- reactive({
@@ -623,40 +632,7 @@ shinyServer(function(input, output, session) {
       formulaText()
     }
   })
-  
-  #This previews the CSV data file
-  output$filetable <- renderTable({
-    species()
-  })
-  # 
-  #   # This creates the oscillo clips after brush
-  #   output$spectroZoomClip <- renderPlot({
-  #     path <- getPath(get_selected(input$tree, "names"))
-  #     if(!is.null(newName)) {
-  #       currDir <- paste0(depPath, "/", path, newName)
-  #     }
-  #     else {
-  #       currDir <- paste0(depPath, "/", path, unlist(get_selected(input$tree)))
-  #     }
-  #     sound <- readWave(currDir)
-  #     if(!is.null(input$plotZoom$xmax)) {
-  # 
-  #       spectro(sound, scale = FALSE, osc = FALSE, tlim = c(input$plotZoom$xmin,input$plotZoom$xmax), flim = c(input$plotZoom$ymin,input$plotZoom$ymax))
-  # 
-  #       # Min and max values for the spectropClipZoom
-  #       xminZoom <<- input$plotZoom$xmin
-  #       xmaxZoom <<- input$plotZoom$xmax
-  # 
-  #       # Min and max values for the spectroClip, not the spectroClipZoom
-  #       xmin <- input$plot_brush$xmin
-  #       xmax <- input$plot_brush$xmax
-  #       # shinyjs::html('remove',tags$div(class = "close-clip", "hello There"))
-  #       shinyjs::onclick("spectroClip",showSpeciesDropdown(xmin, xmax))
-  #       shinyjs::show("playButtonClipZoom",anim = FALSE)
-  #     }
-  #   })
-  # 
-  
+
   observeEvent(input$plot_brush$xmin, {
     if(input$plot_brush$xmax != 0)
     {
@@ -977,13 +953,13 @@ shinyServer(function(input, output, session) {
     if(input$annotationDrop != "")
     {        
       annData <- read.csv(depFilePath)[ ,10:20]
+      annCount <<- length(annData[[1]])
       sound <- readWave(paste0(depPath, "/", unlist(get_selected(input$tree))))
-      currentSelectedMin <- trimws(head(strsplit(input$annotationDrop,split="at")[[1]],2)[2], which = "both")
+      currentSelectedMin <- trimws(head(strsplit(input$annotationDrop, split="at")[[1]],2)[2], which = "both")
       minLast <- tail(annData[[2]], 1)
       # If current selection is last element in dropdown
       if(str_detect(input$annotationDrop, as.character(tail(annData[[6]], 1))) && as.character(currentSelectedMin) == as.character(minLast))
       {
-        annCount <- length(annData[[1]])
         annLast <- tail(annData, 1)
         minLast <- tail(annData[[2]], 1)
         maxLast <- tail(annData[[3]], 1)
@@ -999,8 +975,9 @@ shinyServer(function(input, output, session) {
         shinyjs::html("meanFreq", paste0("Mean Frequency: ",round(meanFreqLast, digits = 2)))
         shinyjs::html("bandwidth", paste0("Bandwidth: ",round(bandwidthLast, digits = 2)))
         
-        updateSelectizeInput(session, "typeDropdown", label = "Type*", choices =  itemsSpecies, selected = tail(annData[[5]], 1))
-        updateSelectizeInput(session, "speciesDropdown", label = "Species*", choices =  itemsType, selected = tail(annData[[6]], 1))
+        updateSelectizeInput(session, "typeDropdown", label = "Type*", choices =  itemsSpecies, selected = as.character(tail(annData[[5]], 1)))
+        filteredSpecies <- filterSpecies(as.character(tail(annData[[5]], 1)), annCount)
+        updateSelectizeInput(session, "speciesDropdown", label = "Species*", choices =  filteredSpecies$Common.Name, selected = as.character(tail(annData[[6]], 1)))
         
         # Creating a temp wav sound from xmin to xmax
         temp <- extractWave(sound, from = minLast, to = maxLast, xunit = "time")
@@ -1024,7 +1001,7 @@ shinyServer(function(input, output, session) {
         meanFreqCurr <- selectedAnn$Mean.Freq
         bandwidthCurr <- selectedAnn$Bandwidth
         typeCurr <- selectedAnn$Type
-        speciesCurr <- selectedAnn$Species
+        speciesCurr <<- selectedAnn$Species
         renderSpectroClip(sound, minCurr, maxCurr, TRUE)
         # updateTextInput(session, "timeMin",label = paste("Time Start: "), value = as.character(minCurr))
         # updateTextInput(session, "timeMax",label = paste("Time End: "), value = as.character(maxCurr))
@@ -1037,7 +1014,8 @@ shinyServer(function(input, output, session) {
         shinyjs::html("bandwidth", paste0("Bandwidth: ",round(bandwidthCurr, digits = 2)))
         
         updateSelectizeInput(session, "typeDropdown", label = "Type*", choices =  itemsSpecies, selected = as.character(typeCurr))
-        updateSelectizeInput(session, "speciesDropdown", label = "Species*", choices =  itemsType, selected = as.character(speciesCurr))
+        filteredSpecies <- filterSpecies(as.character(typeCurr), annCount)
+        updateSelectizeInput(session, "speciesDropdown", label = "Species*", choices = filteredSpecies$Common.Name, selected = as.character(speciesCurr))
         # Creating a temp wav sound from xmin to xmax
         temp <- extractWave(sound, from = minCurr, to = maxCurr, xunit = "time")
         # Writing it to a .wav file
@@ -1048,6 +1026,23 @@ shinyServer(function(input, output, session) {
       }
 
     }
+  })
+  
+  filterSpecies = function(typeCurr, count) {
+    if(is.null(typeCurr) || typeCurr != "Select Type" || typeCurr != "")
+    {
+      speciesList <- species()
+      speciesDF <- as.data.frame(speciesList)
+      filteredSpecies <- speciesDF[which(speciesDF$Type == typeCurr), ] 
+    }
+  }
+  
+  # Listener for animal Type selection dropdown
+  # On change, it refreshes the species list to the its type
+  observeEvent(input$typeDropdown, {
+    filteredSpecies <- filterSpecies(input$typeDropdown, annCount)
+    currentSelectedSpecies <- trimws(head(strsplit(input$annotationDrop,split = " at ")[[1]],2)[1], which = "both")
+    updateSelectizeInput(session, "speciesDropdown", label = "Species*", choices =  filteredSpecies$Common.Name, selected = as.character(currentSelectedSpecies))
   })
   
   ################################
