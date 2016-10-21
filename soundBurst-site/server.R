@@ -411,7 +411,8 @@ shinyServer(function(input, output, session) {
             shinyjs::html(id = "playButton", paste0(html = '<audio controls preload="auto"><source src="', unlist(get_selected(input$tree)), '" type="audio/wav"></audio>'))
             shinyjs::removeClass("loadingContainer1", "loader")
             })
-        } else {
+        } 
+        else {
           spectroToTime <<- soundDuration
           renderSpectro(sound)
           shinyjs::show("playButton",anim = FALSE)
@@ -432,7 +433,7 @@ shinyServer(function(input, output, session) {
       # path to the sound file
       currDir <- paste0(depPath, "/", unlist(get_selected(input$tree)))
       frequencyDF <- get_frequency(currDir, 0, durationMain)
-      shinyjs::hide("time-box-container", anim = TRUE)
+      # shinyjs::hide("time-box-container", anim = TRUE)
       anottationCount <<- 0
       spectro(sound, osc = TRUE, scale = FALSE, tlim = c(spectroFromTime,spectroToTime))
       abline(lm(formula = frequencyDF$y ~ frequencyDF$x), col = "red", lty = 1, lwd = 1)
@@ -636,6 +637,7 @@ shinyServer(function(input, output, session) {
   observeEvent(input$plot_brush$xmin, {
     if(input$plot_brush$xmax != 0)
     {
+      shinyjs::hide("time-box-container", anim = TRUE)
       spectroClipMin <<- round(input$plot_brush$xmin, digits = 2)
       spectroClipMax <<- round(input$plot_brush$xmax, digits = 2)
       renderSpectroClip(NULL, spectroClipMin, spectroClipMax, FALSE)

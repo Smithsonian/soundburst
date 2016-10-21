@@ -14,8 +14,6 @@ install.packages("stringr")
 install.packages("shinydashboard")
 install_github("trestletech/shinyTree")
 install.packages("shinyjs")
-# If using windows, use this line to install S3 package
-install.packages("aws.s3", repos = c("cloudyr" = "http://cloudyr.github.io/drat"), INSTALL_opts = "--no-multiarch")
-# Otherwise use line below
 install_github("cloudyr/aws.s3")
-install.packages("rlist")
+# If you are having trouble installing the AWS S3 package, please run the line below.
+# install.packages("aws.s3", repos = c("cloudyr" = "http://cloudyr.github.io/drat"), INSTALL_opts = "--no-multiarch")
