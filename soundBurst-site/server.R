@@ -1135,6 +1135,7 @@ shinyServer(function(input, output, session) {
   
   readSequenceCSV <- function(wavFileName)
   { 
+    shinyjs::enable("aws-upload-button")
     toggleCompletedDeployment()
     annDataFull <- read.csv(depFilePath)
     # Check if file is empty
