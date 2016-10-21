@@ -320,6 +320,8 @@ shinyServer(function(input, output, session) {
           
           # Listener for "Select a Sequence"
           observeEvent(input$spectroTimeSubmit, {
+            incrementAmount <<- as.numeric(input$spectroEndTime) * 60
+            spectroToTime <<- incrementAmount
             if (file.exists(depFilePath)) {
               shinyjs::addClass("loadingContainer1", "loader")
               readSequenceCSV(unlist(get_selected(input$tree)))
@@ -331,8 +333,6 @@ shinyServer(function(input, output, session) {
             }
             file.copy(currDir, paste0(getwd(), "/www"))
             shinyjs::html(id = "playButton", paste0(html = '<audio controls preload="auto"><source src="', unlist(get_selected(input$tree)), '" type="audio/wav"></audio>'))
-            incrementAmount <<- (soundDuration/as.numeric(input$spectroEndTime))
-            spectroToTime <<- incrementAmount
             renderSpectro(sound)
             if (soundDuration > incrementAmount) {
               shinyjs::show("spectro-increment-container")
@@ -425,8 +425,18 @@ shinyServer(function(input, output, session) {
     sr <- sound@samp.rate
     soundDuration <- round(l/sr,2)
     shinyjs::show("previous-spectro-increment")
+    durationWav <- seewave::duration(sound)
     spectroToTime <<- spectroToTime + incrementAmount
-    spectroFromTime <<- spectroFromTime + incrementAmount
+    if(spectroToTime > durationWav) {
+      spectroToTime <<- durationWav
+      if((spectroFromTime + incrementAmount) < durationWav) {
+        spectroFromTime <<- spectroFromTime + incrementAmount
+      }
+    } else {
+      spectroFromTime <<- spectroFromTime + incrementAmount
+    }
+    
+
     # if (spectroToTime >soundDuration) {
     #   spectroToTime <<- soundDuration
     # }
