@@ -315,7 +315,7 @@ shinyServer(function(input, output, session) {
         # TODO Maybe make a function out of this? Might make the code cleaner
         if (soundDuration > 59) {
           minuteDuration <- round(soundDuration/60)
-          shinyjs::html("time-box-label", paste0("This file is ", minuteDuration, " minutes long. Would you like to increment the display?"))
+          shinyjs::html("time-box-label", paste0("This file is ", minuteDuration, " minutes long. <br> Would you like to increment the display?"))
           shinyjs::show("time-box-container", anim = TRUE)
           
           # Listener for "Select a Sequence"

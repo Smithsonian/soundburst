@@ -93,8 +93,8 @@ dashboardPage(
                shinyTree("tree"),
                hidden(div(id = "time-box-container",
                           div(id = "secondary-time-box-container",
-                              HTML('<label id="time-box-label">Would you like to increment the display?</label>'),
-                              textInput("spectroEndTime", "How many times would you like to split the file?", placeholder = ""),
+                              HTML('<label id="time-box-label"> </label>'),
+                              textInput("spectroEndTime", label = NULL, placeholder = "Please enter a number in minutes"),
                               actionButton("spectroTimeSubmit", "Increment"),
                               actionButton("noTimeSubmission", "Do not Increment")
                           )
