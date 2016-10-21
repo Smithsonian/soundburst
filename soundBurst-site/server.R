@@ -1133,6 +1133,7 @@ shinyServer(function(input, output, session) {
   
   readSequenceCSV <- function(wavFileName)
   { 
+    toggleCompletedDeployment()
     annDataFull <- read.csv(depFilePath)
     # Check if file is empty
     if("File.Name" %in% colnames(annDataFull)){
@@ -1140,7 +1141,9 @@ shinyServer(function(input, output, session) {
       currentSelectedMin <- trimws(head(strsplit(input$annotationDrop,split="at")[[1]],2)[2], which = "both")
       currentSelectedSpecies <- trimws(head(strsplit(input$annotationDrop,split="at")[[1]],2)[1], which = "both")
       df <- as.data.frame(annData)
-      selectedWav <- df[which(df$File.Name == wavFileName), ]
+      # selectedWav <- df[which(df$File.Name == wavFileName), ]
+      selectedWav <- df[which(df$Time.Min..s. >= spectroFromTime & df$Time.Max..s. <= spectroToTime), ]
+      selectedWav <- selectedWav[order(selectedWav$Time.Min..s.), ]
       # If there are no annotations for that sequence
       if(length(selectedWav$Annotation.) == 0)
       {
