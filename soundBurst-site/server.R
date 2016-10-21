@@ -249,7 +249,6 @@ shinyServer(function(input, output, session) {
     }
     # Updating the value of the project name input value
     updateTextInput(session, inputId = "projectName", label = NULL, value = projectName)
-    # folders <- list.dirs(dirPath, full.names = F, recursive = TRUE)
     if(length(dirPath)) {
       createProjectTree()
     }
@@ -257,9 +256,6 @@ shinyServer(function(input, output, session) {
   
   createProjectTree = function () {
     shinyjs::show("progressOne")
-    # create_directory_tree(dirPath)
-    # load("www/dir_tree.Rdata")
-    # output$tree <- renderTree(tree, quoted = FALSE)
     shinyjs::addClass("directory", "active-button")
     shinyjs::show("aws-upload-button")
     deploymentSelect <- shinyDirChoose(input, 'deployment', updateFreq=60000, session=session, root=c(home=normalizePath(dirPath)), restrictions=system.file(package='base'), filetypes=c('', '.wav'))
@@ -268,7 +264,6 @@ shinyServer(function(input, output, session) {
   observeEvent(input$deployment, {
     depPath <<- parseDirPath(root=c(home=normalizePath(dirPath)), input$deployment)
     if(!is.null(depPath)) {
-      # folders <- list.dirs(depPath, full.names = F, recursive = TRUE)
       shinyjs::show("progressOne")
       create_directory_tree(depPath)
       load("www/dir_tree.Rdata")
@@ -290,48 +285,6 @@ shinyServer(function(input, output, session) {
     }
   })
   
-  # Creating onclick event for each play and pause button
-  shinyjs::onclick("playButton", onPlay("spectro"))
-  shinyjs::onclick("pauseButton", pauseSound("spectro"))
-  shinyjs::onclick("playButtonClip", onPlay("spectroClip"))
-  shinyjs::onclick("pauseButtonClip", pauseSound("spectroClip"))
-  shinyjs::onclick("playButtonClipZoom", onPlay("spectroClipZoom"))
-  shinyjs::onclick("pauseButtonClipZoom", pauseSound("spectroClipZoom"))
-  
-  
-  
-  # This is the function that actually calls the play sound function, as it was impossible to pass
-  # in arguments in the above shinyjs function call.
-  onPlay = function(chartType) {
-    if(chartType == "spectro")
-    {
-      playSound(spectroFromTime, spectroToTime, "spectro")
-    }
-    else if(chartType == "spectroClipZoom")
-    {
-      playSound(xminZoom, xmaxZoom, "spectroClipZoom")
-    }
-    else {
-      playSound(xmin, xmax, "spectroClip")
-    }
-  }
-  
-  # This is the function that actually calls the pause sound function, as it was impossible to pass
-  # in arguments in the above shinyjs function call.
-  onPause = function(chartType) {
-    if(chartType == "spectro")
-    {
-      pauseSound("spectro")
-    }
-    else if(chartType == "spectroClipZoom")
-    {
-      pauseSound("spectroClipZoom")
-    }
-    else {
-      pauseSound("spectroClip")
-    }
-  }
-  
   ###########################
   ##### Listener for file selection in "Select Sequence"
   ###########################
@@ -343,10 +296,6 @@ shinyServer(function(input, output, session) {
       return()
     }
     else {
-      # Saving project information
-      # annotationListCsv <<- c(annotationListCsv, normalizePath(paste0(dirPath,"/", file_path_sans_ext(unlist(get_selected(input$tree)))),'.csv'))
-      # Resetting listCompleted
-      listCompleted <<- list()
       # Root path of the selected file
       path <- getPath(get_selected(input$tree, "names"))
       # Full file path
@@ -360,9 +309,6 @@ shinyServer(function(input, output, session) {
         # Duration of the sound file
         durationMain <<- seewave::duration(sound)
         # Storing the start and end time of the wave file in seconds
-        waveDate <<- as.character(as.POSIXct(file.info(currDir)[[4]], origin="1970-01-01", format = "%m/%d/%y"), "%m/%d/%y")
-        waveStartTime <<- as.character(as.POSIXct(file.info(currDir)[[4]], origin="1970-01-01", format = "%H:%M:%S %p"), format = "%H:%M:%S %p")
-        waveEndTime <<- as.character(as.POSIXct((file.info(currDir)[[4]] + durationMain), origin="1970-01-01", format = "%H:%M:%S %p"), format = "%H:%M:%S %p")
         l <- length(sound)
         sr <- sound@samp.rate
         soundDuration <- round(l/sr,2)
@@ -410,7 +356,7 @@ shinyServer(function(input, output, session) {
             file.copy(currDir, paste0(getwd(), "/www"))
             shinyjs::html(id = "playButton", paste0(html = '<audio controls preload="auto"><source src="', unlist(get_selected(input$tree)), '" type="audio/wav"></audio>'))
             shinyjs::removeClass("loadingContainer1", "loader")
-            })
+          })
         } 
         else {
           spectroToTime <<- soundDuration
@@ -430,10 +376,9 @@ shinyServer(function(input, output, session) {
   
   renderSpectro = function (sound){
     output$spectrogram <- renderPlot({
-      # path to the sound file
+      # Path to the sound file
       currDir <- paste0(depPath, "/", unlist(get_selected(input$tree)))
       frequencyDF <- get_frequency(currDir, 0, durationMain)
-      # shinyjs::hide("time-box-container", anim = TRUE)
       anottationCount <<- 0
       spectro(sound, osc = TRUE, scale = FALSE, tlim = c(spectroFromTime,spectroToTime))
       abline(lm(formula = frequencyDF$y ~ frequencyDF$x), col = "red", lty = 1, lwd = 1)
@@ -527,7 +472,6 @@ shinyServer(function(input, output, session) {
       else {
         currDir <- paste0(depPath, "/", path, unlist(get_selected(input$tree)))
       }
-      # Use  from = 1, to = 5, units = "seconds" when playing from a certain time
       wave <- readWave(currDir, from = start, to = end, unit = "seconds")
       sound <- audioSample(wave@stereo, wave@samp.rate, wave@bit)
       if(chartType == "spectro")
@@ -546,10 +490,6 @@ shinyServer(function(input, output, session) {
       }
       audioSound <<- audio::play(sound)
       audioSound
-      # test <- wait(audioSound)
-      print("t")
-      # pause(a)
-      # shinyjs::onclick("pauseButton",pause(a))
     }
   }
   
@@ -572,7 +512,6 @@ shinyServer(function(input, output, session) {
   }
   
   getPath = function(folderList) {
-    # names <- get_selected(input$tree, "names")
     one <- attr(folderList[[1L]], "ancestry", TRUE)
     path <- paste(one, collapse = "/")
     path <- paste0(path, "/")
@@ -644,7 +583,7 @@ shinyServer(function(input, output, session) {
     }
   });
   
-  # This creates the oscillo after brush
+  # Function to create the spectro clip after user has brushed the main plot
   renderSpectroClip = function(sound, xMinLocal, xMaxLocal, readSequenceBool)
   {
     output$spectroClip <- renderPlot({
@@ -663,13 +602,8 @@ shinyServer(function(input, output, session) {
       }
       sound <- readWave(currDir)
       
-      # shinyjs::show("spectro-clip-container")
       if(!is.null(xMaxLocal)) {
         spectro(sound, f = sound@samp.rate, osc = TRUE, scale = FALSE, tlim = c(floor(as.integer(xMinLocal)),ceiling(as.integer(xMaxLocal))))
-        # oscillo(sound, from=input$plot_brush$xMinLocal, to=input$plot_brush$xMaxLocal)
-        # shinyjs::show("spectroClip")
-        # xMinLocal <<- input$plot_brush$xMinLocal
-        # xMaxLocal <<- input$plot_brush$xMaxLocal
         # Getting the duration of the clipped graph
         durationSmall <<- round(xMaxLocal - xMinLocal, digits = 1)
         shinyjs::show("clipInfo-container")
@@ -706,43 +640,19 @@ shinyServer(function(input, output, session) {
   showSpeciesDropdown = function (xmin, xmax, maxFreq, minFreq, meanFreq, bandwidth){
     shinyjs::show("clip-species-dropdown")
     if(!is.null(xmax)) {
-      # updateTextInput(session, "timeMin",label = paste("Time Start: "), value = paste(round(xmin,digits=1)))
-      # updateTextInput(session, "timeMax",label = paste("Time End: "), value = paste(round(xmax,digits=1)))
       shinyjs::html("timeMin", paste0("Min Time: ",round(xmin, digits = 2)))
       shinyjs::html("timeMax", paste0("Max Time: ",round(xmax, digits = 2)))
       shinyjs::html("maxFreq", paste0("Max Frequency: ",round(maxFreq, digits = 2)))
       shinyjs::html("minFreq", paste0("Min Frequency: ",round(minFreq, digits = 2)))
       shinyjs::html("meanFreq", paste0("Mean Frequency: ",round(meanFreq, digits = 2)))
       shinyjs::html("bandwidth", paste0("Bandwidth: ",round(bandwidth, digits = 2)))
-      # updateTextInput(session, "maxFreq",label = paste("Max Frequency: "), value = paste(round(maxFreq,digits=1)))
-      # updateTextInput(session, "minFreq",label = paste("Min Frequecy: "), value = paste(round(minFreq,digits=1)))
-      # updateTextInput(session, "meanFreq",label = paste("Mean Frequecy: "), value = paste(round(meanFreq,digits=1)))
-      # updateTextInput(session, "bandwidth",label = paste("Bandwidth: "), value = paste(round(bandwidth,digits=1)))
-      # shinyjs::disable("timeMin")
-      # shinyjs::disable("timeMax")
-      # shinyjs::disable("maxFreq")
-      # shinyjs::disable("minFreq")
-      # shinyjs::disable("meanFreq")
-      # shinyjs::disable("bandwidth")
     } else {
-      # updateTextInput(session, "timeMin",label = paste("Time Start: "), value = paste(0))
-      # updateTextInput(session, "timeMax",label = paste("Time End: "), value = paste(0))
       shinyjs::html("timeMin", c("Min Time: ",paste(0)))
       shinyjs::html("timeMax", c("Max Time: ",paste(0)))
       shinyjs::html("maxFreq", c("Max Frequency: ",paste(0)))
       shinyjs::html("minFreq", c("Min Frequency: ",paste(0)))
       shinyjs::html("meanFreq", c("Mean Frequency: ",paste(0)))
       shinyjs::html("bandwidth", c("Bandwidth: ",paste(0)))
-      # updateTextInput(session, "maxFreq",label = paste("Max Frequency: "), value = paste(0))
-      # updateTextInput(session, "minFreq",label = paste("Min Frequency: "), value = paste(0))
-      # updateTextInput(session, "meanFreq",label = paste("Mean Frequency: "), value = paste(0))
-      # updateTextInput(session, "bandwidth",label = paste("Bandwidth: "), value = paste(0))
-      # shinyjs::disable("timeMin")
-      # shinyjs::disable("timeMax")
-      # shinyjs::disable("maxFreq")
-      # shinyjs::disable("minFreq")
-      # shinyjs::disable("meanFreq")
-      # shinyjs::disable("bandwidth")
     }
   }
   
@@ -750,13 +660,13 @@ shinyServer(function(input, output, session) {
   shinyjs::hide("clip-species-dropdown")
   
   siteFields <- c("name", "lat", "lon", "recId", "siteNotes")
-  
   # Getting user input data from the deployment info
   formDataSite <- reactive({
     data <- sapply(siteFields, function(x) input[[x]])
     data
   })
   
+  # NOT CURRENTLY CALLED
   createCSVFilePath = function(){
     if(!is.null(newName)) {
       fileName <- sub(".wav", "", newName)
@@ -794,10 +704,8 @@ shinyServer(function(input, output, session) {
       names(data)[7] <- "end_time_date"
       # Link to the location of the LAT/LON entered by the user, saved into the CSV
       googleMapsLink <- paste0("https://www.google.com/maps/@", data[[2]], ",", data[[3]], ",13z")
-      # dataArray <- c(data[[1]],data[[2]],data[[3]],data[[4]],data[[5]],data[[6]],data[[7]], fileFullName, waveStartTime, waveEndTime, waveDate, googleMapsLink)
       dataArray <- c(data[[1]],data[[2]],data[[3]],data[[4]],data[[5]],data[[6]],data[[7]], googleMapsLink)
       dataMatrix <- matrix(dataArray,ncol = length(dataArray), byrow = TRUE)
-      # colnames(dataMatrix) <- c("Name", "Lat", "Lon", "Record ID", "Site Notes", "Start", "End", "File Name", "Wave Start", "Wave End", "Wave Date", "Google Maps")
       colnames(dataMatrix) <- c("Name", "Lat", "Lon", "Record ID", "Site Notes", "Start", "End", "Google Maps")
       siteDataTable <- as.table(dataMatrix)
       deploymentCSVDataTable <<- siteDataTable
@@ -808,8 +716,6 @@ shinyServer(function(input, output, session) {
       fileDate <- gsub(":", "-",fileDate, fixed = TRUE)
       # Creating a new filename out of the metadata
       newFileName <<- paste0(projectName,"_",data[[1]],"_",fileDate)
-      # Creating the new file path
-      newFullFilePath <- paste0(depPath,"/",newFileName)
       # Checking for file duplicate
       fileNameDuplicate <- 0
       # Checking for file duplicates within that folder
@@ -827,10 +733,6 @@ shinyServer(function(input, output, session) {
       }
     }
   })
-  # 
-  # deploymentInfo = function (dataArray) {
-  #   
-  # }
   
   projectFields <- c("projectName", "projectNotes")
   
@@ -838,7 +740,6 @@ shinyServer(function(input, output, session) {
     data <- sapply(projectFields, function(x) input[[x]])
     data
   })
-  
   
   #####################################
   ###### Project info submit button listener
@@ -867,7 +768,6 @@ shinyServer(function(input, output, session) {
     dataMatrix <- matrix(dataArray,ncol = 2, byrow = TRUE)
     colnames(dataMatrix) <- c("Project Name", "Project Notes")
     projectData <<- as.table(dataMatrix)
-    print(data)
     oldProjectName <- projectName
     projectName <<- projectNameArg
     newDirPath <- gsub(oldProjectName,projectName,dirPath)
@@ -885,7 +785,6 @@ shinyServer(function(input, output, session) {
   })
   
   # Adding the clip metadata to the spectrogram metadata
-  # ClipCount -> If we have multiple clips on a given spectro, give a new column name to each clip
   observeEvent(input$speciesDropSubmit, {
     fileFullName <- unlist(get_selected(input$tree))
     if (is.null(deploymentCSVDataTable) ) {
@@ -893,61 +792,61 @@ shinyServer(function(input, output, session) {
         shinyjs::show("site-info-warning-container") 
       }
     }
+    else {
+      shinyjs::enable("aws-upload-button")
+      dataSet <- formDataSpecies()
+      shinyjs::hide("site-info-warning-container")
+      if (dataSet[[1]] == "Select Species") {
+        shinyjs::show("type-name-warning")
+      } 
+      else if (dataSet[[2]] == "Select Type") {
+        shinyjs::show("type-name-warning")
+      } 
       else {
-        shinyjs::enable("aws-upload-button")
-        dataSet <- formDataSpecies()
-        shinyjs::hide("site-info-warning-container")
-        if (dataSet[[1]] == "Select Species") {
-          shinyjs::show("type-name-warning")
-        } 
-        else if (dataSet[[2]] == "Select Type") {
-          shinyjs::show("type-name-warning")
+        if (clipCount == 0) {
+          dataArray <- c(fileFullName,clipCount,xmin,xmax, durationSmall, dataSet[[2]],dataSet[[1]],maxFreq,minFreq,meanFreq,bandwidth,dataSet[[3]])
+          dataMatrix <- matrix(dataArray,ncol = 12, byrow = TRUE)
+          colnames(dataMatrix) <- c("File Name", "Annotation#","Time Min (s)", "Time Max (s)", "Duration", "Type", "Species", "Max Freq", "Min Freq", "Mean Freq", "Bandwidth", "Annotation Notes")
+          dataTable <- as.table(dataMatrix)
+          deploymentCSVDataTable <<- cbind(deploymentCSVDataTable, dataTable)
         } 
         else {
-          if (clipCount == 0) {
-            dataArray <- c(fileFullName,clipCount,xmin,xmax, durationSmall, dataSet[[2]],dataSet[[1]],maxFreq,minFreq,meanFreq,bandwidth,dataSet[[3]])
-            dataMatrix <- matrix(dataArray,ncol = 12, byrow = TRUE)
-            colnames(dataMatrix) <- c("File Name", "Annotation#","Time Min (s)", "Time Max (s)", "Duration", "Type", "Species", "Max Freq", "Min Freq", "Mean Freq", "Bandwidth", "Annotation Notes")
-            dataTable <- as.table(dataMatrix)
-            deploymentCSVDataTable <<- cbind(deploymentCSVDataTable, dataTable)
-          } 
-          else {
-            dataArray <- c(deploymentCSVDataTable[1,1],deploymentCSVDataTable[1,2],deploymentCSVDataTable[1,3],deploymentCSVDataTable[1,4],deploymentCSVDataTable[1,5],deploymentCSVDataTable[1,6],deploymentCSVDataTable[1,7],deploymentCSVDataTable[1,8],fileFullName,clipCount,spectroClipMin, spectroClipMax, durationSmall, dataSet[[2]],dataSet[[1]],maxFreq,minFreq,meanFreq,bandwidth,dataSet[[3]])
-            deploymentCSVDataTable <<- rbind(deploymentCSVDataTable, dataArray)
-          }
-          increaseStatusBar()
-          clipCount <<- clipCount + 1
-          # Creating the path with the file name
-          filePathFull <- paste0(depPath,"/",fileFullName)
-          # Adding the file to the list of annotated files for later zipping and S3 upload
-          annotationListWav <<- c(annotationListWav, normalizePath(filePathFull))
-          if (autoDepCSVLoad) {
-            write.csv(deploymentCSVDataTable,depFilePath, row.names = FALSE)
-            annotationListCsv <<- normalizePath(depFilePath)
-          } else {
-            write.csv(deploymentCSVDataTable, paste0(depPath,"/",paste0(newFileName,'.csv')), row.names = FALSE)
-            annotationListCsv <<- normalizePath(paste0(depPath,"/",paste0(newFileName,'.csv')))
-          }
-          shinyjs::addClass('completedDepContainer', "open-accordian")
-          shinyjs::removeClass('completedDepContainer', "closed-accordian")
-          shinyjs::show("annotationDrop")
-          
-          annotationList <- c(paste0(dataSet[[1]], " at " , xmin))
-          annotationListDrop <<- c(annotationListDrop, annotationList)
-          
-          # Updating the global annotations list
-          currAnnListGlobal <<- c(currAnnListGlobal, annotationList)
-          updateSelectizeInput(session, "annotationDrop", label = "Select an annotation", choices =  currAnnListGlobal, selected = tail(currAnnListGlobal, 1))
-          
-          # Create some REACTIVE VALUES
-          awsProgressValue <<- reactiveValues()
-          awsProgressValue$one <<- 0
-          # Creating the progress bar for AWS upload
-          output$awsProgress <- renderUI({
-            progressGroup(text = "Status",    value = awsProgressValue$one,   min = 0, max = 3, color = "green")
-          })
+          dataArray <- c(deploymentCSVDataTable[1,1],deploymentCSVDataTable[1,2],deploymentCSVDataTable[1,3],deploymentCSVDataTable[1,4],deploymentCSVDataTable[1,5],deploymentCSVDataTable[1,6],deploymentCSVDataTable[1,7],deploymentCSVDataTable[1,8],fileFullName,clipCount,spectroClipMin, spectroClipMax, durationSmall, dataSet[[2]],dataSet[[1]],maxFreq,minFreq,meanFreq,bandwidth,dataSet[[3]])
+          deploymentCSVDataTable <<- rbind(deploymentCSVDataTable, dataArray)
         }
+        increaseStatusBar()
+        clipCount <<- clipCount + 1
+        # Creating the path with the file name
+        filePathFull <- paste0(depPath,"/",fileFullName)
+        # Adding the file to the list of annotated files for later zipping and S3 upload
+        annotationListWav <<- c(annotationListWav, normalizePath(filePathFull))
+        if (autoDepCSVLoad) {
+          write.csv(deploymentCSVDataTable,depFilePath, row.names = FALSE)
+          annotationListCsv <<- normalizePath(depFilePath)
+        } else {
+          write.csv(deploymentCSVDataTable, paste0(depPath,"/",paste0(newFileName,'.csv')), row.names = FALSE)
+          annotationListCsv <<- normalizePath(paste0(depPath,"/",paste0(newFileName,'.csv')))
+        }
+        shinyjs::addClass('completedDepContainer', "open-accordian")
+        shinyjs::removeClass('completedDepContainer', "closed-accordian")
+        shinyjs::show("annotationDrop")
+        
+        annotationList <- c(paste0(dataSet[[1]], " at " , xmin))
+        annotationListDrop <<- c(annotationListDrop, annotationList)
+        
+        # Updating the global annotations list
+        currAnnListGlobal <<- c(currAnnListGlobal, annotationList)
+        updateSelectizeInput(session, "annotationDrop", label = "Select an annotation", choices =  currAnnListGlobal, selected = tail(currAnnListGlobal, 1))
+        
+        # Create some REACTIVE VALUES
+        awsProgressValue <<- reactiveValues()
+        awsProgressValue$one <<- 0
+        # Creating the progress bar for AWS upload
+        output$awsProgress <- renderUI({
+          progressGroup(text = "Status",    value = awsProgressValue$one,   min = 0, max = 3, color = "green")
+        })
       }
+    }
   })
   
   observeEvent(input$annotationDrop, {
@@ -962,7 +861,7 @@ shinyServer(function(input, output, session) {
       # If current selection is last element in dropdown
       if(str_detect(input$annotationDrop, as.character(tail(annData[[6]], 1))) && as.character(currentSelectedMin) == as.character(minLast))
       {
-        annLast <- tail(annData, 1)
+        # Getting the last sequence from the deployment metadata
         minLast <- tail(annData[[2]], 1)
         maxLast <- tail(annData[[3]], 1)
         maxFreqLast <- tail(annData[[7]], 1)
@@ -995,7 +894,7 @@ shinyServer(function(input, output, session) {
         currentSelectedSpecies <- trimws(head(strsplit(input$annotationDrop,split=" at ")[[1]],2)[1], which = "both")
         df <- as.data.frame(annData)
         selectedAnn <- df[which(df$Time.Min..s. == currentSelectedMin & df$Species == currentSelectedSpecies), ]
-        annCurr <- selectedAnn$Annotatiion.
+        
         minCurr <- selectedAnn$Time.Min..s.
         maxCurr <- selectedAnn$Time.Max..s.
         maxFreqCurr <- selectedAnn$Max.Freq
@@ -1005,8 +904,6 @@ shinyServer(function(input, output, session) {
         typeCurr <- selectedAnn$Type
         speciesCurr <<- selectedAnn$Species
         renderSpectroClip(sound, minCurr, maxCurr, TRUE)
-        # updateTextInput(session, "timeMin",label = paste("Time Start: "), value = as.character(minCurr))
-        # updateTextInput(session, "timeMax",label = paste("Time End: "), value = as.character(maxCurr))
         
         shinyjs::html("timeMin", paste0("Min Time: ",round(minCurr, digits = 2)))
         shinyjs::html("timeMax", paste0("Max Time: ",round(maxCurr, digits = 2)))
@@ -1048,9 +945,8 @@ shinyServer(function(input, output, session) {
   })
   
   ################################
-  ######## Modal UI
+  ######## Modal UI for AWS
   ################################
-  
   observeEvent(input$awsUploadModal, {
     awsAccessKey <- input$awsAccessKey
     awsSecretKey <- input$awsSecretKey
@@ -1075,7 +971,6 @@ shinyServer(function(input, output, session) {
         file.copy(annotationListCsvProject, csvDir)
         file.copy(annotationListWav, wavDir)
         incrementAwsCount()
-        dirToZip <- csvDir
         # Zip folder
         oldwd <- getwd()
         setwd(tempDir)
@@ -1088,12 +983,6 @@ shinyServer(function(input, output, session) {
         # Upload to AWS
         awsUpload <- put_object(file = normalizePath(paste0(dirPath, fullZipName, ".zip")), bucket = awsBucket)
         
-        observeEvent(awsUpload, {
-          if(awsUpload[1] == TRUE)
-          {
-            incrementAwsCount();
-          }
-        })
         # Resetting annotationListWav to 0
         annotationListWav <<- vector();
         annotationListCsv <<- vector();
@@ -1107,8 +996,13 @@ shinyServer(function(input, output, session) {
     }
   })
   
-  removeAnnotationFromCSV <- function(annotationNumber) {
-    browser()
+  awsUpload <- function() {
+    observeEvent(awsUpload, {
+      if(awsUpload[1] == TRUE)
+      {
+        incrementAwsCount();
+      }
+    })
   }
   
   substrRight <- function(x, n){
@@ -1124,7 +1018,7 @@ shinyServer(function(input, output, session) {
         projectFileCountGlobal <<- projectFileCountGlobal + 1
       }
     }
-    # Create some REACTIVE VALUES
+    # Progress value for the status bar
     progressValue <<- reactiveValues()
     progressValue$one <<- 0
     # Render UI output
@@ -1137,7 +1031,6 @@ shinyServer(function(input, output, session) {
   ###### Function to increase the count of the status bar
   #################################
   increaseStatusBar = function () {
-    # shinyjs::hide("content-id")
     progressValue$one <<- progressValue$one + 1
     if (progressValue$one == projectFileCountGlobal) {
       shinyjs::hide("tree", anim = TRUE)
@@ -1170,7 +1063,6 @@ shinyServer(function(input, output, session) {
       updateTextInput(session, inputId = "projectName", label = NULL, value = projectCSV$Project.Name[[1]])
       shinyjs::html("projectNotes", projectCSV$Project.Notes[[1]])
       toggleAfterProjectCsvLoaded()
-      # projectInfo(projectCSV$Project.Name[[1]], projectCSV$Project.Notes[[1]])
     }
   }
   
@@ -1190,7 +1082,6 @@ shinyServer(function(input, output, session) {
       shinyjs::html("siteNotes", deploymentCSV$Site.Notes[[1]])
       toggleAfterDeploymentCsvLoaded()
       autoDepCSVLoad <<- TRUE
-      # deploymentInfo(projectCSV$Project.Name[[1]], projectCSV$Site.Notes[[1]])
     }
   }
   
@@ -1286,8 +1177,6 @@ shinyServer(function(input, output, session) {
       shinyjs::show(id = "spectroClip", anim = FALSE)
       shinyjs::show(id = "clipInfo-container", anim = FALSE)
       updateSelectizeInput(session, "annotationDrop", label = "Select an annotation", choices =  currAnnList, selected = tail(currAnnList, 1))
-      # updateTextInput(session, "timeMin",label = paste("Time Start: "), value = as.character(minLast))
-      # updateTextInput(session, "timeMax",label = paste("Time End: "), value = as.character(maxLast))
       shinyjs::html("timeMin", paste0("Min Time: ",round(minLast, digits = 2)))
       shinyjs::html("timeMax", paste0("Max Time: ",round(maxLast, digits = 2)))
       shinyjs::html("maxFreq", paste0("Max Frequency: ",round(maxFreqLast, digits = 2)))
