@@ -5,4 +5,5 @@ df <- as.data.frame(test3)
 max(df$y, na.rm = T)
 min(df$y, na.rm = T)
 mean(df$y, na.rm = T)
-abline(lm(formula = df$y ~ df$x), col="red")
+t <- abline(lm(formula = df$y ~ df$x), col="red")
+t

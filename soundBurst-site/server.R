@@ -381,7 +381,6 @@ shinyServer(function(input, output, session) {
       frequencyDF <- get_frequency(currDir, 0, durationMain)
       anottationCount <<- 0
       spectro(sound, osc = TRUE, scale = FALSE, tlim = c(spectroFromTime,spectroToTime))
-      abline(lm(formula = frequencyDF$y ~ frequencyDF$x), col = "red", lty = 1, lwd = 1)
       shinyjs::show("complete-deployment")
       shinyjs::removeClass("loadingContainer1", "loader")
     })
@@ -597,12 +596,6 @@ shinyServer(function(input, output, session) {
   renderSpectroClip = function(sound, xMinLocal, xMaxLocal, readSequenceBool)
   {
     output$spectroClip <- renderPlot({
-      if(readSequenceBool)
-      {
-        spectro(sound, osc = TRUE, scale = FALSE, tlim = c(xMinLocal,xMaxLocal))
-        readSequenceBool <<- FALSE
-        return()
-      }
       path <- getPath(get_selected(input$tree, "names"))
       if(!is.null(newName)) {
         currDir <- paste0(depPath, "/", path, newName)
@@ -610,10 +603,19 @@ shinyServer(function(input, output, session) {
       else {
         currDir <- paste0(depPath, "/", path, unlist(get_selected(input$tree)))
       }
+      frequencyDF <- get_frequency(currDir, 0, xMaxLocal - xMinLocal)
+      if(readSequenceBool)
+      {
+        spectro(sound, osc = TRUE, scale = FALSE, tlim = c(xMinLocal,xMaxLocal))
+        abline(lm(formula = frequencyDF$y ~ frequencyDF$x), col = "red", lty = 1, lwd = 2)
+        readSequenceBool <<- FALSE
+        return()
+      }
       sound <- readWave(currDir)
       
       if(!is.null(xMaxLocal)) {
         spectro(sound, f = sound@samp.rate, osc = TRUE, scale = FALSE, tlim = c(floor(as.integer(xMinLocal)),ceiling(as.integer(xMaxLocal))))
+        abline(lm(formula = frequencyDF$y ~ frequencyDF$x), col = "red", lty = 1, lwd = 1)
         # Getting the duration of the clipped graph
         durationSmall <<- round(xMaxLocal - xMinLocal, digits = 1)
         shinyjs::show("clipInfo-container")
