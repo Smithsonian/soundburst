@@ -6,4 +6,5 @@ max(df$y, na.rm = T)
 min(df$y, na.rm = T)
 mean(df$y, na.rm = T)
 t <- abline(lm(formula = df$y ~ df$x), col="red")
-t
+t <- lm(formula = df$y ~ df$x)
+t$coefficients[["df$x"]]

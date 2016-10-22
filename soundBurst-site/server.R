@@ -25,6 +25,7 @@ clipCount <<- 0
 newName <- NULL
 depPath <<- NULL
 autoProjectCSVLoad <<- FALSE
+newSequenceBool <<- FALSE
 autoDepCSVLoad <<- FALSE
 annData <<- list()
 readSequenceBool <<- FALSE
@@ -36,6 +37,7 @@ annotationListCsvProject <<- vector()
 progressValue <<- reactiveValues()
 progressValue$one <<- 0
 projectFileCountGlobal <<- 0
+
 
 # This is used to connect correctly with AWS
 set_config( config( ssl_verifypeer = 0L ) )
@@ -313,6 +315,7 @@ shinyServer(function(input, output, session) {
         sr <- sound@samp.rate
         soundDuration <- round(l/sr,2)
         # TODO Maybe make a function out of this? Might make the code cleaner
+        newSequenceBool <<- TRUE
         if (soundDuration > 59) {
           minuteDuration <- round(soundDuration/60)
           shinyjs::html("time-box-label", paste0("This file is ", minuteDuration, " minutes long. <br> Would you like to increment the display?"))
@@ -604,6 +607,9 @@ shinyServer(function(input, output, session) {
         currDir <- paste0(depPath, "/", path, unlist(get_selected(input$tree)))
       }
       frequencyDF <- get_frequency(currDir, 0, xMaxLocal - xMinLocal)
+      # Calculating the regression line
+      regressionLine <- lm(formula = frequencyDF$y ~ frequencyDF$x)
+      lineSlope <<- regressionLine$coefficients[["frequencyDF$x"]]
       if(readSequenceBool)
       {
         spectro(sound, osc = TRUE, scale = FALSE, tlim = c(xMinLocal,xMaxLocal))
@@ -816,17 +822,21 @@ shinyServer(function(input, output, session) {
       } 
       else {
         if (clipCount == 0) {
-          dataArray <- c(fileFullName,clipCount,xmin,xmax, durationSmall, dataSet[[2]],dataSet[[1]],maxFreq,minFreq,meanFreq,bandwidth,dataSet[[3]])
-          dataMatrix <- matrix(dataArray,ncol = 12, byrow = TRUE)
-          colnames(dataMatrix) <- c("File Name", "Annotation#","Time Min (s)", "Time Max (s)", "Duration", "Type", "Species", "Max Freq", "Min Freq", "Mean Freq", "Bandwidth", "Annotation Notes")
+          dataArray <- c(fileFullName, clipCount, xmin, xmax, durationSmall, dataSet[[2]], dataSet[[1]], maxFreq, minFreq, meanFreq, bandwidth, lineSlope, dataSet[[3]])
+          dataMatrix <- matrix(dataArray,ncol = 13, byrow = TRUE)
+          colnames(dataMatrix) <- c("File Name", "Annotation#","Time Min (s)", "Time Max (s)", "Duration", "Type", "Species", "Max Freq", "Min Freq", "Mean Freq", "Bandwidth", "Annotation Slope", "Annotation Notes")
           dataTable <- as.table(dataMatrix)
           deploymentCSVDataTable <<- cbind(deploymentCSVDataTable, dataTable)
         } 
         else {
-          dataArray <- c(deploymentCSVDataTable[1,1],deploymentCSVDataTable[1,2],deploymentCSVDataTable[1,3],deploymentCSVDataTable[1,4],deploymentCSVDataTable[1,5],deploymentCSVDataTable[1,6],deploymentCSVDataTable[1,7],deploymentCSVDataTable[1,8],fileFullName,clipCount,spectroClipMin, spectroClipMax, durationSmall, dataSet[[2]],dataSet[[1]],maxFreq,minFreq,meanFreq,bandwidth,dataSet[[3]])
+          dataArray <- c(deploymentCSVDataTable[1,1], deploymentCSVDataTable[1,2], deploymentCSVDataTable[1,3], deploymentCSVDataTable[1,4], deploymentCSVDataTable[1,5], deploymentCSVDataTable[1,6], deploymentCSVDataTable[1,7], deploymentCSVDataTable[1,8], fileFullName, clipCount, spectroClipMin, spectroClipMax, durationSmall, dataSet[[2]], dataSet[[1]], maxFreq, minFreq, meanFreq, bandwidth, lineSlope, dataSet[[3]])
           deploymentCSVDataTable <<- rbind(deploymentCSVDataTable, dataArray)
         }
-        increaseStatusBar()
+        if(newSequenceBool)
+        {
+          increaseStatusBar()
+          newSequenceBool <<- FALSE
+        }
         clipCount <<- clipCount + 1
         # Creating the path with the file name
         filePathFull <- paste0(depPath,"/",fileFullName)
@@ -855,7 +865,7 @@ shinyServer(function(input, output, session) {
         awsProgressValue$one <<- 0
         # Creating the progress bar for AWS upload
         output$awsProgress <- renderUI({
-          progressGroup(text = "Status",    value = awsProgressValue$one,   min = 0, max = 3, color = "green")
+          progressGroup(text = "Status",  value = awsProgressValue$one,   min = 0, max = 3, color = "green")
         })
       }
     }
@@ -1030,12 +1040,10 @@ shinyServer(function(input, output, session) {
         projectFileCountGlobal <<- projectFileCountGlobal + 1
       }
     }
-    # Progress value for the status bar
-    progressValue <<- reactiveValues()
-    progressValue$one <<- 0
+
     # Render UI output
     output$progressOne <- renderUI({
-      progressGroup(text = "Status",    value = progressValue$one,   min = 0, max = projectFileCount, color = "aqua")
+      progressGroup(text = "Status", value = progressValue$one, min = 0, max = projectFileCount, color = "aqua")
     })
   }
   
@@ -1052,6 +1060,10 @@ shinyServer(function(input, output, session) {
     } else {
       
     }
+  }
+  
+  resetStatusBarCount <- function () {
+    progressValue$one <<- 0
   }
   
   incrementAwsCount = function () {
@@ -1084,6 +1096,7 @@ shinyServer(function(input, output, session) {
       shinyjs::hide("species-sidebox-container", anim = TRUE)
       shinyjs::toggleClass("select-dep-container", "open-accordian")
       shinyjs::toggleClass("select-dep-container", "closed-accordian")
+      resetStatusBarCount()
       csvFileName <<- gsub("^.*\\/", "", depPath)
       deploymentCSV <- read.csv(depFilePath)
       createDataVarFromCSV(deploymentCSV)
@@ -1092,9 +1105,15 @@ shinyServer(function(input, output, session) {
       updateTextInput(session, inputId = "lon", label = NULL, value = as.character(deploymentCSV$Lon[[1]]))
       updateTextInput(session, inputId = "recId", label = NULL, value = as.character(deploymentCSV$Record.ID[[1]]))
       shinyjs::html("siteNotes", deploymentCSV$Site.Notes[[1]])
+      countAnnDone <- getStatusBarCount()
+      updateProgressBar(countAnnDone)
       toggleAfterDeploymentCsvLoaded()
       autoDepCSVLoad <<- TRUE
     }
+  }
+  
+  updateProgressBar <- function(countAnnDone) {
+    progressValue$one <- as.numeric(countAnnDone)
   }
   
   createDataVarFromCSV = function (deploymentCSV) {
@@ -1140,7 +1159,7 @@ shinyServer(function(input, output, session) {
     annDataFull <- read.csv(depFilePath)
     # Check if file is empty
     if("File.Name" %in% colnames(annDataFull)){
-      annData <- annDataFull[ ,9:19]
+      annData <- annDataFull[ ,9:20]
       currentSelectedMin <- trimws(head(strsplit(input$annotationDrop,split="at")[[1]],2)[2], which = "both")
       currentSelectedSpecies <- trimws(head(strsplit(input$annotationDrop,split="at")[[1]],2)[1], which = "both")
       df <- as.data.frame(annData)
@@ -1205,6 +1224,11 @@ shinyServer(function(input, output, session) {
     else { # Otherwise just return since nothing to read
       return()
     }
+  }
+  
+  getStatusBarCount <- function() {
+    # Couting the unique different sequences that have been already annotated
+    countAnnDone <- length(unique(read.csv(depFilePath)[ ,9]))
   }
   
   findFileInfo = function() {
