@@ -386,7 +386,7 @@ shinyServer(function(input, output, session) {
       spectro(sound, osc = TRUE, scale = FALSE, tlim = c(spectroFromTime,spectroToTime))
       shinyjs::show("complete-deployment")
       shinyjs::removeClass("loadingContainer1", "loader")
-    })
+    }, res = 72, execOnResize = T)
   }
   
   shinyjs::onclick("previous-spectro-increment", showPreviousSpectroIncrement())
@@ -1163,8 +1163,11 @@ shinyServer(function(input, output, session) {
       currentSelectedMin <- trimws(head(strsplit(input$annotationDrop,split="at")[[1]],2)[2], which = "both")
       currentSelectedSpecies <- trimws(head(strsplit(input$annotationDrop,split="at")[[1]],2)[1], which = "both")
       df <- as.data.frame(annData)
-      # selectedWav <- df[which(df$File.Name == wavFileName), ]
-      selectedWav <- df[which(df$Time.Min..s. >= spectroFromTime & df$Time.Max..s. <= spectroToTime), ]
+      # Filtering by currently selected sequence
+      selectedWav <- df[which(df$File.Name == wavFileName), ]
+      # Filtering the data frame to get only the data that is within the plot's view
+      selectedWav <- selectedWav[which(selectedWav$Time.Min..s. >= spectroFromTime & selectedWav$Time.Max..s. <= spectroToTime), ]
+      # Ordering the data frame
       selectedWav <- selectedWav[order(selectedWav$Time.Min..s.), ]
       # If there are no annotations for that sequence
       if(length(selectedWav$Annotation.) == 0)
