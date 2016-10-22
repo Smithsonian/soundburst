@@ -434,16 +434,12 @@ shinyServer(function(input, output, session) {
       if((spectroFromTime + incrementAmount) < durationWav) {
         spectroFromTime <<- spectroFromTime + incrementAmount
       }
-    } else {
+    } 
+    else {
       spectroFromTime <<- spectroFromTime + incrementAmount
     }
-    
-
-    # if (spectroToTime >soundDuration) {
-    #   spectroToTime <<- soundDuration
-    # }
     renderSpectro(sound)
-    print('clicked')
+    readSequenceCSV(unlist(get_selected(input$tree)))
     shinyjs::show("previous-spectro-increment")
     if (spectroToTime >= soundDuration) {
       shinyjs::hide("next-spectro-increment")
