@@ -425,7 +425,6 @@ shinyServer(function(input, output, session) {
     sound <- readWave(currDir)
     l <- length(sound@stereo)
     sr <- sound@samp.rate
-    soundDuration <- round(l/sr,2)
     shinyjs::show("previous-spectro-increment")
     durationWav <- seewave::duration(sound)
     spectroToTime <<- spectroToTime + incrementAmount
@@ -441,7 +440,7 @@ shinyServer(function(input, output, session) {
     renderSpectro(sound)
     readSequenceCSV(unlist(get_selected(input$tree)))
     shinyjs::show("previous-spectro-increment")
-    if (spectroToTime >= soundDuration) {
+    if (spectroToTime >= durationWav) {
       shinyjs::hide("next-spectro-increment")
     }
   }
