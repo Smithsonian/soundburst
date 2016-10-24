@@ -112,6 +112,7 @@ shinyServer(function(input, output, session) {
   
   projectName <<- NULL
   spectroFromTime <<- 0
+  spectroToTime <<- 0
   deploymentCSVDataTable <<- NULL
   dirPath <<- NULL
   
@@ -291,7 +292,6 @@ shinyServer(function(input, output, session) {
   ##### Listener for file selection in "Select Sequence"
   ###########################
   observeEvent(unlist(get_selected(input$tree)), {
-    spectroFromTime <<- 0
     # Plot main spectrogram
     shinyjs::show("loadingContainer1")
     if (is.null(unlist(get_selected(input$tree))))
@@ -299,6 +299,7 @@ shinyServer(function(input, output, session) {
       return()
     }
     else {
+      spectroFromTime <<- 0
       # Root path of the selected file
       path <- getPath(get_selected(input$tree, "names"))
       # Full file path
@@ -324,6 +325,7 @@ shinyServer(function(input, output, session) {
           
           # Listener for "Select a Sequence"
           observeEvent(input$spectroTimeSubmit, {
+            # Getting the increment amount
             incrementAmount <<- as.numeric(input$spectroEndTime) * 60
             spectroToTime <<- incrementAmount
             if (file.exists(depFilePath)) {
@@ -346,6 +348,9 @@ shinyServer(function(input, output, session) {
           })
           observeEvent(input$noTimeSubmission,{
             if (file.exists(depFilePath)) {
+              sound <- readWave(paste0(depPath, "/", unlist(get_selected(input$tree))))
+              soundLength <- seewave::duration(sound)
+              spectroToTime <<- soundLength
               shinyjs::addClass("loadingContainer1", "loader")
               df <- species()
               itemsType <<- c('Select Species',as.character(df[[1]]))
@@ -616,7 +621,7 @@ shinyServer(function(input, output, session) {
       sound <- readWave(currDir)
       
       if(!is.null(xMaxLocal)) {
-        spectro(sound, f = sound@samp.rate, osc = TRUE, scale = FALSE, tlim = c(floor(as.integer(xMinLocal)),ceiling(as.integer(xMaxLocal))))
+        spectro(sound, f = sound@samp.rate, osc = TRUE, scale = FALSE, tlim = c(floor(xMinLocal),ceiling(xMaxLocal)))
         abline(lm(formula = frequencyDF$y ~ frequencyDF$x), col = "red", lty = 1, lwd = 1)
         # Getting the duration of the clipped graph
         durationSmall <<- round(xMaxLocal - xMinLocal, digits = 1)
@@ -801,7 +806,7 @@ shinyServer(function(input, output, session) {
   # Adding the clip metadata to the spectrogram metadata
   observeEvent(input$speciesDropSubmit, {
     fileFullName <- unlist(get_selected(input$tree))
-    if (is.null(deploymentCSVDataTable) ) {
+    if (is.null(deploymentCSVDataTable) ) { #### WHY IS THIS NULL?
       if(!autoDepCSVLoad) {
         shinyjs::show("site-info-warning-container") 
       }
@@ -830,7 +835,7 @@ shinyServer(function(input, output, session) {
         }
         if(newSequenceBool)
         {
-          increaseStatusBar()
+          # increaseStatusBar()
           newSequenceBool <<- FALSE
         }
         clipCount <<- clipCount + 1
@@ -871,10 +876,14 @@ shinyServer(function(input, output, session) {
     # Checking that we actually have an element in the dropdown
     if(input$annotationDrop != "")
     {        
-      annData <- read.csv(depFilePath)[ ,10:20]
+      tryCatch({
+        annData <- read.csv(depFilePath)[ ,10:20]
+      }, error=function(e) {
+        print("Error with the CSV file. Error #1")
+      })
       annCount <<- length(annData[[1]])
       sound <- readWave(paste0(depPath, "/", unlist(get_selected(input$tree))))
-      currentSelectedMin <- trimws(head(strsplit(input$annotationDrop, split="at")[[1]],2)[2], which = "both")
+      currentSelectedMin <- trimws(head(strsplit(input$annotationDrop, split=" at ")[[1]],2)[2], which = "both")
       minLast <- tail(annData[[2]], 1)
       # If current selection is last element in dropdown
       if(str_detect(input$annotationDrop, as.character(tail(annData[[6]], 1))) && as.character(currentSelectedMin) == as.character(minLast))
@@ -1114,11 +1123,11 @@ shinyServer(function(input, output, session) {
   
   createDataVarFromCSV = function (deploymentCSV) {
     csvLength <- length(deploymentCSV$Name)
-    if (length(deploymentCSV$Annotation.) > 0) {
+    if (csvLength > 0) {
       for(i in 1:csvLength) {
-        dataArray <- c(as.character(deploymentCSV$Name[[i]]),as.character(deploymentCSV$Lat[[i]]),as.character(deploymentCSV$Lon[[i]]),as.character(deploymentCSV$Record.ID[[i]]), as.character(deploymentCSV$Site.Notes[[i]]), as.character(deploymentCSV$Start[[i]]),as.character(deploymentCSV$End[[i]]),as.character(deploymentCSV$Google.Maps[[i]]),as.character(deploymentCSV$File.Name[[i]]),as.character(deploymentCSV$Annotation.[[i]]),as.character(deploymentCSV$Time.Min..s.[[i]]),as.character(deploymentCSV$Time.Max..s.[[i]]),as.character(deploymentCSV$Duration[[i]]),as.character(deploymentCSV$Type[[i]]),as.character(deploymentCSV$Species[[i]]),as.character(deploymentCSV$Max.Freq[[i]]),as.character(deploymentCSV$Min.Freq[[i]]),as.character(deploymentCSV$Mean.Freq[[i]]),as.character(deploymentCSV$Bandwidth[[i]]),as.character(deploymentCSV$Annotation.Notes[[i]]))
-        dataMatrix <- matrix(dataArray,ncol = 20, byrow = TRUE)
-        colnames(dataMatrix) <- c("Name", "Lat", "Lon", "Record ID", "Site Notes", "Start", "End", "Google Maps", "File Name", "Annotation#","Time Min (s)", "Time Max (s)", "Duration", "Type", "Species", "Max Freq", "Min Freq", "Mean Freq", "Bandwidth", "Annotation Notes")
+        dataArray <- c(as.character(deploymentCSV$Name[[i]]),as.character(deploymentCSV$Lat[[i]]),as.character(deploymentCSV$Lon[[i]]),as.character(deploymentCSV$Record.ID[[i]]), as.character(deploymentCSV$Site.Notes[[i]]), as.character(deploymentCSV$Start[[i]]),as.character(deploymentCSV$End[[i]]),as.character(deploymentCSV$Google.Maps[[i]]),as.character(deploymentCSV$File.Name[[i]]),as.character(deploymentCSV$Annotation.[[i]]),as.character(deploymentCSV$Time.Min..s.[[i]]),as.character(deploymentCSV$Time.Max..s.[[i]]),as.character(deploymentCSV$Duration[[i]]),as.character(deploymentCSV$Type[[i]]),as.character(deploymentCSV$Species[[i]]),as.character(deploymentCSV$Max.Freq[[i]]),as.character(deploymentCSV$Min.Freq[[i]]),as.character(deploymentCSV$Mean.Freq[[i]]),as.character(deploymentCSV$Bandwidth[[i]]), as.character(deploymentCSV$Annotation.Slope[[i]]), as.character(deploymentCSV$Annotation.Notes[[i]]))
+        dataMatrix <- matrix(dataArray,ncol = 21, byrow = TRUE)
+        colnames(dataMatrix) <- c("Name", "Lat", "Lon", "Record ID", "Site Notes", "Start", "End", "Google Maps", "File Name", "Annotation#","Time Min (s)", "Time Max (s)", "Duration", "Type", "Species", "Max Freq", "Min Freq", "Mean Freq", "Bandwidth", "Annotation Slope","Annotation Notes")
         dataTable <- as.table(dataMatrix)
         deploymentCSVDataTable <<- rbind(deploymentCSVDataTable, dataTable)
         clipCount <<- clipCount + 1
@@ -1155,9 +1164,13 @@ shinyServer(function(input, output, session) {
     annDataFull <- read.csv(depFilePath)
     # Check if file is empty
     if("File.Name" %in% colnames(annDataFull)){
-      annData <- annDataFull[ ,9:20]
-      currentSelectedMin <- trimws(head(strsplit(input$annotationDrop,split="at")[[1]],2)[2], which = "both")
-      currentSelectedSpecies <- trimws(head(strsplit(input$annotationDrop,split="at")[[1]],2)[1], which = "both")
+      tryCatch({
+        annData <- annDataFull[ ,9:20]
+      }, error=function(e) {
+        print("Error with the CSV file. Error #1")
+      })
+      # currentSelectedMin <- trimws(head(strsplit(input$annotationDrop,split=" at ")[[1]],2)[2], which = "both")
+      # currentSelectedSpecies <- trimws(head(strsplit(input$annotationDrop,split=" at ")[[1]],2)[1], which = "both")
       df <- as.data.frame(annData)
       # Filtering by currently selected sequence
       selectedWav <- df[which(df$File.Name == wavFileName), ]
@@ -1226,8 +1239,11 @@ shinyServer(function(input, output, session) {
   }
   
   getStatusBarCount <- function() {
-    # Couting the unique different sequences that have been already annotated
-    countAnnDone <- length(unique(read.csv(depFilePath)[ ,9]))
+    csv <- read.csv(depFilePath)
+    if("Annotation." %in% colnames(csv)){
+      # Couting the unique different sequences that have been already annotated
+      countAnnDone <- length(unique(csv[ ,9]))
+    }
   }
   
   findFileInfo = function() {
