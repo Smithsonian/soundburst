@@ -291,6 +291,7 @@ shinyServer(function(input, output, session) {
   ##### Listener for file selection in "Select Sequence"
   ###########################
   observeEvent(unlist(get_selected(input$tree)), {
+    spectroFromTime <<- 0
     # Plot main spectrogram
     shinyjs::show("loadingContainer1")
     if (is.null(unlist(get_selected(input$tree))))
