@@ -167,14 +167,18 @@ label {
   border: solid 1px #f39c12;
 }
 
-#timeMin, #timeMax, #bandwidth {
+#timeMin, #timeMax, #bandwidth, #slope {
   margin-top: 4%;
 }
 
-#timeMin, #timeMax, #maxFreq, #minFreq, #meanFreq, #bandwidth {
+#timeMin, #timeMax, #maxFreq, #minFreq, #meanFreq, #bandwidth, #slope {
   width: 5em;
   display: inline-block;
   text-align: center;
+}
+
+#slope {
+  width: 3em;
 }
 
 #timeMax {

@@ -168,7 +168,8 @@ dashboardPage(
                                         HTML('<div id="meanFreq"></div>')
                                     ),
                                     div(id="freq-container",
-                                        HTML('<div id="bandwidth"></div>')
+                                        HTML('<div id="bandwidth"></div>'),
+                                        HTML('<div id="slope"></div>')
                                     )
                                   ),
                                 # textInput("maxFreq", "Max Frequency", 1),

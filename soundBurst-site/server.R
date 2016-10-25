@@ -646,7 +646,7 @@ shinyServer(function(input, output, session) {
       minFreq <<- round(min(frequencyDF$y, na.rm = T), digits = 2)
       meanFreq <<- round(mean(frequencyDF$y, na.rm = T), digits = 2)
       bandwidth <<- round((maxFreq - minFreq), digits = 2)
-      showSpeciesDropdown(xMinLocal, xMaxLocal, maxFreq, minFreq, meanFreq, bandwidth)
+      showSpeciesDropdown(xMinLocal, xMaxLocal, maxFreq, minFreq, meanFreq, bandwidth, lineSlope)
     })
   }
   
@@ -657,7 +657,7 @@ shinyServer(function(input, output, session) {
     df <- as.data.frame(finalFreq)
   }
   
-  showSpeciesDropdown = function (xmin, xmax, maxFreq, minFreq, meanFreq, bandwidth){
+  showSpeciesDropdown = function (xmin, xmax, maxFreq, minFreq, meanFreq, bandwidth, lineSlope){
     shinyjs::show("clip-species-dropdown")
     if(!is.null(xmax)) {
       shinyjs::html("timeMin", paste0("Start Time ",round(xmin, digits = 2)))
@@ -666,6 +666,7 @@ shinyServer(function(input, output, session) {
       shinyjs::html("minFreq", paste0("Min ",round(minFreq, digits = 2)))
       shinyjs::html("meanFreq", paste0("Mean ",round(meanFreq, digits = 2)))
       shinyjs::html("bandwidth", paste0("Bandwidth ",round(bandwidth, digits = 2)))
+      shinyjs::html("slope", paste0("Slope ",round(lineSlope, digits = 4)))
     } else {
       shinyjs::html("timeMin", c("Start Time ",paste(0)))
       shinyjs::html("timeMax", c("End Time ",paste(0)))
@@ -673,6 +674,7 @@ shinyServer(function(input, output, session) {
       shinyjs::html("minFreq", c("Min ",paste(0)))
       shinyjs::html("meanFreq", c("Mean ",paste(0)))
       shinyjs::html("bandwidth", c("Bandwidth ",paste(0)))
+      shinyjs::html("slope", c("Slope ",paste(0)))
     }
   }
   
@@ -878,7 +880,7 @@ shinyServer(function(input, output, session) {
     if(input$annotationDrop != "")
     {        
       tryCatch({
-        annData <- read.csv(depFilePath)[ ,10:20]
+        annData <- read.csv(depFilePath)[ ,10:21]
       }, error=function(e) {
         print("Error with the CSV file. Error #1")
       })
@@ -896,6 +898,7 @@ shinyServer(function(input, output, session) {
         minFreqLast <- tail(annData[[8]], 1)
         meanFreqLast <- tail(annData[[9]], 1)
         bandwidthLast <- tail(annData[[10]], 1)
+        slopeLast <- tail(annData[[11]], 1)
         
         shinyjs::html("timeMin", paste0("Start Time ",round(minLast, digits = 2)))
         shinyjs::html("timeMax", paste0("End Time ",round(maxLast, digits = 2)))
@@ -903,6 +906,7 @@ shinyServer(function(input, output, session) {
         shinyjs::html("minFreq", paste0("Min ",minFreqLast))
         shinyjs::html("meanFreq", paste0("Mean ",meanFreqLast))
         shinyjs::html("bandwidth", paste0("Bandwidth ",bandwidthLast))
+        shinyjs::html("slope", paste0("Slope ",slopeLast))
         
         updateSelectizeInput(session, "typeDropdown", label = "Type*", choices =  itemsSpecies, selected = as.character(tail(annData[[5]], 1)))
         filteredSpecies <- filterSpecies(as.character(tail(annData[[5]], 1)), annCount)
@@ -929,6 +933,7 @@ shinyServer(function(input, output, session) {
         minFreqCurr <- selectedAnn$Min
         meanFreqCurr <- selectedAnn$Mean.Freq
         bandwidthCurr <- selectedAnn$Bandwidth
+        lineSlopeCurr <- selectedAnn$lineSlope
         typeCurr <- selectedAnn$Type
         speciesCurr <<- selectedAnn$Species
         renderSpectroClip(sound, minCurr, maxCurr, TRUE)
@@ -939,6 +944,7 @@ shinyServer(function(input, output, session) {
         shinyjs::html("minFreq", paste0("Min ", minFreqCurr))
         shinyjs::html("meanFreq", paste0("Mean ", meanFreqCurr))
         shinyjs::html("bandwidth", paste0("Bandwidth ", bandwidthCurr))
+        shinyjs::html("slope", paste0("Slope ", lineSlopeCurr))
         
         updateSelectizeInput(session, "typeDropdown", label = "Type*", choices =  itemsSpecies, selected = as.character(typeCurr))
         filteredSpecies <- filterSpecies(as.character(typeCurr), annCount)
@@ -1204,6 +1210,7 @@ shinyServer(function(input, output, session) {
       minFreqLast <- tail(selectedWav[[9]], 1)
       meanFreqLast <- tail(selectedWav[[10]], 1)
       bandwidthLast <- tail(selectedWav[[11]], 1)
+      slopeLast <- tail(selectedWav[[12]], 1)
       
       typeLast <- tail(selectedWav[[5]], 1)
       speciesLast <- tail(selectedWav[[6]], 1)
@@ -1231,6 +1238,7 @@ shinyServer(function(input, output, session) {
       shinyjs::html("minFreq", paste0("Min ", minFreqLast))
       shinyjs::html("meanFreq", paste0("Mean ", meanFreqLast))
       shinyjs::html("bandwidth", paste0("Bandwidth ", bandwidthLast))
+      shinyjs::html("slope", paste0("Slope ", slopeLast))
       updateSelectizeInput(session, "typeDropdown", label = "Type*", choices =  itemsSpecies, selected = as.character(typeLast))
       updateSelectizeInput(session, "speciesDropdown", label = "Species*", choices =  itemsType, selected = as.character(speciesLast))
     }
