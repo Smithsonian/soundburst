@@ -413,6 +413,7 @@ shinyServer(function(input, output, session) {
     spectroToTime <<- spectroToTime - incrementAmount
     spectroFromTime <<- spectroFromTime - incrementAmount
     renderSpectro(sound)
+    readSequenceCSV(unlist(get_selected(input$tree)))
     shinyjs::show("next-spectro-increment")
     if (spectroFromTime == 0) {
       shinyjs::hide("previous-spectro-increment")
@@ -585,7 +586,7 @@ shinyServer(function(input, output, session) {
       formulaText()
     }
   })
-
+  
   observeEvent(input$plot_brush$xmin, {
     if(input$plot_brush$xmax != 0)
     {
@@ -895,13 +896,13 @@ shinyServer(function(input, output, session) {
         minFreqLast <- tail(annData[[8]], 1)
         meanFreqLast <- tail(annData[[9]], 1)
         bandwidthLast <- tail(annData[[10]], 1)
-
+        
         shinyjs::html("timeMin", paste0("Min Time: ",round(minLast, digits = 2)))
         shinyjs::html("timeMax", paste0("Max Time: ",round(maxLast, digits = 2)))
-        shinyjs::html("maxFreq", paste0("Max Frequency: ",round(maxFreqLast, digits = 2)))
-        shinyjs::html("minFreq", paste0("Min Frequency: ",round(minFreqLast, digits = 2)))
-        shinyjs::html("meanFreq", paste0("Mean Frequency: ",round(meanFreqLast, digits = 2)))
-        shinyjs::html("bandwidth", paste0("Bandwidth: ",round(bandwidthLast, digits = 2)))
+        shinyjs::html("maxFreq", paste0("Max Frequency: ",maxFreqLast))
+        shinyjs::html("minFreq", paste0("Min Frequency: ",minFreqLast))
+        shinyjs::html("meanFreq", paste0("Mean Frequency: ",meanFreqLast))
+        shinyjs::html("bandwidth", paste0("Bandwidth: ",bandwidthLast))
         
         updateSelectizeInput(session, "typeDropdown", label = "Type*", choices =  itemsSpecies, selected = as.character(tail(annData[[5]], 1)))
         filteredSpecies <- filterSpecies(as.character(tail(annData[[5]], 1)), annCount)
@@ -934,10 +935,10 @@ shinyServer(function(input, output, session) {
         
         shinyjs::html("timeMin", paste0("Min Time: ",round(minCurr, digits = 2)))
         shinyjs::html("timeMax", paste0("Max Time: ",round(maxCurr, digits = 2)))
-        shinyjs::html("maxFreq", paste0("Max Frequency: ",round(maxFreqCurr, digits = 2)))
-        shinyjs::html("minFreq", paste0("Min Frequency: ",round(minFreqCurr, digits = 2)))
-        shinyjs::html("meanFreq", paste0("Mean Frequency: ",round(meanFreqCurr, digits = 2)))
-        shinyjs::html("bandwidth", paste0("Bandwidth: ",round(bandwidthCurr, digits = 2)))
+        shinyjs::html("maxFreq", paste0("Max Frequency: ", maxFreqCurr))
+        shinyjs::html("minFreq", paste0("Min Frequency: ", minFreqCurr))
+        shinyjs::html("meanFreq", paste0("Mean Frequency: ", meanFreqCurr))
+        shinyjs::html("bandwidth", paste0("Bandwidth: ", bandwidthCurr))
         
         updateSelectizeInput(session, "typeDropdown", label = "Type*", choices =  itemsSpecies, selected = as.character(typeCurr))
         filteredSpecies <- filterSpecies(as.character(typeCurr), annCount)
@@ -950,7 +951,7 @@ shinyServer(function(input, output, session) {
         shinyjs::show("playButtonClip",anim = FALSE)
         shinyjs::html(id = "playButtonClip", paste0(html = '<audio src="temp.wav" type="audio/wav" controls></audio>'))
       }
-
+      
     }
   })
   
@@ -1045,7 +1046,7 @@ shinyServer(function(input, output, session) {
         projectFileCountGlobal <<- projectFileCountGlobal + 1
       }
     }
-
+    
     # Render UI output
     output$progressOne <- renderUI({
       progressGroup(text = "Status", value = progressValue$one, min = 0, max = projectFileCount, color = "aqua")
@@ -1220,16 +1221,16 @@ shinyServer(function(input, output, session) {
       if (is.null(df)) return(NULL)
       itemsType <<- c('Select Species',as.character(df[[1]]))
       itemsSpecies <<- c('Select Type',as.character(df[[3]]))
-
+      
       shinyjs::show(id = "spectroClip", anim = FALSE)
       shinyjs::show(id = "clipInfo-container", anim = FALSE)
       updateSelectizeInput(session, "annotationDrop", label = "Select an annotation", choices =  currAnnList, selected = tail(currAnnList, 1))
       shinyjs::html("timeMin", paste0("Min Time: ",round(minLast, digits = 2)))
       shinyjs::html("timeMax", paste0("Max Time: ",round(maxLast, digits = 2)))
-      shinyjs::html("maxFreq", paste0("Max Frequency: ",round(maxFreqLast, digits = 2)))
-      shinyjs::html("minFreq", paste0("Min Frequency: ",round(minFreqLast, digits = 2)))
-      shinyjs::html("meanFreq", paste0("Mean Frequency: ",round(meanFreqLast, digits = 2)))
-      shinyjs::html("bandwidth", paste0("Bandwidth: ",round(bandwidthLast, digits = 2)))
+      shinyjs::html("maxFreq", paste0("Max Frequency: ", maxFreqLast))
+      shinyjs::html("minFreq", paste0("Min Frequency: ", minFreqLast))
+      shinyjs::html("meanFreq", paste0("Mean Frequency: ", meanFreqLast))
+      shinyjs::html("bandwidth", paste0("Bandwidth: ", bandwidthLast))
       updateSelectizeInput(session, "typeDropdown", label = "Type*", choices =  itemsSpecies, selected = as.character(typeLast))
       updateSelectizeInput(session, "speciesDropdown", label = "Species*", choices =  itemsType, selected = as.character(speciesLast))
     }
@@ -1268,5 +1269,4 @@ shinyServer(function(input, output, session) {
     output$minTime <- renderPrint({cat(as.character(minTimeVar))})
     output$maxTime <- renderPrint({cat(as.character(maxTimeVar))})
   }
-  
 })
