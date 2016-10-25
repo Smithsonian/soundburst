@@ -93,8 +93,8 @@ dashboardPage(
                shinyTree("tree"),
                hidden(div(id = "time-box-container",
                           div(id = "secondary-time-box-container",
-                              HTML('<label id="time-box-label">Would you like to increment the display?</label>'),
-                              textInput("spectroEndTime", "How many times would you like to split the file?", placeholder = ""),
+                              HTML('<label id="time-box-label"> </label>'),
+                              textInput("spectroEndTime", label = NULL, placeholder = "Please enter a number in minutes"),
                               actionButton("spectroTimeSubmit", "Increment"),
                               actionButton("noTimeSubmission", "Do not Increment")
                           )
@@ -150,18 +150,27 @@ dashboardPage(
                   #   div(id = "pauseButtonClipZoom"),
                   #   plotOutput("spectroZoomClip")
                   # ),
-                  hidden(column(width = 4, id = "clipInfo-container",
+                  hidden(column(width = 3, id = "clipInfo-container",
                                 hidden(div(id = "site-info-warning-container",
                                            div(id = "site-info-warning", "Attention: Please ensure you have submitted information for this Deployment on the left prior to submitting annotation information")
                                 )),
                                 # textInput("timeMin", "Time Start", 1),
                                 # textInput("timeMax", "Time End", 2),
-                                HTML('<div id="timeMin"></div>'),
-                                HTML('<div id="timeMax"></div>'),
-                                HTML('<div id="maxFreq"></div>'),
-                                HTML('<div id="minFreq"></div>'),
-                                HTML('<div id="meanFreq"></div>'),
-                                HTML('<div id="bandwidth"></div>'),
+                                div(id="detail-info-container",
+                                    div(id="time-container",
+                                        HTML('<div id="timeMin"></div>'),
+                                        HTML('<div id="timeMax"></div>')
+                                    ),
+                                    div(id="freq-title", "Frequency"),
+                                    div(id="freq-container",
+                                        HTML('<div id="maxFreq"></div>'),
+                                        HTML('<div id="minFreq"></div>'),
+                                        HTML('<div id="meanFreq"></div>')
+                                    ),
+                                    div(id="freq-container",
+                                        HTML('<div id="bandwidth"></div>')
+                                    )
+                                  ),
                                 # textInput("maxFreq", "Max Frequency", 1),
                                 # textInput("minFreq", "Min Frequency", 1),
                                 # textInput("meanFreq", "Mean Frequency", 1),

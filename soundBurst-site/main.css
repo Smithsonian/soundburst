@@ -55,6 +55,7 @@
 #clipInfo-container {
   background-color: white;
   box-shadow: 0px 0px 2px black;
+  /*width: 31%;*/
 }
 
 .content-wrapper {
@@ -64,6 +65,7 @@
 
 label {
   margin-top: 5%;
+  color: white;
 }
 
 #clipInfo-container label {
@@ -165,10 +167,13 @@ label {
   border: solid 1px #f39c12;
 }
 
+#timeMin, #timeMax, #bandwidth {
+  margin-top: 4%;
+}
+
 #timeMin, #timeMax, #maxFreq, #minFreq, #meanFreq, #bandwidth {
   width: 5em;
   display: inline-block;
-  margin-top: 4%;
   text-align: center;
 }
 
@@ -338,7 +343,7 @@ section.sidebar .shiny-input-container {
 }
 
 #secondary-time-box-container {
-  background: white;
+  background: #222D32;
   padding: 1em;
   position: relative;
   margin: 0 auto;
@@ -448,4 +453,8 @@ textarea {
 
 .loader {
   z-index: 1000;
+}
+
+#freq-title {
+  font-weight: bold;
 }
