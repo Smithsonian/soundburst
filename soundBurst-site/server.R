@@ -1029,7 +1029,7 @@ shinyServer(function(input, output, session) {
   })
   
   filterSpecies = function(typeCurr, count) {
-    if(is.null(typeCurr) || typeCurr != "Select Type" || typeCurr != "")
+    if(is.null(typeCurr) || typeCurr != "Select Type")
     {
       speciesList <- species()
       speciesDF <- as.data.frame(speciesList)
@@ -1042,7 +1042,7 @@ shinyServer(function(input, output, session) {
   observeEvent(input$typeDropdown, {
     filteredSpecies <- filterSpecies(input$typeDropdown, annCount)
     currentSelectedSpecies <- trimws(head(strsplit(input$annotationDrop,split = " at ")[[1]],2)[1], which = "both")
-    updateSelectizeInput(session, "speciesDropdown", label = "Species*", choices =  filteredSpecies$Common.Name, selected = as.character(currentSelectedSpecies))
+    updateSelectizeInput(session, "speciesDropdown", label = "Species*", choices =  filteredSpecies$Common.Name)
   })
   
   ################################
