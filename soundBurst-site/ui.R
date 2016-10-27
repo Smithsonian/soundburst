@@ -93,6 +93,7 @@ dashboardPage(
                shinyTree("tree"),
                hidden(div(id = "time-box-container",
                           div(id = "secondary-time-box-container",
+                              hidden(div(id = "time-submit-warning", "Please enter a time less than the total duration")),
                               HTML('<label id="time-box-label"> </label>'),
                               textInput("spectroEndTime", label = NULL, placeholder = "Please enter a number in minutes"),
                               actionButton("spectroTimeSubmit", "Increment"),

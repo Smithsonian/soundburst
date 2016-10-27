@@ -132,3 +132,7 @@
 .active-aws-button {
   background-color: #357CA5;
 }
+
+#time-submit-warning {
+  color: #d62d34;
+}
