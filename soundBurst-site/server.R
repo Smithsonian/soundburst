@@ -328,7 +328,11 @@ shinyServer(function(input, output, session) {
             # Getting the increment amount
             incrementAmount <<- as.numeric(input$spectroEndTime) * 60
             spectroToTime <<- incrementAmount
-            if (incrementAmount > soundDuration) {
+            if (is.na(incrementAmount)) {
+              shinyjs::show("time-submit-warning")
+            } else if (incrementAmount == 0) {
+              shinyjs::show("time-submit-warning")
+            } else if (incrementAmount > soundDuration) {
               shinyjs::show("time-submit-warning")
             } else {
               shinyjs::hide("time-submit-warning")
