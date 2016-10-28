@@ -988,8 +988,12 @@ shinyServer(function(input, output, session) {
   observeEvent(input$typeDropdown, {
     filteredSpecies <- filterSpecies(input$typeDropdown, annCount)
     currentSelectedSpecies <- trimws(head(strsplit(input$annotationDrop,split = " at ")[[1]],2)[1], which = "both")
-    if(currentSelectedSpecies != "") {
-      updateSelectizeInput(session, "speciesDropdown", label = "Species*", choices =  filteredSpecies$Common.Name, selected = currentSelectedSpecies)
+    if(!is.na(currentSelectedSpecies)) {
+      if(currentSelectedSpecies != "") {
+        updateSelectizeInput(session, "speciesDropdown", label = "Species*", choices =  filteredSpecies$Common.Name, selected = currentSelectedSpecies)
+      } else {
+        updateSelectizeInput(session, "speciesDropdown", label = "Species*", choices =  filteredSpecies$Common.Name)
+      }
     } else {
       updateSelectizeInput(session, "speciesDropdown", label = "Species*", choices =  filteredSpecies$Common.Name)
     }
