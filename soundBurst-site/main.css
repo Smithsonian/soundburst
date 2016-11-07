@@ -1,11 +1,11 @@
 #playButton audio {
-  width: 600px;
-  margin-left: 29%;
+  width: 100%;
+  /*margin-left: 29%;*/
 }
 
 #playButtonClip audio {
-  width: 600px;
-  margin-left: 23%;
+  width: 100%;
+  /*margin-left: 23%;*/
 }
 
 #loadingContainer1 {
@@ -461,4 +461,8 @@ textarea {
 
 #freq-title {
   font-weight: bold;
+}
+
+#site-info-warning-container {
+  color: #d62d34;
 }

@@ -152,9 +152,6 @@ dashboardPage(
                   #   plotOutput("spectroZoomClip")
                   # ),
                   hidden(column(width = 3, id = "clipInfo-container",
-                                hidden(div(id = "site-info-warning-container",
-                                           div(id = "site-info-warning", "Attention: Please ensure you have submitted information for this Deployment on the left prior to submitting annotation information")
-                                )),
                                 # textInput("timeMin", "Time Start", 1),
                                 # textInput("timeMax", "Time End", 2),
                                 div(id="detail-info-container",
@@ -183,6 +180,9 @@ dashboardPage(
                                 uiOutput("commonName"),
                                 HTML('<label>Site Notes</label>'),
                                 HTML('<textarea id="annotNotes" rows="3" cols="40" placeholder = "Annotation Notes"></textarea>'),
+                                hidden(div(id = "site-info-warning-container",
+                                           div(id = "site-info-warning", "Attention: Please ensure you have submitted information for this Deployment on the left prior to submitting annotation information")
+                                )),
                                 actionButton("speciesDropSubmit", "Submit")
                   ))
                 ),
