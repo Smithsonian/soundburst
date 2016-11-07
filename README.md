@@ -20,6 +20,9 @@
 
 7. Next, open server.R file from the bottom right pane. Click "Run App" in the top left pane to launch the application.
 
+> If after you clicked on Run App you see an error similar to "Error: There is no package called: ..", please try bullet point #6 and #7 once more and it should fix the problem. If the problem persists, please 
+> create a github issue and we will help you out.
+
 
 # Mac
 
@@ -39,6 +42,9 @@
 
 6. Next, open server.R file from the bottom right pane. Click "Run App" in the top left pane to launch the application.
 
+> If after you clicked on Run App you see an error similar to "Error: There is no package called: ..", please try bullet point #5 and #6 once more and it should fix the problem. If the problem persists, please 
+> create a github issue and we will help you out.
+
 # Linux
 
 1. First download and install R if you don't already have it installed. Please go [here](https://cran.r-project.org/bin/linux/), choose your Linux distribution and download the latest version of R **OR** download the version of R with which the SoundBurst App was developed **R 3.3.1**.
@@ -55,3 +61,6 @@
  > Note that you might need to "Install additional tools". Just click "yes" if asked.
 
 6. Next, open server.R file from the bottom right pane. Click "Run App" in the top left pane to launch the application.
+
+> If after you clicked on Run App you see an error similar to "Error: There is no package called: ..", please try bullet point #5 and #6 once more and it should fix the problem. If the problem persists, please 
+> create a github issue and we will help you out.
