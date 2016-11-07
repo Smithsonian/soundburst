@@ -10,7 +10,7 @@
 
 3. Since you will be running the SoundBurst App on Windows, it is necessary to also install RTools. Please download the latest version from [here](https://cran.r-project.org/bin/windows/Rtools/) or [version 3.4](https://cran.r-project.org/bin/windows/Rtools/Rtools34.exe) which was used to during the app's development. **Make sure that you select "Edit System Path" during the installation of Rtools so that it can be located and used by RStudio. See image below** ![Rtools Edit System Path](http://blueraster-users.s3.amazonaws.com/cphang/edit-path-rtools)
 
-3. Once you have everything installed, you will need to download our source code from our [github page] (https://github.com/blueraster/emammal-soundBurst). If you are a developer, please clone the master branch. Otherwise you can just click [here] (https://github.com/blueraster/emammal-soundBurst/archive/master.zip) to download the latest version of the Soundburst app. 
+3. Once you have everything installed, you will need to download our source code from our [github page](https://github.com/blueraster/emammal-soundBurst). If you are a developer, please clone the master branch. Otherwise you can just click [here](https://github.com/blueraster/emammal-soundBurst/archive/master.zip) to download the latest version of the Soundburst app. 
 
 4. Once the code is downloaded, unzip the file. 
 
@@ -33,7 +33,7 @@
 
 2. The next step is to download and install RStudio if you don't already have it installed. You can download the latest version of RStudio from [here](https://www.rstudio.com/products/rstudio/download) or download the version of RStudio with which SoundBurst App was developed with from [here](https://download1.rstudio.org/RStudio-0.99.903.dmg)
 
-3. Once you have everything installed, you will need to download the SoundBurst App from our [github page] (https://github.com/blueraster/emammal-soundBurst/archive/master.zip). If you are a developer, please clone the master branch from [here] (https://github.com/blueraster/emammal-soundBurst). 
+3. Once you have everything installed, you will need to download the SoundBurst App from our [github page](https://github.com/blueraster/emammal-soundBurst/archive/master.zip). If you are a developer, please clone the master branch from [here](https://github.com/blueraster/emammal-soundBurst). 
 
 4. Once the code is downloaded, unzip the file. 
 
@@ -53,7 +53,7 @@
 
 2. The next step is to download and install RStudio if you don't already have it installed. Please go [here](https://www.rstudio.com/products/rstudio/download/) and choose your Linux distribution to download the latest version of RStudio. If you want to download a previous version of RStudio (0.99.903 is not packaged for any Linux distribution), please go [here](https://download1.rstudio.org/)
 
-3. Once you have everything installed, you will need to download the SoundBurst App from our [github page] (https://github.com/blueraster/emammal-soundBurst/archive/master.zip). If you are a developer, please clone the master branch from [here] (https://github.com/blueraster/emammal-soundBurst).  
+3. Once you have everything installed, you will need to download the SoundBurst App from our [github page](https://github.com/blueraster/emammal-soundBurst/archive/master.zip). If you are a developer, please clone the master branch from [here](https://github.com/blueraster/emammal-soundBurst).  
 
 4. Once the code is downloaded, unzip the file. 
 
@@ -63,4 +63,4 @@
 6. Next, open server.R file from the bottom right pane. Click "Run App" in the top left pane to launch the application.
 
 > If after you clicked on Run App you see an error similar to "Error: There is no package called: ..", please try bullet point #5 and #6 once more and it should fix the problem. If the problem persists, please 
-> create a github issue and we will help you out.
+> create a github issue and we will help you out.wichga -Agc -m "Readme update"gp origin maer
