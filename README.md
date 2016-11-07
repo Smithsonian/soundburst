@@ -1,7 +1,6 @@
 # Windows
 
-1. First download and install R if you don't already have it installed. You can download the latest version of R from 
-[here](https://cran.r-project.org/bin/) **OR** you can download the version of R with which the SoundBurst App was developed with (**R 3.3.1**) from [here](https://cran.r-project.org/bin/windows/base/R-3.3.1-win.exe). _Please note that you might need to run the installer as administrator on Windows._
+1. First download and install R if you don't already have it installed.  The application was created and tested using R 3.3.1 which can be downloaded from [here](https://cran.r-project.org/bin/windows/base/R-3.3.1-win.exe). If you prefer to use the latest version, you can obtain the install from [here](https://cran.r-project.org/bin/). _Please note that you might need to run the installer as administrator on Windows._
 
 > It is always better to download the latest version of R, however if you are having any issues with the SoundBurst App, please download the version of R with which it was developed with.
 
@@ -26,8 +25,7 @@
 
 # Mac
 
-1. First download and install R if you don't already have it installed. You can download the latest version of R from 
-[here](https://cran.r-project.org/bin/) **OR** you can download the version of R with which the SoundBurst App was developed with (**R 3.3.1**) from [here](https://cran.r-project.org/bin/macosx/R-3.3.1.pkg). 
+1. First download and install R if you don't already have it installed.  The application was created and tested using R 3.3.1 which can be downloaded from [here](https://cran.r-project.org/bin/). If you prefer to use the latest version, you can obtain the install from [here](https://cran.r-project.org/bin/macosx/R-3.3.1.pkg). 
 
 > It is always better to download the latest version of R, however if you are having any issues with the SoundBurst App, please download the version of R with which it was developed with.
 
@@ -45,7 +43,7 @@
 > If after you clicked on Run App you see an error similar to "Error: There is no package called: ..", please try bullet point #5 and #6 once more and it should fix the problem. If the problem persists, please 
 > create a github issue and we will help you out.
 
-# Linux
+# Linux (Desktop)
 
 1. First download and install R if you don't already have it installed. Please go [here](https://cran.r-project.org/bin/linux/), choose your Linux distribution and download the latest version of R **OR** download the version of R with which the SoundBurst App was developed **R 3.3.1**.
 
