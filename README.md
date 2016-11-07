@@ -8,7 +8,8 @@
 
 2. The next step is to download and install RStudio if you don't already have it installed. You can download the latest version of RStudio from [here](https://www.rstudio.com/products/rstudio/download/) or download the version of RStudio with which SoundBurst App was developed with from [here](https://download1.rstudio.org/RStudio-0.99.903.exe)
 
-3. Since you will be running the SoundBurst App on Windows, it is necessary to also install RTools. Please download the latest version from [here](https://cran.r-project.org/bin/windows/Rtools/) or [version 3.4](https://cran.r-project.org/bin/windows/Rtools/Rtools34.exe) which was used to during the app's development. **Make sure that you select "Edit System Path" during the installation of Rtools so that it can be located and used by RStudio. See image below** ![Rtools Edit System Path](http://blueraster-users.s3.amazonaws.com/cphang/edit-path-rtools)
+3. Since you will be running the SoundBurst App on Windows, it is necessary to also install RTools. Please download the latest version from [here](https://cran.r-project.org/bin/windows/Rtools/) or [version 3.4](https://cran.r-project.org/bin/windows/Rtools/Rtools34.exe) which was used to during the app's development. **Make sure that you select "Edit System Path" during the installation of Rtools so that it can be located and used by RStudio. See image below** 
+![Rtools Edit System Path](http://blueraster-users.s3.amazonaws.com/cphang/edit-path-rtools)
 
 3. Once you have everything installed, you will need to download our source code from our [github page](https://github.com/blueraster/emammal-soundBurst). If you are a developer, please clone the master branch. Otherwise you can just click [here](https://github.com/blueraster/emammal-soundBurst/archive/master.zip) to download the latest version of the Soundburst app. 
 
