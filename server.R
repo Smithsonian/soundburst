@@ -328,32 +328,23 @@ shinyServer(function(input, output, session) {
             # Getting the increment amount
             incrementAmount <<- as.numeric(input$spectroEndTime) * 60
             spectroToTime <<- incrementAmount
-            if (is.na(incrementAmount)) {
-              shinyjs::show("time-submit-warning")
-            } else if (incrementAmount == 0) {
-              shinyjs::show("time-submit-warning")
-            } else if (incrementAmount > soundDuration) {
-              shinyjs::show("time-submit-warning")
-            } else {
-              shinyjs::hide("time-submit-warning")
-              if (file.exists(depFilePath)) {
-                shinyjs::addClass("loadingContainer1", "loader")
-                readSequenceCSV(unlist(get_selected(input$tree)))
-                df <- species()
-                itemsType <<- c('Select Species',as.character(df[[1]]))
-                itemsSpecies <<- c('Select Type',as.character(df[[3]]))
-                updateSelectizeInput(session, "typeDropdown", label = "Type*", choices =  itemsSpecies)
-                updateSelectizeInput(session, "speciesDropdown", label = "Species*", choices =  itemsType)
-              }
-              file.copy(currDir, paste0(getwd(), "/www"))
-              shinyjs::html(id = "playButton", paste0(html = '<audio controls preload="auto"><source src="', unlist(get_selected(input$tree)), '" type="audio/wav"></audio>'))
-              renderSpectro(sound)
-              if (soundDuration > incrementAmount) {
-                shinyjs::show("spectro-increment-container")
-                shinyjs::show("next-spectro-increment")
-              }
-              shinyjs::show("playButton",anim = FALSE)
+            if (file.exists(depFilePath)) {
+              shinyjs::addClass("loadingContainer1", "loader")
+              readSequenceCSV(unlist(get_selected(input$tree)))
+              df <- species()
+              itemsType <<- c('Select Species',as.character(df[[1]]))
+              itemsSpecies <<- c('Select Type',as.character(df[[3]]))
+              updateSelectizeInput(session, "typeDropdown", label = "Type*", choices =  itemsSpecies)
+              updateSelectizeInput(session, "speciesDropdown", label = "Species*", choices =  itemsType)
             }
+            file.copy(currDir, paste0(getwd(), "/www"))
+            shinyjs::html(id = "playButton", paste0(html = '<audio controls preload="auto"><source src="', unlist(get_selected(input$tree)), '" type="audio/wav"></audio>'))
+            renderSpectro(sound)
+            if (soundDuration > incrementAmount) {
+              shinyjs::show("spectro-increment-container")
+              shinyjs::show("next-spectro-increment")
+            }
+            shinyjs::show("playButton",anim = FALSE)
           })
           observeEvent(input$noTimeSubmission,{
             if (file.exists(depFilePath)) {
@@ -907,8 +898,7 @@ shinyServer(function(input, output, session) {
         minFreqLast <- tail(annData[[8]], 1)
         meanFreqLast <- tail(annData[[9]], 1)
         bandwidthLast <- tail(annData[[10]], 1)
-        slopeLast <- round(tail(annData[[11]], 1), digits = 4)
-        notesLast <- tail(annData[[12]], 1)
+        slopeLast <- tail(annData[[11]], 1)
         
         shinyjs::html("timeMin", paste0("Start Time ",round(minLast, digits = 2)))
         shinyjs::html("timeMax", paste0("End Time ",round(maxLast, digits = 2)))
@@ -917,11 +907,10 @@ shinyServer(function(input, output, session) {
         shinyjs::html("meanFreq", paste0("Mean ",meanFreqLast))
         shinyjs::html("bandwidth", paste0("Bandwidth ",bandwidthLast))
         shinyjs::html("slope", paste0("Slope ",slopeLast))
-        shinyjs::html("annotNotes", notesLast)
         
         updateSelectizeInput(session, "typeDropdown", label = "Type*", choices =  itemsSpecies, selected = as.character(tail(annData[[5]], 1)))
         filteredSpecies <- filterSpecies(as.character(tail(annData[[5]], 1)), annCount)
-        updateSelectizeInput(session, "speciesDropdown", label = "Species*", choices =  filteredSpecies$Common.Name, selected = as.character(annData[[6]],1))
+        updateSelectizeInput(session, "speciesDropdown", label = "Species*", choices =  filteredSpecies$Common.Name, selected = as.character(tail(annData[[6]], 1)))
         
         # Creating a temp wav sound from xmin to xmax
         temp <- extractWave(sound, from = minLast, to = maxLast, xunit = "time")
@@ -944,10 +933,9 @@ shinyServer(function(input, output, session) {
         minFreqCurr <- selectedAnn$Min
         meanFreqCurr <- selectedAnn$Mean.Freq
         bandwidthCurr <- selectedAnn$Bandwidth
-        lineSlopeCurr <- round(selectedAnn$Annotation.Slope, digits = 4)
+        lineSlopeCurr <- selectedAnn$lineSlope
         typeCurr <- selectedAnn$Type
         speciesCurr <<- selectedAnn$Species
-        notesCurr <<- selectedAnn$Annotation.Notes
         renderSpectroClip(sound, minCurr, maxCurr, TRUE)
         
         shinyjs::html("timeMin", paste0("Start Time ",round(minCurr, digits = 2)))
@@ -957,7 +945,6 @@ shinyServer(function(input, output, session) {
         shinyjs::html("meanFreq", paste0("Mean ", meanFreqCurr))
         shinyjs::html("bandwidth", paste0("Bandwidth ", bandwidthCurr))
         shinyjs::html("slope", paste0("Slope ", lineSlopeCurr))
-        shinyjs::html("annotNotes", notesCurr)
         
         updateSelectizeInput(session, "typeDropdown", label = "Type*", choices =  itemsSpecies, selected = as.character(typeCurr))
         filteredSpecies <- filterSpecies(as.character(typeCurr), annCount)
@@ -988,15 +975,7 @@ shinyServer(function(input, output, session) {
   observeEvent(input$typeDropdown, {
     filteredSpecies <- filterSpecies(input$typeDropdown, annCount)
     currentSelectedSpecies <- trimws(head(strsplit(input$annotationDrop,split = " at ")[[1]],2)[1], which = "both")
-    if(!is.na(currentSelectedSpecies)) {
-      if(currentSelectedSpecies != "") {
-        updateSelectizeInput(session, "speciesDropdown", label = "Species*", choices =  filteredSpecies$Common.Name, selected = currentSelectedSpecies)
-      } else {
-        updateSelectizeInput(session, "speciesDropdown", label = "Species*", choices =  filteredSpecies$Common.Name)
-      }
-    } else {
-      updateSelectizeInput(session, "speciesDropdown", label = "Species*", choices =  filteredSpecies$Common.Name)
-    }
+    updateSelectizeInput(session, "speciesDropdown", label = "Species*", choices =  filteredSpecies$Common.Name)
   })
   
   ################################
@@ -1193,7 +1172,7 @@ shinyServer(function(input, output, session) {
     # Check if file is empty
     if("File.Name" %in% colnames(annDataFull)){
       tryCatch({
-        annData <- annDataFull[ ,9:21]
+        annData <- annDataFull[ ,9:20]
       }, error=function(e) {
         print("Error with the CSV file. Error #1")
       })
@@ -1231,11 +1210,10 @@ shinyServer(function(input, output, session) {
       minFreqLast <- tail(selectedWav[[9]], 1)
       meanFreqLast <- tail(selectedWav[[10]], 1)
       bandwidthLast <- tail(selectedWav[[11]], 1)
-      slopeLast <- round(tail(selectedWav[[12]], 1), digits = 4)
-      notesLast <- tail(selectedWav[[13]], 1)
+      slopeLast <- tail(selectedWav[[12]], 1)
       
-      typeLast <- tail(selectedWav[[6]], 1)
-      speciesLast <- tail(selectedWav[[7]], 1)
+      typeLast <- tail(selectedWav[[5]], 1)
+      speciesLast <- tail(selectedWav[[6]], 1)
       sound <- readWave(paste0(depPath, "/", wavFileName))
       readSequenceBool <- TRUE
       renderSpectroClip(sound, minLast, maxLast, readSequenceBool)
@@ -1261,7 +1239,6 @@ shinyServer(function(input, output, session) {
       shinyjs::html("meanFreq", paste0("Mean ", meanFreqLast))
       shinyjs::html("bandwidth", paste0("Bandwidth ", bandwidthLast))
       shinyjs::html("slope", paste0("Slope ", slopeLast))
-      shinyjs::html("annotNotes", notesLast)
       updateSelectizeInput(session, "typeDropdown", label = "Type*", choices =  itemsSpecies, selected = as.character(typeLast))
       updateSelectizeInput(session, "speciesDropdown", label = "Species*", choices =  itemsType, selected = as.character(speciesLast))
     }
