@@ -2,9 +2,7 @@
 
 ### Windows
 
-1. First download and install R if you don't already have it installed.  The application was created and tested using R 3.3.1 which can be downloaded from [here](https://cran.r-project.org/bin/windows/base/old/3.3.1/R-3.3.1-win.exe). If you prefer to use the latest version, you can obtain the install from [here](https://cran.r-project.org/bin/). _Please note that you might need to run the installer as administrator on Windows._
-
-> It is always better to download the latest version of R, however if you are having any issues with the SoundBurst App, please download the version of R with which it was developed with.
+1. First download and install R if you don't already have it installed. It is always better to download the latest version of R, however if you are having any issues with the SoundBurst App, please download the version of R with which it was developed with. The application was created and tested using R 3.3.1 which can be downloaded from [here](https://cran.r-project.org/bin/windows/base/old/3.3.1/R-3.3.1-win.exe). If you prefer to use the latest version, you can obtain the install from [here](https://cran.r-project.org/bin/). _Please note that you might need to run the installer as administrator on Windows._
 
 2. The next step is to download and install RStudio if you don't already have it installed. You can download the latest version of RStudio from [here](https://www.rstudio.com/products/rstudio/download/) or download the version of RStudio with which SoundBurst App was developed with from [here](https://download1.rstudio.org/RStudio-0.99.903.exe)
 
@@ -28,9 +26,7 @@
 
 ### Mac
 
-1. First download and install R if you don't already have it installed.  The application was created and tested using R 3.3.1 which can be downloaded from [here](https://cran.r-project.org/bin/macosx/old/R-3.3.1.pkg). If you prefer to use the latest version, you can obtain the install from [here](https://cran.r-project.org/bin/). 
-
-> It is always better to download the latest version of R, however if you are having any issues with the SoundBurst App, please download the version of R with which it was developed with.
+1. First download and install R if you don't already have it installed. It is always better to download the latest version of R, however if you are having any issues with the SoundBurst App, please download the version of R with which it was developed with. The application was created and tested using R 3.3.1 which can be downloaded from [here](https://cran.r-project.org/bin/macosx/old/R-3.3.1.pkg). If you prefer to use the latest version, you can obtain the install from [here](https://cran.r-project.org/bin/). 
 
 2. The next step is to download and install RStudio if you don't already have it installed. You can download the latest version of RStudio from [here](https://www.rstudio.com/products/rstudio/download) or download the version of RStudio with which SoundBurst App was developed with from [here](https://download1.rstudio.org/RStudio-0.99.903.dmg)
 
@@ -48,9 +44,8 @@
 
 ### Linux (Desktop)
 
-1. First download and install R if you don't already have it installed. Please go [here](https://cran.r-project.org/bin/linux/), choose your Linux distribution and download the latest version of R **OR** download the version of R with which the SoundBurst App was developed **R 3.3.1**.
+1. First download and install R if you don't already have it installed. It is always better to download the latest version of R, however if you are having any issues with the SoundBurst App, please download the version of R with which it was developed with. Please go [here](https://cran.r-project.org/bin/linux/), choose your Linux distribution and download the latest version of R **OR** download the version of R with which the SoundBurst App was developed **R 3.3.1**.
 
-> It is always better to download the latest version of R, however if you are having any issues with the SoundBurst App, please download the version of R with which it was developed with.
 
 2. The next step is to download and install RStudio if you don't already have it installed. Please go [here](https://www.rstudio.com/products/rstudio/download/) and choose your Linux distribution to download the latest version of RStudio. If you want to download a previous version of RStudio (0.99.903 is not packaged for any Linux distribution), please go [here](https://download1.rstudio.org/)
 
@@ -58,8 +53,7 @@
 
 4. Once the code is downloaded, unzip the file. 
 
-5. Once the file is unzipped, double click on soundBurst-site.Rproj. This will open RStudio. Click on installPackagesMac-Linux.r from the bottom right pane. In the top left pane, click the button "Run." This installs the necessary packages for the app to run. 
- > Note that you might need to "Install additional tools". Just click "yes" if asked.
+5. Once the file is unzipped, double click on soundBurst-site.Rproj. This will open RStudio. Click on installPackagesMac-Linux.r from the bottom right pane. In the top left pane, click the button "Run." This installs the necessary packages for the app to run. Note that you might need to "Install additional tools". Just click "yes" if asked.
 
 6. Next, open server.R file from the bottom right pane. Click "Run App" in the top left pane to launch the application.
 
