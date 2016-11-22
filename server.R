@@ -134,7 +134,7 @@ shinyServer(function(input, output, session) {
   shinyjs::onevent('mouseenter', "csvFile", showCSVModal())
   shinyjs::onevent('mouseleave', "csvFile", hideCSVModal())
   
-  shinyjs::onclick("sF-selectButton", toggleAfterProjectSelect())
+  # shinyjs::onclick("sF-selectButton", toggleAfterProjectSelect())
   
   showCSVModal = function() {
     shinyjs::show("csv-info-modal-container")
@@ -195,9 +195,9 @@ shinyServer(function(input, output, session) {
     shinyjs::toggleClass("enter-project-info-label", "closed-accordian")
     dirPath <<- parseDirPath(roots=c(home='~'), input$directory)
     # Had to check if dirPath was not of length 0 otherwise shiny would return an error
-    if(length(dirPath) != 0) {
-      setwd(normalizePath(dirPath))
-    }
+    # if(length(dirPath) != 0) {
+    #   setwd(normalizePath(dirPath))
+    # }
   }
   
   toggleAfterProjectCsvLoaded = function() {
@@ -244,6 +244,7 @@ shinyServer(function(input, output, session) {
     unlink(wavToRemove)
     getOS()
     dirPath <<- parseDirPath(roots=c(home=mainDir), input$directory)
+    toggleAfterProjectSelect()
     # Get folder name -> which is also the project name
     projectName <<- gsub("^.*\\/", "", dirPath)
     if(file.exists(paste0(dirPath, "/Project_", projectName, ".csv"))) { # CHANGE
