@@ -59,7 +59,7 @@ dashboardPage(
            ),
            div(id = "deployment-select-container",
                div(id = "select-dep-container", class = "closed-accordian unfinished-step", "Select a Deployment"),
-               hidden(shinyDirButton('deployment', class = 'inactive-button', 'Folder select', 'Please select a folder'))
+               shinyDirButton('deployment', class = 'inactive-button', 'Folder select', 'Please select a folder')
            ),
            div(id = "full-project-info-container",
                div(id = "right-column-title", class = "closed-accordian unfinished-step", "Enter Deployment Info"),

@@ -126,6 +126,7 @@ shinyServer(function(input, output, session) {
   shinyjs::hide("progressOne")
   shinyjs::hide("tree")
   shinyjs::hide("directorypath")
+  shinyjs::hide("deployment")
   shinyjs::hide(id = "playButton",anim = FALSE)
   shinyjs::hide(id = "playButtonClipZoom", anim = FALSE)
   shinyjs::onclick("aws-upload-button", resetAwsCount())
