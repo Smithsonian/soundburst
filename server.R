@@ -134,7 +134,7 @@ shinyServer(function(input, output, session) {
   shinyjs::onevent('mouseenter', "csvFile", showCSVModal())
   shinyjs::onevent('mouseleave', "csvFile", hideCSVModal())
   
-  # shinyjs::onclick("sF-selectButton", toggleAfterProjectSelect())
+  shinyjs::onclick("sF-selectButton", toggleAfterProjectSelect())
   
   showCSVModal = function() {
     shinyjs::show("csv-info-modal-container")
@@ -193,7 +193,7 @@ shinyServer(function(input, output, session) {
     shinyjs::toggleClass("left-column-title", "closed-accordian")
     shinyjs::toggleClass("enter-project-info-label", "open-accordian")
     shinyjs::toggleClass("enter-project-info-label", "closed-accordian")
-    dirPath <<- parseDirPath(roots=c(home='~'), input$directory)
+    dirPath <<- parseDirPath(roots=c(home=mainDir), input$directory)
     # Had to check if dirPath was not of length 0 otherwise shiny would return an error
     # if(length(dirPath) != 0) {
     #   setwd(normalizePath(dirPath))
@@ -239,12 +239,12 @@ shinyServer(function(input, output, session) {
   test <- shinyDirChoose(input, 'directory', updateFreq=60000, session=session, root=c(home=mainDir), restrictions=system.file(package='base'), filetypes=c('', '.wav'))
   
   observeEvent(input$directory, {
+    toggleAfterProjectSelect()
     # Removing any .wav files that were copied in the /www folder for sound play
     wavToRemove <-list.files(paste0(getwd(), "/www"), pattern='.wav', full.names = TRUE)
     unlink(wavToRemove)
     getOS()
     dirPath <<- parseDirPath(roots=c(home=mainDir), input$directory)
-    toggleAfterProjectSelect()
     # Get folder name -> which is also the project name
     projectName <<- gsub("^.*\\/", "", dirPath)
     if(file.exists(paste0(dirPath, "/Project_", projectName, ".csv"))) { # CHANGE
