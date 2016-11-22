@@ -15,7 +15,7 @@
 
 5. **NOTE:** if you are running Windows 10, you may encounter the following unexpected error (see image below). If you experience this error, please select "Do this for all current items" and click Skip. ![windows10-SoundBurst-App](http://blueraster-users.s3.amazonaws.com/cphang/windows10-SoundBurst)
 
-6. Once the file is unzipped, double click on soundBurst-site.Rproj. This will open RStudio. Click on installPackagesWin.r from the bottom right pane. In the top left pane, click the button "Run." This installs the necessary packages for the app to run.
+6. Once the file is unzipped, double click on soundBurst-site.Rproj. This will open RStudio. Click on installPackagesWin.r from the bottom right pane. In the top left pane, highlight all text and click the button "Run." This installs the necessary packages for the app to run.
 > Note that you might need to "Install additional tools". Just click "yes" if asked.
 
 8. Next, open server.R file from the bottom right pane. Click "Run App" in the top left pane to launch the application.
@@ -34,7 +34,7 @@
 
 4. Once the code is downloaded, unzip the file. 
 
-5. Once the file is unzipped, double click on soundBurst-site.Rproj. This will open RStudio. Click on installPackagesMac-Linux.r from the bottom right pane. In the top left pane, click the button "Run." This installs the necessary packages for the app to run.
+5. Once the file is unzipped, double click on soundBurst-site.Rproj. This will open RStudio. Click on installPackagesMac-Linux.r from the bottom right pane. In the top left pane, highlight all text and click the button "Run." This installs the necessary packages for the app to run.
 > Note that you might need to "Install additional tools". Just click "yes" if asked.
 
 6. Next, open server.R file from the bottom right pane. Click "Run App" in the top left pane to launch the application.
