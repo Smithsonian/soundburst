@@ -134,7 +134,7 @@ shinyServer(function(input, output, session) {
   shinyjs::onevent('mouseenter', "csvFile", showCSVModal())
   shinyjs::onevent('mouseleave', "csvFile", hideCSVModal())
   
-  shinyjs::onclick("sF-selectButton", toggleAfterProjectSelect())
+  # shinyjs::onclick("sF-selectButton", toggleAfterProjectSelect())
   
   showCSVModal = function() {
     shinyjs::show("csv-info-modal-container")
