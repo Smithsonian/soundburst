@@ -35,7 +35,7 @@
 4. Once the code is downloaded, unzip the file.
 
 5. Once the file is unzipped, double click on soundBurst-site.Rproj. This will open RStudio. Click on installPackagesMac-Linux.r from the bottom right pane. In the top left pane, highlight all text and click the button "Run." This installs the necessary packages for the app to run.
-> Note that you might need to "Install additional tools". Just click "yes" if asked.
+> Note if you receive a question about updating packages, simply select "No".
 
 6. Next, open server.R file from the bottom right pane. Click "Run App" in the top left pane to launch the application.
 
