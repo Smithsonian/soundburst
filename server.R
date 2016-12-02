@@ -998,18 +998,28 @@ shinyServer(function(input, output, session) {
         tempDir <- tempdir()
         csvDir <- paste0(tempDir, "/", projectName)
         wavDir <- paste0(csvDir, "/deployment")
+        # If directory already exists, remove any previous files
         if(dir.exists(csvDir)) {
           unlink(csvDir, recursive = TRUE)
         }
+        data <- formDataProject()
+        projectInfo(data[[1]], data[[2]])
         dir.create(csvDir)
         dir.create(wavDir)
         file.copy(annotationListCsv, wavDir)
-        file.copy(annotationListCsvProject, csvDir)
+        file.copy(annotationListCsvProject[length(annotationListCsvProject)], csvDir)
         file.copy(annotationListWav, wavDir)
         incrementAwsCount()
         # Zip folder
         oldwd <- getwd()
         setwd(tempDir)
+        # Getting the site data
+        data <- formDataSite()
+        # Reformating user input
+        fileDate <- gsub(" ", "-",as.character(minTimeVar), fixed = TRUE)
+        fileDate <- gsub(":", "-",fileDate, fixed = TRUE)
+        # Creating a new filename out of the metadata
+        newFileName <<- paste0(projectName,"_",data[[1]],"_",fileDate)
         zipName <- sub('_([^_]*)$', '', newFileName)
         currDate <- format(Sys.time(), "%Y%m%d")
         fullZipName <- paste0("/", zipName, "_", currDate)
@@ -1018,7 +1028,7 @@ shinyServer(function(input, output, session) {
         setwd(oldwd)
         # Upload to AWS
         awsUpload <- put_object(file = normalizePath(paste0(dirPath, fullZipName, ".zip")), bucket = awsBucket)
-        
+        incrementAwsCount()
         # Resetting annotationListWav to 0
         annotationListWav <<- vector();
         annotationListCsv <<- vector();
