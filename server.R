@@ -1270,13 +1270,19 @@ shinyServer(function(input, output, session) {
   findFileInfo = function() {
     files <- list.files(depPath, all.files=F, recursive=T, include.dirs=T)
     filesArray <<- 0
+    dateArray <<- 0
     for (i in 1:length(files)) {
       if (substrRight(files[i],4) == ".wav") {
         fileName <- paste0(depPath,"/",files[i])
+        wavFile <- substr(fileName, attr(regexpr('.*/', fileName),"match.length")+1, nchar(fileName))
+        timeStringLength <- regexpr('_.*_', wavFile)
+        matchedString <- timeStringLength + attr(timeStringLength, "match.length")-1
+        fileTime <- substr(wavFile, timeStringLength+1, matchedString-1)
+        dateArray <<- c(dateArray, fileTime)
         filesArray <<- c(filesArray, fileName)
       }
     }
-    findMaxAndMinFileTimes(filesArray)
+    findMaxAndMinFileDates(dateArray)
   }
   
   findMaxAndMinFileTimes = function (filesArray){
@@ -1286,6 +1292,16 @@ shinyServer(function(input, output, session) {
     }
     minTimeVar <<- as.POSIXct(min(timeArray), origin="1970-01-01")
     maxTimeVar <<- as.POSIXct(max(timeArray), origin="1970-01-01")
+    output$minTime <- renderPrint({cat(as.character(minTimeVar))})
+    output$maxTime <- renderPrint({cat(as.character(maxTimeVar))})
+  }
+  
+  findMaxAndMinFileDates = function (dateArray){
+    timeArray <<- dateArray[rev(order(as.Date(dateArray, format = "%m-%d-%Y")))]
+    # minTimeVar <<- as.POSIXct(min(timeArray), origin="1970-01-01")
+    # maxTimeVar <<- as.POSIXct(max(timeArray), origin="1970-01-01")
+    minTimeVar <<- as.Date(timeArray[length(timeArray)-1])
+    maxTimeVar <<- as.Date(timeArray[1])
     output$minTime <- renderPrint({cat(as.character(minTimeVar))})
     output$maxTime <- renderPrint({cat(as.character(maxTimeVar))})
   }
