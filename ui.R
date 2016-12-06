@@ -94,7 +94,7 @@ dashboardPage(
                hidden(div(id = "time-box-container",
                           div(id = "secondary-time-box-container",
                               HTML('<label id="time-box-label"> </label>'),
-                              textInput("spectroEndTime", label = NULL, placeholder = "Please enter a number in minutes"),
+                              textInput("spectroEndTime", label = NULL, placeholder = "Please enter a number between 0 and 1 if Increment"),
                               actionButton("spectroTimeSubmit", "Increment"),
                               actionButton("noTimeSubmission", "Do not Increment")
                           )

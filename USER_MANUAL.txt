@@ -1,0 +1,71 @@
+# Users Manual
+
+## Requirements
+
+* Please ensure all wav file names end with the following format: _2016-04-28_221200_EDT.wav
+** The date MUST be preceded by an underscore, and end with "_EDT" or other time zone.
+
+* When opening the application, please make sure to do so in Chrome or Firefox.
+** This can be done by the following (https://s3.amazonaws.com/blueraster-users/jglatman/soundburst/runApp.png) select "Run External".
+
+
+### Project Select
+
+Click the "Folder Select" button under the "Select Project" dropdown.
+A list of directories on your machine with appear (see screenshot below).
+Navigate to your main project folder and highlight it.
+To the right, you will see a list of folders containing your deployments.
+Screenshot(https://s3.amazonaws.com/blueraster-users/jglatman/soundburst/projectSelect.png)
+
+### Project Information
+
+The Project name will be populated by the name of the folder you selected.
+You may change that name, and it will in turn edit the actual folder name once submitted.
+Enter any additional notes about the overall project in the notes field.
+Click the "Submit" button to finish.
+Screenshot(https://s3.amazonaws.com/blueraster-users/jglatman/soundburst/projectInfo.png)
+
+### Deployment Select
+
+Click the "Folder Select" button that now appears under the "Select a Deployment" dropdown.
+Similar to the project select, a window will open with the list of deployments within the initial project folder.
+Highlight a folder. You will notice that the right pane may say "empty folder", that is a limitation of the package, as it is looking for more folders. There will still be .wav files.
+Screenshot(https://s3.amazonaws.com/blueraster-users/jglatman/soundburst/deploymentSelect.png)
+
+### Deployment Information
+
+The next form that appears will be for deployment-specific meta-data.
+Name will be auto-populated by the deployment folder name. This can be changed.
+Lat, Lon, and Recorder ID are all REQUIRED fields.
+Lat and Lon fields work best if using only numeric values (ie. 77, -44).
+Start and End times are populated from the dates within the actual file names.
+Screenshot(https://s3.amazonaws.com/blueraster-users/jglatman/soundburst/deploymentInfo.png)
+
+### Sequence Select
+
+Select a sequence from the list.
+Screenshot(https://s3.amazonaws.com/blueraster-users/jglatman/soundburst/sequence.png)
+
+### Increment
+
+After selecting a sequence, please decide whether you would like to increment the file into multiple spectrograms.
+Screenshot(https://s3.amazonaws.com/blueraster-users/jglatman/soundburst/increment.png)
+NOTE: the increment value is to be between 0 - 1. This will represent the percentage at which the files is incremented.
+For example, if you enter 0.2, the file will increment 5x (20% for each spectrogram).
+Selecting "Do Not Increment" will render the full file in one spectrogram.
+
+## Create Annotations
+
+Hover over the main spectrogram, and your curser will become a cross.
+Once yous ee that, you can make a clip similar to :https://s3.amazonaws.com/blueraster-users/jglatman/soundburst/clip.png
+A clipped spectrogram will appear below, as will a form on the bottom right (https://s3.amazonaws.com/blueraster-users/jglatman/soundburst/annotation.png)
+Most of the fields are auto-populated. Please fill in the Type, and Species, and any notes about the clip.
+After submitting, the clip in the main spectrogram will turn green, letting you know it is complete. You may then make another clip.
+The meta-data created here will populate in a csv within the specific deployment folder.
+
+### Upload to AWS-S3
+
+Once you have completed the desired annotations for each deployment,
+please click the "Upload to AWS" button at the top.
+This will open a window to enter you AWS credentials (https://s3.amazonaws.com/blueraster-users/jglatman/soundburst/AWSUpload.png)
+Please fill out all three fields, and submit. Once the status bar reaches "3/3", the upload is completed.
