@@ -274,16 +274,18 @@ shinyServer(function(input, output, session) {
       files <- list.files(depPath, all.files=F, recursive=T, include.dirs=T)
       sapply(files,FUN=function(eachPath){
         if (substrRight(eachPath,4) == ".wav") {
-          fileName <- paste0(depPath,"/",eachPath)
-          fileType <- substrRight(eachPath,4)
-          timeStringLength <- regexpr('_.*__', eachPath)
-          matchedString <- timeStringLength + attr(timeStringLength, "match.length")-1
-          fileTime <- substr(eachPath, timeStringLength+1, matchedString-1)
-          fileNameCountRemoved <- gsub(fileTime,"_",eachPath, fixed = TRUE)
-          updatedFileName1 <- sub("_", "",fileNameCountRemoved, fixed = TRUE)
-          updatedWavFileName <- sub("_", "",updatedFileName1, fixed = TRUE)
-          updatedWavFilePath <- paste0(depPath,"/",updatedWavFileName)
-          file.rename(fileName,updatedWavFilePath)
+          if (regexpr('_.*__', eachPath)[1] != -1) {
+            fileName <- paste0(depPath,"/",eachPath)
+            fileType <- substrRight(eachPath,4)
+            timeStringLength <- regexpr('_.*__', eachPath)
+            matchedString <- timeStringLength + attr(timeStringLength, "match.length")-1
+            fileTime <- substr(eachPath, timeStringLength+1, matchedString-1)
+            fileNameCountRemoved <- gsub(fileTime,"_",eachPath, fixed = TRUE)
+            updatedFileName1 <- sub("_", "",fileNameCountRemoved, fixed = TRUE)
+            updatedWavFileName <- sub("_", "",updatedFileName1, fixed = TRUE)
+            updatedWavFilePath <- paste0(depPath,"/",updatedWavFileName)
+            file.rename(fileName,updatedWavFilePath)
+          }
         }
       })
       create_directory_tree(depPath)
@@ -407,7 +409,7 @@ shinyServer(function(input, output, session) {
       currDir <- paste0(depPath, "/", unlist(get_selected(input$tree)))
       frequencyDF <- get_frequency(currDir, 0, durationMain)
       anottationCount <<- 0
-      spectro(sound, osc = TRUE, scale = FALSE, tlim = c(spectroFromTime,spectroToTime))
+      spectro(sound, osc = TRUE, scale = FALSE, tlim = c(spectroFromTime,spectroToTime), cont=TRUE)
       shinyjs::show("complete-deployment")
       shinyjs::removeClass("loadingContainer1", "loader")
     }, res = 72, execOnResize = T)
