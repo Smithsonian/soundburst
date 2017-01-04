@@ -15,6 +15,7 @@ library(stringr)
 source("createDirectoryTree.r")
 source("playSound.r")
 library("fftw")
+library(lubridate)
 
 # Removing previously loaded global environment, if any
 rm(list=ls())
@@ -270,6 +271,21 @@ shinyServer(function(input, output, session) {
     depPath <<- parseDirPath(root=c(home=normalizePath(dirPath)), input$deployment)
     if(!is.null(depPath)) {
       shinyjs::show("progressOne")
+      files <- list.files(depPath, all.files=F, recursive=T, include.dirs=T)
+      sapply(files,FUN=function(eachPath){
+        if (substrRight(eachPath,4) == ".wav") {
+          fileName <- paste0(depPath,"/",eachPath)
+          fileType <- substrRight(eachPath,4)
+          timeStringLength <- regexpr('_.*__', eachPath)
+          matchedString <- timeStringLength + attr(timeStringLength, "match.length")-1
+          fileTime <- substr(eachPath, timeStringLength+1, matchedString-1)
+          fileNameCountRemoved <- gsub(fileTime,"_",eachPath, fixed = TRUE)
+          updatedFileName1 <- sub("_", "",fileNameCountRemoved, fixed = TRUE)
+          updatedWavFileName <- sub("_", "",updatedFileName1, fixed = TRUE)
+          updatedWavFilePath <- paste0(depPath,"/",updatedWavFileName)
+          file.rename(fileName,updatedWavFilePath)
+        }
+      })
       create_directory_tree(depPath)
       load("www/dir_tree.Rdata")
       output$tree <- renderTree(tree, quoted = FALSE)
@@ -595,12 +611,14 @@ shinyServer(function(input, output, session) {
       shinyjs::hide("time-box-container", anim = TRUE)
       spectroClipMin <<- round(input$plot_brush$xmin, digits = 2)
       spectroClipMax <<- round(input$plot_brush$xmax, digits = 2)
-      renderSpectroClip(NULL, spectroClipMin, spectroClipMax, FALSE)
+      spectroClipYMin <<- round(input$plot_brush$ymin, digits = 2)
+      spectroClipYMax <<- round(input$plot_brush$ymax, digits = 2)
+      renderSpectroClip(NULL, spectroClipMin, spectroClipMax, spectroClipYMin, spectroClipYMax, FALSE)
     }
   });
   
   # Function to create the spectro clip after user has brushed the main plot
-  renderSpectroClip = function(sound, xMinLocal, xMaxLocal, readSequenceBool)
+  renderSpectroClip = function(sound, xMinLocal, xMaxLocal, yMinLocal, yMaxLocal, readSequenceBool)
   {
     output$spectroClip <- renderPlot({
       path <- getPath(get_selected(input$tree, "names"))
@@ -616,7 +634,7 @@ shinyServer(function(input, output, session) {
       lineSlope <<- regressionLine$coefficients[["frequencyDF$x"]]
       if(readSequenceBool)
       {
-        spectro(sound, osc = TRUE, scale = FALSE, tlim = c(xMinLocal,xMaxLocal))
+        spectro(sound, osc = TRUE, scale = FALSE, tlim = c(xMinLocal,xMaxLocal), flim = c(yMinLocal, yMaxLocal))
         abline(lm(formula = frequencyDF$y ~ frequencyDF$x), col = "red", lty = 1, lwd = 2)
         readSequenceBool <<- FALSE
         return()
@@ -624,7 +642,7 @@ shinyServer(function(input, output, session) {
       sound <- readWave(currDir)
       
       if(!is.null(xMaxLocal)) {
-        spectro(sound, f = sound@samp.rate, osc = TRUE, scale = FALSE, tlim = c(floor(xMinLocal),ceiling(xMaxLocal)))
+        spectro(sound, f = sound@samp.rate, osc = TRUE, scale = FALSE, tlim = c(floor(xMinLocal),ceiling(xMaxLocal)), flim = c(yMinLocal, yMaxLocal))
         abline(lm(formula = frequencyDF$y ~ frequencyDF$x), col = "red", lty = 1, lwd = 1)
         # Getting the duration of the clipped graph
         durationSmall <<- round(xMaxLocal - xMinLocal, digits = 1)
@@ -654,7 +672,7 @@ shinyServer(function(input, output, session) {
   
   get_frequency <- function(currDir, xMinLocal, xMaxLocal) {
     freqSound <- readWave(currDir, from = xMinLocal, to = xMaxLocal, units = c("seconds"))
-    filteredSound <- ffilter(freqSound, from = 1000, to = 6000, output = "Wave", fftw = T)
+    filteredSound <- ffilter(freqSound, from = 1000, output = "Wave", fftw = T)
     finalFreq <- dfreq(filteredSound, fftw = T, clip = 0.11, plot = F)
     df <- as.data.frame(finalFreq)
   }
@@ -1297,11 +1315,11 @@ shinyServer(function(input, output, session) {
   }
   
   findMaxAndMinFileDates = function (dateArray){
-    timeArray <<- dateArray[rev(order(as.Date(dateArray, format = "%m-%d-%Y")))]
+    timeArray <<- dateArray[rev(order(as.Date(ymd(dateArray), format = "%m-%d-%Y")))]
     # minTimeVar <<- as.POSIXct(min(timeArray), origin="1970-01-01")
     # maxTimeVar <<- as.POSIXct(max(timeArray), origin="1970-01-01")
-    minTimeVar <<- as.Date(timeArray[length(timeArray)-1])
-    maxTimeVar <<- as.Date(timeArray[1])
+    minTimeVar <<- as.Date(ymd(timeArray[length(timeArray)]))
+    maxTimeVar <<- as.Date(ymd(timeArray[2]))
     output$minTime <- renderPrint({cat(as.character(minTimeVar))})
     output$maxTime <- renderPrint({cat(as.character(maxTimeVar))})
   }
