@@ -132,7 +132,7 @@ dashboardPage(
                 div(id = "mainPlotContainer",
                     # img(src = "ajax-loader.gif", id = "plotSpinner"),
                     hidden(tags$div(id = "loadingContainer1", HTML("<i id='loadingMain' class='fa fa-spinner fa-spin' style='font-size:128px;'></i>"))),
-                    plotOutput("spectrogram", brush = brushOpts(id = "plot_brush", direction = "x", resetOnNew = TRUE, delay = 500, opacity = 0.45, stroke = "#FFD265", fill="#EEEE00"))
+                    plotOutput("spectrogram", brush = brushOpts(id = "plot_brush", direction = "xy", resetOnNew = TRUE, delay = 500, opacity = 0.45, stroke = "#FFD265", fill="#EEEE00"))
                 ),
                 div(id = "spectro-increment-container",
                     hidden(div(id = "previous-spectro-increment")),
