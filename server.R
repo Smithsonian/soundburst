@@ -407,9 +407,8 @@ shinyServer(function(input, output, session) {
     output$spectrogram <- renderPlot({
       # Path to the sound file
       currDir <- paste0(depPath, "/", unlist(get_selected(input$tree)))
-      frequencyDF <- get_frequency(currDir, 0, durationMain)
       anottationCount <<- 0
-      spectro(sound, osc = TRUE, scale = FALSE, tlim = c(spectroFromTime,spectroToTime), cont=TRUE)
+      spectro(sound, osc = FALSE, scale = FALSE, tlim = c(spectroFromTime,spectroToTime), cont=TRUE)
       shinyjs::show("complete-deployment")
       shinyjs::removeClass("loadingContainer1", "loader")
     }, res = 72, execOnResize = T)
@@ -613,8 +612,8 @@ shinyServer(function(input, output, session) {
       shinyjs::hide("time-box-container", anim = TRUE)
       spectroClipMin <<- round(input$plot_brush$xmin, digits = 2)
       spectroClipMax <<- round(input$plot_brush$xmax, digits = 2)
-      spectroClipYMin <<- round(input$plot_brush$ymin, digits = 2)
-      spectroClipYMax <<- round(input$plot_brush$ymax, digits = 2)
+      spectroClipYMin <<- input$plot_brush$ymin
+      spectroClipYMax <<- input$plot_brush$ymax
       renderSpectroClip(NULL, spectroClipMin, spectroClipMax, spectroClipYMin, spectroClipYMax, FALSE)
     }
   });
@@ -630,13 +629,13 @@ shinyServer(function(input, output, session) {
       else {
         currDir <- paste0(depPath, "/", path, unlist(get_selected(input$tree)))
       }
-      frequencyDF <- get_frequency(currDir, 0, xMaxLocal - xMinLocal)
+      frequencyDF <- get_frequency(currDir, 0, xMaxLocal - xMinLocal, yMinLocal, yMaxLocal)
       # Calculating the regression line
       regressionLine <- lm(formula = frequencyDF$y ~ frequencyDF$x)
       lineSlope <<- regressionLine$coefficients[["frequencyDF$x"]]
       if(readSequenceBool)
       {
-        spectro(sound, osc = TRUE, scale = FALSE, tlim = c(xMinLocal,xMaxLocal), flim = c(yMinLocal, yMaxLocal))
+        spectro(sound, osc = FALSE, scale = FALSE, tlim = c(xMinLocal,xMaxLocal), flim = c(yMinLocal, yMaxLocal))
         abline(lm(formula = frequencyDF$y ~ frequencyDF$x), col = "red", lty = 1, lwd = 2)
         readSequenceBool <<- FALSE
         return()
@@ -644,7 +643,7 @@ shinyServer(function(input, output, session) {
       sound <- readWave(currDir)
       
       if(!is.null(xMaxLocal)) {
-        spectro(sound, f = sound@samp.rate, osc = TRUE, scale = FALSE, tlim = c(floor(xMinLocal),ceiling(xMaxLocal)), flim = c(yMinLocal, yMaxLocal))
+        spectro(sound, f = sound@samp.rate, osc = FALSE, scale = FALSE, tlim = c(floor(xMinLocal),ceiling(xMaxLocal)), flim = c(yMinLocal, yMaxLocal))
         abline(lm(formula = frequencyDF$y ~ frequencyDF$x), col = "red", lty = 1, lwd = 1)
         # Getting the duration of the clipped graph
         durationSmall <<- round(xMaxLocal - xMinLocal, digits = 1)
@@ -659,7 +658,7 @@ shinyServer(function(input, output, session) {
       }
       xmin <<- xMinLocal
       xmax <<- xMaxLocal
-      frequencyDF <- get_frequency(currDir, xMinLocal, xMaxLocal);
+      frequencyDF <- get_frequency(currDir, xMinLocal, xMaxLocal, yMinLocal, yMaxLocal);
       # Storing some variables used for calculating the abline
       ablineY <<- frequencyDF$y
       ablineX <<- frequencyDF$x
@@ -672,9 +671,9 @@ shinyServer(function(input, output, session) {
     })
   }
   
-  get_frequency <- function(currDir, xMinLocal, xMaxLocal) {
+  get_frequency <- function(currDir, xMinLocal, xMaxLocal, yMinLocal, yMaxLocal) {
     freqSound <- readWave(currDir, from = xMinLocal, to = xMaxLocal, units = c("seconds"))
-    filteredSound <- ffilter(freqSound, from = 1000, output = "Wave", fftw = T)
+    filteredSound <- ffilter(freqSound, from = yMinLocal * 1000, to = yMaxLocal * 1000, output = "Wave", fftw = T)
     finalFreq <- dfreq(filteredSound, fftw = T, clip = 0.11, plot = F)
     df <- as.data.frame(finalFreq)
   }
