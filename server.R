@@ -629,16 +629,19 @@ shinyServer(function(input, output, session) {
       else {
         currDir <- paste0(depPath, "/", path, unlist(get_selected(input$tree)))
       }
-      frequencyDF <- get_frequency(currDir, 0, xMaxLocal - xMinLocal, yMinLocal, yMaxLocal)
-      # Calculating the regression line
-      regressionLine <- lm(formula = frequencyDF$y ~ frequencyDF$x)
-      lineSlope <<- regressionLine$coefficients[["frequencyDF$x"]]
-      if(readSequenceBool)
+      if(yMaxLocal >- 0)
       {
-        spectro(sound, osc = FALSE, scale = FALSE, tlim = c(xMinLocal,xMaxLocal), flim = c(yMinLocal, yMaxLocal))
-        abline(lm(formula = frequencyDF$y ~ frequencyDF$x), col = "red", lty = 1, lwd = 2)
-        readSequenceBool <<- FALSE
-        return()
+        frequencyDF <- get_frequency(currDir, 0, xMaxLocal - xMinLocal, yMinLocal, yMaxLocal)
+        # Calculating the regression line
+        regressionLine <- lm(formula = frequencyDF$y ~ frequencyDF$x)
+        lineSlope <<- regressionLine$coefficients[["frequencyDF$x"]]
+        if(readSequenceBool)
+        {
+          spectro(sound, osc = FALSE, scale = FALSE, tlim = c(xMinLocal,xMaxLocal), flim = c(yMinLocal, yMaxLocal))
+          abline(lm(formula = frequencyDF$y ~ frequencyDF$x), col = "red", lty = 1, lwd = 2)
+          readSequenceBool <<- FALSE
+          return()
+        }
       }
       sound <- readWave(currDir)
       
@@ -936,7 +939,7 @@ shinyServer(function(input, output, session) {
         # Creating a temp wav sound from xmin to xmax
         temp <- extractWave(sound, from = minLast, to = maxLast, xunit = "time")
         writeWave(temp, paste0(getwd(), "/www/temp.wav"))
-        renderSpectroClip(sound, minLast, maxLast, TRUE)
+        renderSpectroClip(sound, minLast, maxLast, input$plot_brush$ymin, input$plot_brush$ymax, TRUE)
         
         # Creating an audio tag holding that temp.wav file to be played
         shinyjs::show("playButtonClip",anim = FALSE)
@@ -957,7 +960,7 @@ shinyServer(function(input, output, session) {
         lineSlopeCurr <- selectedAnn$lineSlope
         typeCurr <- selectedAnn$Type
         speciesCurr <<- selectedAnn$Species
-        renderSpectroClip(sound, minCurr, maxCurr, TRUE)
+        renderSpectroClip(sound, minCurr, maxCurr, input$plot_brush$ymin, input$plot_brush$ymax, TRUE)
         
         shinyjs::html("timeMin", paste0("Start Time ",round(minCurr, digits = 2)))
         shinyjs::html("timeMax", paste0("End Time ",round(maxCurr, digits = 2)))
@@ -1247,7 +1250,7 @@ shinyServer(function(input, output, session) {
       speciesLast <- tail(selectedWav[[6]], 1)
       sound <- readWave(paste0(depPath, "/", wavFileName))
       readSequenceBool <- TRUE
-      renderSpectroClip(sound, minLast, maxLast, readSequenceBool)
+      renderSpectroClip(sound, minLast, maxLast, input$plot_brush$ymin, input$plot_brush$ymax, readSequenceBool)
       # Creating a temp wav sound from xmin to xmax
       temp <- extractWave(sound, from = minLast, to = maxLast, xunit = "time")
       # Writing it to a .wav file
