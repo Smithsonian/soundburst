@@ -725,10 +725,17 @@ shinyServer(function(input, output, session) {
   ####### Observe event for the site information at the bottom right of the app
   ######################################
   observeEvent(input$deploymentInfo, {
-    # Getting file list
-    files <- list.files(depPath, all.files=F, recursive=T, include.dirs=T)
     # Getting the site data
     data <- formDataSite()
+    if (data[[1]] != input$deployment[[1]][2][[1]]) {
+      newDepPath <- gsub(input$deployment[[1]][2][[1]],data[[1]],depPath)
+      file.rename(depPath,newDepPath)
+      depFilePath <<- gsub(depPath,newDepPath,depFilePath)
+        # paste0(depPath,"/", depFileName, ".csv")
+      depPath <<- newDepPath
+    }
+    # Getting file list
+    files <- list.files(depPath, all.files=F, recursive=T, include.dirs=T)
     if (data[[1]] == "") {
       shinyjs::show("dep-name-warning")
     } else if (data[[4]] == "") {
@@ -817,7 +824,9 @@ shinyServer(function(input, output, session) {
     file.rename(dirPath,newDirPath)
     dirPath <<- newDirPath
     write.csv(projectData, paste0(dirPath,"/",paste0('Project_', projectName,'.csv')), row.names = FALSE)
-    annotationListCsvProject <<- c(annotationListCsv, normalizePath(paste0(dirPath,"/",paste0('Project_', projectName,'.csv'))))
+    if (length(annotationListCsv) != 0) {
+      annotationListCsvProject <<- c(annotationListCsv, normalizePath(paste0(dirPath,"/",paste0('Project_', projectName,'.csv'))))
+    }
   }
   
   speciesFields <- c("speciesDropdown", "typeDropdown", "annotNotes")
