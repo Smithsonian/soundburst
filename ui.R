@@ -45,8 +45,8 @@ dashboardPage(
                           shinyFilesButton('csvFile', 'File select', 'Please select a file', FALSE),
                           div(id = "species-select-file-container",
                               hidden(div(id = "csv-info-modal-container",
-                                         div(id = "csv-info-modal", "A CSV with a list of Species has already been loaded. However, you may upload a new CSV, as long as it is in the following format"),
-                                         div(id = "csv-layout-guide", "A column must be included that contains the TYPE of animal. This columnd must be called 'Type'. Another column must include the specific SPECIES. This column must be titled 'CommonName'.")
+                                         div(id = "csv-info-modal", "A CSV with a list of Species has already been loaded. However, you may upload a new CSV, as long as it is in the following format."),
+                                         div(id = "csv-layout-guide", "A column must be included that contains the TYPE of animal. This column must be called 'Type'. Another column must include the specific SPECIES. This column must be titled 'CommonName'.")
                               ))
                           ),
                           hidden(div(id = "proj-name-warning", "Attention: Please make sure this field is filled out.")),
