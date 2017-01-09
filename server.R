@@ -629,8 +629,9 @@ shinyServer(function(input, output, session) {
       else {
         currDir <- paste0(depPath, "/", path, unlist(get_selected(input$tree)))
       }
-      if(yMaxLocal >- 0)
-      {
+      sound <- readWave(currDir)
+      
+      if(!is.null(xMaxLocal)) {
         frequencyDF <- get_frequency(currDir, 0, xMaxLocal - xMinLocal, yMinLocal, yMaxLocal)
         # Calculating the regression line
         regressionLine <- lm(formula = frequencyDF$y ~ frequencyDF$x)
@@ -642,10 +643,6 @@ shinyServer(function(input, output, session) {
           readSequenceBool <<- FALSE
           return()
         }
-      }
-      sound <- readWave(currDir)
-      
-      if(!is.null(xMaxLocal)) {
         spectro(sound, f = sound@samp.rate, osc = FALSE, scale = FALSE, tlim = c(floor(xMinLocal),ceiling(xMaxLocal)), flim = c(yMinLocal, yMaxLocal))
         abline(lm(formula = frequencyDF$y ~ frequencyDF$x), col = "red", lty = 1, lwd = 1)
         # Getting the duration of the clipped graph
@@ -859,14 +856,14 @@ shinyServer(function(input, output, session) {
       } 
       else {
         if (clipCount == 0) {
-          dataArray <- c(fileFullName, clipCount, xmin, xmax, durationSmall, dataSet[[2]], dataSet[[1]], maxFreq, minFreq, meanFreq, bandwidth, lineSlope, dataSet[[3]])
-          dataMatrix <- matrix(dataArray,ncol = 13, byrow = TRUE)
-          colnames(dataMatrix) <- c("File Name", "Annotation#","Time Min (s)", "Time Max (s)", "Duration", "Type", "Species", "Max Freq", "Min Freq", "Mean Freq", "Bandwidth", "Annotation Slope", "Annotation Notes")
+          dataArray <- c(fileFullName, clipCount, xmin, xmax, durationSmall, dataSet[[2]], dataSet[[1]], maxFreq, minFreq, meanFreq, bandwidth, lineSlope, dataSet[[3]], spectroClipYMin, spectroClipYMax)
+          dataMatrix <- matrix(dataArray,ncol = 15, byrow = TRUE)
+          colnames(dataMatrix) <- c("File Name", "Annotation#","Time Min (s)", "Time Max (s)", "Duration", "Type", "Species", "Max Freq", "Min Freq", "Mean Freq", "Bandwidth", "Annotation Slope", "Annotation Notes", "yMin", "yMax")
           dataTable <- as.table(dataMatrix)
           deploymentCSVDataTable <<- cbind(deploymentCSVDataTable, dataTable)
         } 
         else {
-          dataArray <- c(deploymentCSVDataTable[1,1], deploymentCSVDataTable[1,2], deploymentCSVDataTable[1,3], deploymentCSVDataTable[1,4], deploymentCSVDataTable[1,5], deploymentCSVDataTable[1,6], deploymentCSVDataTable[1,7], deploymentCSVDataTable[1,8], fileFullName, clipCount, spectroClipMin, spectroClipMax, durationSmall, dataSet[[2]], dataSet[[1]], maxFreq, minFreq, meanFreq, bandwidth, lineSlope, dataSet[[3]])
+          dataArray <- c(deploymentCSVDataTable[1,1], deploymentCSVDataTable[1,2], deploymentCSVDataTable[1,3], deploymentCSVDataTable[1,4], deploymentCSVDataTable[1,5], deploymentCSVDataTable[1,6], deploymentCSVDataTable[1,7], deploymentCSVDataTable[1,8], fileFullName, clipCount, spectroClipMin, spectroClipMax, durationSmall, dataSet[[2]], dataSet[[1]], maxFreq, minFreq, meanFreq, bandwidth, lineSlope, dataSet[[3]], spectroClipYMin, spectroClipYMax)
           deploymentCSVDataTable <<- rbind(deploymentCSVDataTable, dataArray)
         }
         if(newSequenceBool)
@@ -913,7 +910,7 @@ shinyServer(function(input, output, session) {
     if(input$annotationDrop != "")
     {        
       tryCatch({
-        annData <- read.csv(depFilePath)[ ,10:21]
+        annData <- read.csv(depFilePath)[ ,10:23]
       }, error=function(e) {
         print("Error with the CSV file. Error #1")
       })
@@ -932,6 +929,8 @@ shinyServer(function(input, output, session) {
         meanFreqLast <- tail(annData[[9]], 1)
         bandwidthLast <- tail(annData[[10]], 1)
         slopeLast <- tail(annData[[11]], 1)
+        csvYMin <- tail(annData[[13]], 1)
+        csvYMax <- tail(annData[[14]], 1)
         
         shinyjs::html("timeMin", paste0("Start Time ",round(minLast, digits = 2)))
         shinyjs::html("timeMax", paste0("End Time ",round(maxLast, digits = 2)))
@@ -948,7 +947,7 @@ shinyServer(function(input, output, session) {
         # Creating a temp wav sound from xmin to xmax
         temp <- extractWave(sound, from = minLast, to = maxLast, xunit = "time")
         writeWave(temp, paste0(getwd(), "/www/temp.wav"))
-        renderSpectroClip(sound, minLast, maxLast, input$plot_brush$ymin, input$plot_brush$ymax, TRUE)
+        renderSpectroClip(sound, minLast, maxLast, csvYMin, csvYMax, TRUE)
         
         # Creating an audio tag holding that temp.wav file to be played
         shinyjs::show("playButtonClip",anim = FALSE)
@@ -966,10 +965,12 @@ shinyServer(function(input, output, session) {
         minFreqCurr <- selectedAnn$Min
         meanFreqCurr <- selectedAnn$Mean.Freq
         bandwidthCurr <- selectedAnn$Bandwidth
-        lineSlopeCurr <- selectedAnn$lineSlope
+        lineSlopeCurr <- selectedAnn$Annotation.Slope
         typeCurr <- selectedAnn$Type
         speciesCurr <<- selectedAnn$Species
-        renderSpectroClip(sound, minCurr, maxCurr, input$plot_brush$ymin, input$plot_brush$ymax, TRUE)
+        csvYMin <- selectedAnn$yMin
+        csvYMax <- selectedAnn$yMax
+        renderSpectroClip(sound, minCurr, maxCurr, csvYMin, csvYMax, TRUE)
         
         shinyjs::html("timeMin", paste0("Start Time ",round(minCurr, digits = 2)))
         shinyjs::html("timeMax", paste0("End Time ",round(maxCurr, digits = 2)))
@@ -1175,9 +1176,9 @@ shinyServer(function(input, output, session) {
     csvLength <- length(deploymentCSV$Name)
     if (csvLength > 0) {
       for(i in 1:csvLength) {
-        dataArray <- c(as.character(deploymentCSV$Name[[i]]),as.character(deploymentCSV$Lat[[i]]),as.character(deploymentCSV$Lon[[i]]),as.character(deploymentCSV$Record.ID[[i]]), as.character(deploymentCSV$Site.Notes[[i]]), as.character(deploymentCSV$Start[[i]]),as.character(deploymentCSV$End[[i]]),as.character(deploymentCSV$Google.Maps[[i]]),as.character(deploymentCSV$File.Name[[i]]),as.character(deploymentCSV$Annotation.[[i]]),as.character(deploymentCSV$Time.Min..s.[[i]]),as.character(deploymentCSV$Time.Max..s.[[i]]),as.character(deploymentCSV$Duration[[i]]),as.character(deploymentCSV$Type[[i]]),as.character(deploymentCSV$Species[[i]]),as.character(deploymentCSV$Max.Freq[[i]]),as.character(deploymentCSV$Min.Freq[[i]]),as.character(deploymentCSV$Mean.Freq[[i]]),as.character(deploymentCSV$Bandwidth[[i]]), as.character(deploymentCSV$Annotation.Slope[[i]]), as.character(deploymentCSV$Annotation.Notes[[i]]))
-        dataMatrix <- matrix(dataArray,ncol = 21, byrow = TRUE)
-        colnames(dataMatrix) <- c("Name", "Lat", "Lon", "Record ID", "Site Notes", "Start", "End", "Google Maps", "File Name", "Annotation#","Time Min (s)", "Time Max (s)", "Duration", "Type", "Species", "Max Freq", "Min Freq", "Mean Freq", "Bandwidth", "Annotation Slope","Annotation Notes")
+        dataArray <- c(as.character(deploymentCSV$Name[[i]]),as.character(deploymentCSV$Lat[[i]]),as.character(deploymentCSV$Lon[[i]]),as.character(deploymentCSV$Record.ID[[i]]), as.character(deploymentCSV$Site.Notes[[i]]), as.character(deploymentCSV$Start[[i]]),as.character(deploymentCSV$End[[i]]),as.character(deploymentCSV$Google.Maps[[i]]),as.character(deploymentCSV$File.Name[[i]]),as.character(deploymentCSV$Annotation.[[i]]),as.character(deploymentCSV$Time.Min..s.[[i]]),as.character(deploymentCSV$Time.Max..s.[[i]]),as.character(deploymentCSV$Duration[[i]]),as.character(deploymentCSV$Type[[i]]),as.character(deploymentCSV$Species[[i]]),as.character(deploymentCSV$Max.Freq[[i]]),as.character(deploymentCSV$Min.Freq[[i]]),as.character(deploymentCSV$Mean.Freq[[i]]),as.character(deploymentCSV$Bandwidth[[i]]), as.character(deploymentCSV$Annotation.Slope[[i]]), as.character(deploymentCSV$Annotation.Notes[[i]]), as.character(deploymentCSV$yMin[[i]]), as.character(deploymentCSV$yMax[[i]]))
+        dataMatrix <- matrix(dataArray,ncol = 23, byrow = TRUE)
+        colnames(dataMatrix) <- c("Name", "Lat", "Lon", "Record ID", "Site Notes", "Start", "End", "Google Maps", "File Name", "Annotation#","Time Min (s)", "Time Max (s)", "Duration", "Type", "Species", "Max Freq", "Min Freq", "Mean Freq", "Bandwidth", "Annotation Slope","Annotation Notes", "yMin", "yMax")
         dataTable <- as.table(dataMatrix)
         deploymentCSVDataTable <<- rbind(deploymentCSVDataTable, dataTable)
         clipCount <<- clipCount + 1
@@ -1215,7 +1216,7 @@ shinyServer(function(input, output, session) {
     # Check if file is empty
     if("File.Name" %in% colnames(annDataFull)){
       tryCatch({
-        annData <- annDataFull[ ,9:20]
+        annData <- annDataFull[ ,9:23]
       }, error=function(e) {
         print("Error with the CSV file. Error #1")
       })
@@ -1254,12 +1255,14 @@ shinyServer(function(input, output, session) {
       meanFreqLast <- tail(selectedWav[[10]], 1)
       bandwidthLast <- tail(selectedWav[[11]], 1)
       slopeLast <- tail(selectedWav[[12]], 1)
+      csvYMin <- tail(selectedWav[[14]], 1)
+      csvYMax <- tail(selectedWav[[15]], 1)
       
       typeLast <- tail(selectedWav[[5]], 1)
       speciesLast <- tail(selectedWav[[6]], 1)
       sound <- readWave(paste0(depPath, "/", wavFileName))
       readSequenceBool <- TRUE
-      renderSpectroClip(sound, minLast, maxLast, input$plot_brush$ymin, input$plot_brush$ymax, readSequenceBool)
+      renderSpectroClip(sound, minLast, maxLast, csvYMin, csvYMax, readSequenceBool)
       # Creating a temp wav sound from xmin to xmax
       temp <- extractWave(sound, from = minLast, to = maxLast, xunit = "time")
       # Writing it to a .wav file
