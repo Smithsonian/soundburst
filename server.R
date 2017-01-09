@@ -733,8 +733,8 @@ shinyServer(function(input, output, session) {
     if (data[[1]] != input$deployment[[1]][2][[1]]) {
       newDepPath <- gsub(input$deployment[[1]][2][[1]],data[[1]],depPath)
       file.rename(depPath,newDepPath)
-      depFilePath <<- gsub(depPath,newDepPath,depFilePath)
-        # paste0(depPath,"/", depFileName, ".csv")
+      depFilePath <<- gsub(input$deployment[[1]][2][[1]],data[[1]],depFilePath)
+      # paste0(depPath,"/", depFileName, ".csv")
       depPath <<- newDepPath
     }
     # Getting file list
@@ -883,7 +883,7 @@ shinyServer(function(input, output, session) {
           write.csv(deploymentCSVDataTable,depFilePath, row.names = FALSE)
           annotationListCsv <<- normalizePath(depFilePath)
         } else {
-          write.csv(deploymentCSVDataTable, paste0(depPath,"/",paste0(newFileName,'.csv')), row.names = FALSE)
+          write.csv(deploymentCSVDataTable, normalizePath(paste0(depPath,"/",paste0(newFileName,'.csv'))), row.names = FALSE)
           annotationListCsv <<- normalizePath(paste0(depPath,"/",paste0(newFileName,'.csv')))
         }
         shinyjs::addClass('completedDepContainer', "open-accordian")
