@@ -1200,14 +1200,14 @@ shinyServer(function(input, output, session) {
           dataMatrix <- matrix(dataArray,ncol = 23, byrow = TRUE)
           colnames(dataMatrix) <- c("Name", "Lat", "Lon", "Record ID", "Site Notes", "Start", "End", "Google Maps", "File Name", "Annotation#","Time Min (s)", "Time Max (s)", "Duration", "Type", "Species", "Max Freq", "Min Freq", "Mean Freq", "Bandwidth", "Annotation Slope","Annotation Notes", "yMin", "yMax")
           dataTable <- as.table(dataMatrix)
-          deploymentCSVDataTable <<- rbind(deploymentCSVDataTable, dataTable)
+          deploymentCSVDataTable <<- rbind(dataTable)
           clipCount <<- clipCount + 1
         } else {
           dataArray <- c(as.character(deploymentCSV$Name[[i]]),as.character(deploymentCSV$Lat[[i]]),as.character(deploymentCSV$Lon[[i]]),as.character(deploymentCSV$Record.ID[[i]]), as.character(deploymentCSV$Site.Notes[[i]]), as.character(deploymentCSV$Start[[i]]),as.character(deploymentCSV$End[[i]]),as.character(deploymentCSV$Google.Maps[[i]]))
           dataMatrix <- matrix(dataArray,ncol = 8, byrow = TRUE)
           colnames(dataMatrix) <- c("Name", "Lat", "Lon", "Record ID", "Site Notes", "Start", "End", "Google Maps")
           dataTable <- as.table(dataMatrix)
-          deploymentCSVDataTable <<- rbind(deploymentCSVDataTable, dataTable)
+          deploymentCSVDataTable <<- rbind(dataTable)
         }
       }
     }
