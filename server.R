@@ -269,6 +269,7 @@ shinyServer(function(input, output, session) {
   
   observeEvent(input$deployment, {
     depPath <<- parseDirPath(root=c(home=normalizePath(dirPath)), input$deployment)
+    firstTime <<- FALSE
     if(!is.null(depPath)) {
       shinyjs::show("progressOne")
       files <- list.files(depPath, all.files=F, recursive=T, include.dirs=T)
@@ -277,27 +278,30 @@ shinyServer(function(input, output, session) {
           if (regexpr('_.*__', eachPath)[1] != -1) {
             fileName <- paste0(depPath,"/",eachPath)
             fileType <- substrRight(eachPath,4)
-            timeStringLength <- regexpr('_.*__', eachPath)
-            matchedString <- timeStringLength + attr(timeStringLength, "match.length")-1
-            fileTime <- substr(eachPath, timeStringLength+1, matchedString-1)
-            fileNameCountRemoved <- gsub(fileTime,"_",eachPath, fixed = TRUE)
-            updatedFileName1 <- sub("_", "",fileNameCountRemoved, fixed = TRUE)
-            updatedWavFileName <- sub("_", "",updatedFileName1, fixed = TRUE)
-            updatedWavFilePath <- paste0(depPath,"/",updatedWavFileName)
+            removeType <- gsub(".*__","",eachPath)
+            addProjectName <- paste0(projectName,"_", removeType)
+            # timeStringLength <- regexpr('_.*__', eachPath)
+            # matchedString <- timeStringLength + attr(timeStringLength, "match.length")-1
+            # fileTime <- substr(eachPath, timeStringLength+1, matchedString-1)
+            # fileNameCountRemoved <- gsub(fileTime,"_",eachPath, fixed = TRUE)
+            # updatedFileName1 <- sub("_", "",fileNameCountRemoved, fixed = TRUE)
+            # updatedWavFileName <- sub("_", "",updatedFileName1, fixed = TRUE)
+            updatedWavFilePath <- paste0(depPath,"/",addProjectName)
             file.rename(fileName,updatedWavFilePath)
+            firstTime <<- TRUE
           }
         }
       })
-      create_directory_tree(depPath)
-      load("www/dir_tree.Rdata")
-      output$tree <- renderTree(tree, quoted = FALSE)
+      # create_directory_tree(depPath)
+      # load("www/dir_tree.Rdata")
+      # output$tree <- renderTree(tree, quoted = FALSE)
       shinyjs::addClass("deployment", "active-button")
       deploymentName <<- gsub("^.*\\/", "", depPath)
       toggleAfterDeploymentSelect()
-      findFileInfo()
+      findFileInfo(firstTime)
       fileDate <- gsub(" ", "-",minTimeVar, fixed = TRUE)
       fileDate <- gsub(":", "-",fileDate, fixed = TRUE)
-      depFileName <- paste0(projectName,"_",deploymentName,"_",fileDate)
+      depFileName <- paste0(projectName,"_",deploymentName)
       depFilePath <<- paste0(depPath,"/", depFileName, ".csv")
       updateTextInput(session, inputId = "name", label = NULL, value = deploymentName)
       if(file.exists(paste0(depPath,"/", depFileName, ".csv"))) { # CHANGE
@@ -727,6 +731,21 @@ shinyServer(function(input, output, session) {
   observeEvent(input$deploymentInfo, {
     # Getting the site data
     data <- formDataSite()
+    files <- list.files(depPath, all.files=F, recursive=T, include.dirs=T)
+    sapply(files,FUN=function(eachPath){
+      if (substrRight(eachPath,4) == ".wav") {
+        if (!grepl(paste0("_",data[[4]],"_"),eachPath)){
+          fileName <- paste0(depPath,"/",eachPath)
+          removeProjectName <- gsub(paste0(projectName),"",eachPath)
+          addProjectNameAndDeployment <- paste0(projectName,"_",data[[4]], removeProjectName)
+          updatedWavFilePath <- paste0(depPath,"/",addProjectNameAndDeployment)
+          file.rename(fileName,updatedWavFilePath)
+        }
+      }
+    })
+    create_directory_tree(depPath)
+    load("www/dir_tree.Rdata")
+    output$tree <- renderTree(tree, quoted = FALSE)
     if (data[[1]] != input$deployment[[1]][2][[1]]) {
       newDepPath <- gsub(input$deployment[[1]][2][[1]],data[[1]],depPath)
       file.rename(depPath,newDepPath)
@@ -765,7 +784,7 @@ shinyServer(function(input, output, session) {
       fileDate <- gsub(" ", "-",data[[6]], fixed = TRUE)
       fileDate <- gsub(":", "-",fileDate, fixed = TRUE)
       # Creating a new filename out of the metadata
-      newFileName <<- paste0(projectName,"_",data[[1]],"_",fileDate)
+      newFileName <<- paste0(projectName,"_",data[[1]])
       # Checking for file duplicate
       fileNameDuplicate <- 0
       # Checking for file duplicates within that folder
@@ -1051,7 +1070,7 @@ shinyServer(function(input, output, session) {
         fileDate <- gsub(" ", "-",as.character(minTimeVar), fixed = TRUE)
         fileDate <- gsub(":", "-",fileDate, fixed = TRUE)
         # Creating a new filename out of the metadata
-        newFileName <<- paste0(projectName,"_",data[[1]],"_",fileDate)
+        newFileName <<- paste0(projectName,"_",data[[1]])
         zipName <- sub('_([^_]*)$', '', newFileName)
         currDate <- format(Sys.time(), "%Y%m%d")
         fullZipName <- paste0("/", zipName, "_", currDate)
@@ -1176,14 +1195,25 @@ shinyServer(function(input, output, session) {
     csvLength <- length(deploymentCSV$Name)
     if (csvLength > 0) {
       for(i in 1:csvLength) {
-        dataArray <- c(as.character(deploymentCSV$Name[[i]]),as.character(deploymentCSV$Lat[[i]]),as.character(deploymentCSV$Lon[[i]]),as.character(deploymentCSV$Record.ID[[i]]), as.character(deploymentCSV$Site.Notes[[i]]), as.character(deploymentCSV$Start[[i]]),as.character(deploymentCSV$End[[i]]),as.character(deploymentCSV$Google.Maps[[i]]),as.character(deploymentCSV$File.Name[[i]]),as.character(deploymentCSV$Annotation.[[i]]),as.character(deploymentCSV$Time.Min..s.[[i]]),as.character(deploymentCSV$Time.Max..s.[[i]]),as.character(deploymentCSV$Duration[[i]]),as.character(deploymentCSV$Type[[i]]),as.character(deploymentCSV$Species[[i]]),as.character(deploymentCSV$Max.Freq[[i]]),as.character(deploymentCSV$Min.Freq[[i]]),as.character(deploymentCSV$Mean.Freq[[i]]),as.character(deploymentCSV$Bandwidth[[i]]), as.character(deploymentCSV$Annotation.Slope[[i]]), as.character(deploymentCSV$Annotation.Notes[[i]]), as.character(deploymentCSV$yMin[[i]]), as.character(deploymentCSV$yMax[[i]]))
-        dataMatrix <- matrix(dataArray,ncol = 23, byrow = TRUE)
-        colnames(dataMatrix) <- c("Name", "Lat", "Lon", "Record ID", "Site Notes", "Start", "End", "Google Maps", "File Name", "Annotation#","Time Min (s)", "Time Max (s)", "Duration", "Type", "Species", "Max Freq", "Min Freq", "Mean Freq", "Bandwidth", "Annotation Slope","Annotation Notes", "yMin", "yMax")
-        dataTable <- as.table(dataMatrix)
-        deploymentCSVDataTable <<- rbind(deploymentCSVDataTable, dataTable)
-        clipCount <<- clipCount + 1
+        if (length(as.character(deploymentCSV$Annotation.[[1]])) > 0) {
+          dataArray <- c(as.character(deploymentCSV$Name[[i]]),as.character(deploymentCSV$Lat[[i]]),as.character(deploymentCSV$Lon[[i]]),as.character(deploymentCSV$Record.ID[[i]]), as.character(deploymentCSV$Site.Notes[[i]]), as.character(deploymentCSV$Start[[i]]),as.character(deploymentCSV$End[[i]]),as.character(deploymentCSV$Google.Maps[[i]]),as.character(deploymentCSV$File.Name[[i]]),as.character(deploymentCSV$Annotation.[[i]]),as.character(deploymentCSV$Time.Min..s.[[i]]),as.character(deploymentCSV$Time.Max..s.[[i]]),as.character(deploymentCSV$Duration[[i]]),as.character(deploymentCSV$Type[[i]]),as.character(deploymentCSV$Species[[i]]),as.character(deploymentCSV$Max.Freq[[i]]),as.character(deploymentCSV$Min.Freq[[i]]),as.character(deploymentCSV$Mean.Freq[[i]]),as.character(deploymentCSV$Bandwidth[[i]]), as.character(deploymentCSV$Annotation.Slope[[i]]), as.character(deploymentCSV$Annotation.Notes[[i]]), as.character(deploymentCSV$yMin[[i]]), as.character(deploymentCSV$yMax[[i]]))
+          dataMatrix <- matrix(dataArray,ncol = 23, byrow = TRUE)
+          colnames(dataMatrix) <- c("Name", "Lat", "Lon", "Record ID", "Site Notes", "Start", "End", "Google Maps", "File Name", "Annotation#","Time Min (s)", "Time Max (s)", "Duration", "Type", "Species", "Max Freq", "Min Freq", "Mean Freq", "Bandwidth", "Annotation Slope","Annotation Notes", "yMin", "yMax")
+          dataTable <- as.table(dataMatrix)
+          deploymentCSVDataTable <<- rbind(deploymentCSVDataTable, dataTable)
+          clipCount <<- clipCount + 1
+        } else {
+          dataArray <- c(as.character(deploymentCSV$Name[[i]]),as.character(deploymentCSV$Lat[[i]]),as.character(deploymentCSV$Lon[[i]]),as.character(deploymentCSV$Record.ID[[i]]), as.character(deploymentCSV$Site.Notes[[i]]), as.character(deploymentCSV$Start[[i]]),as.character(deploymentCSV$End[[i]]),as.character(deploymentCSV$Google.Maps[[i]]))
+          dataMatrix <- matrix(dataArray,ncol = 8, byrow = TRUE)
+          colnames(dataMatrix) <- c("Name", "Lat", "Lon", "Record ID", "Site Notes", "Start", "End", "Google Maps")
+          dataTable <- as.table(dataMatrix)
+          deploymentCSVDataTable <<- rbind(deploymentCSVDataTable, dataTable)
+        }
       }
     }
+    create_directory_tree(depPath)
+    load("www/dir_tree.Rdata")
+    output$tree <- renderTree(tree, quoted = FALSE)
   }
   
   writeDeploymentCSV <- function(siteDataTable) {
@@ -1301,7 +1331,7 @@ shinyServer(function(input, output, session) {
     }
   }
   
-  findFileInfo = function() {
+  findFileInfo = function(firstTime) {
     files <- list.files(depPath, all.files=F, recursive=T, include.dirs=T)
     filesArray <<- 0
     dateArray <<- 0
@@ -1311,7 +1341,13 @@ shinyServer(function(input, output, session) {
         wavFile <- substr(fileName, attr(regexpr('.*/', fileName),"match.length")+1, nchar(fileName))
         timeStringLength <- regexpr('_.*_', wavFile)
         matchedString <- timeStringLength + attr(timeStringLength, "match.length")-1
-        fileTime <- substr(wavFile, timeStringLength+1, matchedString-1)
+        fileTime <- ''
+        if(firstTime) {
+          fileTime <- substr(wavFile, timeStringLength+1, matchedString-1)
+        } else {
+          string <- substr(wavFile, timeStringLength+1, matchedString-1)
+          fileTime <- gsub(".*_", "", string)
+        }
         dateArray <<- c(dateArray, fileTime)
         filesArray <<- c(filesArray, fileName)
       }
