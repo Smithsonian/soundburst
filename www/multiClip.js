@@ -8,7 +8,8 @@
     var count = jQuery(".completedBrush").length;
     jQuery("#spectrogram_brush").clone(true).prop("id", count + 1).prop("class", "completedBrush").css({'background-color':'green'}).appendTo("#spectrogram");
   });
-
+    
+    
   jQuery(document).on('click', '.removeAnn', function(e) {
     var id = jQuery(this).parent()[0].id;
     jQuery("#spectrogram #" + id).remove();
