@@ -4,7 +4,6 @@ library(shinyTree)
 library(shinyjs)
 library(shinyFiles)
 library(shinyBS)
-library(V8)
 # source("customHeader.r")
 
 # species <- read.csv("www/species-short.csv", header = TRUE)
