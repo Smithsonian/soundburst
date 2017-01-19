@@ -315,97 +315,97 @@ shinyServer(function(input, output, session) {
   ###########################
   ##### Listener for file selection in "Select Sequence"
   ###########################
-  observeEvent(unlist(get_selected(input$tree)), {
-    # Plot main spectrogram
-    shinyjs::show("loadingContainer1")
-    if (is.null(unlist(get_selected(input$tree))))
-    {
-      return()
-    }
-    else {
-      spectroFromTime <<- 0
-      # Root path of the selected file
-      path <- getPath(get_selected(input$tree, "names"))
-      # Full file path
-      currDir <- paste0(depPath, "/", path, unlist(get_selected(input$tree)))
-      fileType <- substrRight(currDir,4)
-      if (fileType != ".wav") {
-        return()
-      } else {
-        # Reading the sound file
-        sound <- readWave(currDir)
-        # Duration of the sound file
-        durationMain <<- seewave::duration(sound)
-        # Storing the start and end time of the wave file in seconds
-        l <- length(sound)
-        sr <- sound@samp.rate
-        soundDuration <- round(l/sr,2)
-        # TODO Maybe make a function out of this? Might make the code cleaner
-        newSequenceBool <<- TRUE
-        if (soundDuration > 59) {
-          minuteDuration <- round(soundDuration/60)
-          shinyjs::html("time-box-label", paste0("This file is ", minuteDuration, " minutes long. <br> Would you like to increment the display?"))
-          shinyjs::show("time-box-container", anim = TRUE)
-          
-          # Listener for "Select a Sequence"
-          observeEvent(input$spectroTimeSubmit, {
-            # Getting the increment amount
-            incrementAmount <<- as.numeric(input$spectroEndTime) * 60
-            spectroToTime <<- incrementAmount
-            if (file.exists(depFilePath)) {
-              shinyjs::addClass("loadingContainer1", "loader")
-              readSequenceCSV(unlist(get_selected(input$tree)))
-              df <- species()
-              itemsType <<- c('Select Species',as.character(df[[1]]))
-              itemsSpecies <<- c('Select Type',as.character(df[[3]]))
-              updateSelectizeInput(session, "typeDropdown", label = "Type*", choices =  itemsSpecies)
-              updateSelectizeInput(session, "speciesDropdown", label = "Species*", choices =  itemsType)
-            }
-            file.copy(currDir, paste0(getwd(), "/www"))
-            shinyjs::html(id = "playButton", paste0(html = '<audio controls preload="auto"><source src="', unlist(get_selected(input$tree)), '" type="audio/wav"></audio>'))
-            renderSpectro(sound)
-            if (soundDuration > incrementAmount) {
-              shinyjs::show("spectro-increment-container")
-              shinyjs::show("next-spectro-increment")
-            }
-            shinyjs::show("playButton",anim = FALSE)
-          })
-          observeEvent(input$noTimeSubmission,{
-            if (file.exists(depFilePath)) {
-              sound <- readWave(paste0(depPath, "/", unlist(get_selected(input$tree))))
-              soundLength <- seewave::duration(sound)
-              spectroToTime <<- soundLength
-              shinyjs::addClass("loadingContainer1", "loader")
-              df <- species()
-              itemsType <<- c('Select Species',as.character(df[[1]]))
-              itemsSpecies <<- c('Select Type',as.character(df[[3]]))
-              updateSelectizeInput(session, "typeDropdown", label = "Type*", choices =  itemsSpecies)
-              updateSelectizeInput(session, "speciesDropdown", label = "Species*", choices =  itemsType)
-              readSequenceCSV(unlist(get_selected(input$tree)))  
-            }
-            spectroToTime <<- soundDuration
-            renderSpectro(sound)
-            shinyjs::show("playButton",anim = FALSE)
-            file.copy(currDir, paste0(getwd(), "/www"))
-            shinyjs::html(id = "playButton", paste0(html = '<audio controls preload="auto"><source src="', unlist(get_selected(input$tree)), '" type="audio/wav"></audio>'))
-            shinyjs::removeClass("loadingContainer1", "loader")
-          })
-        } 
-        else {
-          spectroToTime <<- soundDuration
-          renderSpectro(sound)
-          shinyjs::show("playButton",anim = FALSE)
-        }
-        shinyjs::show("content-id")
-        if(!is.null(newName)) {
-          shinyjs::html("titleHeader",newName)
-        }
-        else {
-          shinyjs::html("titleHeader",unlist(get_selected(input$tree)))
-        }
-      }
-    }
-  })
+  # observeEvent(unlist(get_selected(input$tree)), {
+  #   # Plot main spectrogram
+  #   shinyjs::show("loadingContainer1")
+  #   if (is.null(unlist(get_selected(input$tree))))
+  #   {
+  #     return()
+  #   }
+  #   else {
+  #     spectroFromTime <<- 0
+  #     # Root path of the selected file
+  #     path <- getPath(get_selected(input$tree, "names"))
+  #     # Full file path
+  #     currDir <- paste0(depPath, "/", path, unlist(get_selected(input$tree)))
+  #     fileType <- substrRight(currDir,4)
+  #     if (fileType != ".wav") {
+  #       return()
+  #     } else {
+  #       # Reading the sound file
+  #       sound <- readWave(currDir)
+  #       # Duration of the sound file
+  #       durationMain <<- seewave::duration(sound)
+  #       # Storing the start and end time of the wave file in seconds
+  #       l <- length(sound)
+  #       sr <- sound@samp.rate
+  #       soundDuration <- round(l/sr,2)
+  #       # TODO Maybe make a function out of this? Might make the code cleaner
+  #       newSequenceBool <<- TRUE
+  #       if (soundDuration > 59) {
+  #         minuteDuration <- round(soundDuration/60)
+  #         shinyjs::html("time-box-label", paste0("This file is ", minuteDuration, " minutes long. <br> Would you like to increment the display?"))
+  #         shinyjs::show("time-box-container", anim = TRUE)
+  #         
+  #         # Listener for "Select a Sequence"
+  #         observeEvent(input$spectroTimeSubmit, {
+  #           # Getting the increment amount
+  #           incrementAmount <<- as.numeric(input$spectroEndTime) * 60
+  #           spectroToTime <<- incrementAmount
+  #           if (file.exists(depFilePath)) {
+  #             shinyjs::addClass("loadingContainer1", "loader")
+  #             readSequenceCSV(unlist(get_selected(input$tree)))
+  #             df <- species()
+  #             itemsType <<- c('Select Species',as.character(df[[1]]))
+  #             itemsSpecies <<- c('Select Type',as.character(df[[3]]))
+  #             updateSelectizeInput(session, "typeDropdown", label = "Type*", choices =  itemsSpecies)
+  #             updateSelectizeInput(session, "speciesDropdown", label = "Species*", choices =  itemsType)
+  #           }
+  #           file.copy(currDir, paste0(getwd(), "/www"))
+  #           shinyjs::html(id = "playButton", paste0(html = '<audio controls preload="auto"><source src="', unlist(get_selected(input$tree)), '" type="audio/wav"></audio>'))
+  #           renderSpectro(sound)
+  #           if (soundDuration > incrementAmount) {
+  #             shinyjs::show("spectro-increment-container")
+  #             shinyjs::show("next-spectro-increment")
+  #           }
+  #           shinyjs::show("playButton",anim = FALSE)
+  #         })
+  #         observeEvent(input$noTimeSubmission,{
+  #           if (file.exists(depFilePath)) {
+  #             sound <- readWave(paste0(depPath, "/", unlist(get_selected(input$tree))))
+  #             soundLength <- seewave::duration(sound)
+  #             spectroToTime <<- soundLength
+  #             shinyjs::addClass("loadingContainer1", "loader")
+  #             df <- species()
+  #             itemsType <<- c('Select Species',as.character(df[[1]]))
+  #             itemsSpecies <<- c('Select Type',as.character(df[[3]]))
+  #             updateSelectizeInput(session, "typeDropdown", label = "Type*", choices =  itemsSpecies)
+  #             updateSelectizeInput(session, "speciesDropdown", label = "Species*", choices =  itemsType)
+  #             readSequenceCSV(unlist(get_selected(input$tree)))  
+  #           }
+  #           spectroToTime <<- soundDuration
+  #           renderSpectro(sound)
+  #           shinyjs::show("playButton",anim = FALSE)
+  #           file.copy(currDir, paste0(getwd(), "/www"))
+  #           shinyjs::html(id = "playButton", paste0(html = '<audio controls preload="auto"><source src="', unlist(get_selected(input$tree)), '" type="audio/wav"></audio>'))
+  #           shinyjs::removeClass("loadingContainer1", "loader")
+  #         })
+  #       } 
+  #       else {
+  #         spectroToTime <<- soundDuration
+  #         renderSpectro(sound)
+  #         shinyjs::show("playButton",anim = FALSE)
+  #       }
+  #       shinyjs::show("content-id")
+  #       if(!is.null(newName)) {
+  #         shinyjs::html("titleHeader",newName)
+  #       }
+  #       else {
+  #         shinyjs::html("titleHeader",unlist(get_selected(input$tree)))
+  #       }
+  #     }
+  #   }
+  # }, autoDestroy = FALSE)
   
   renderSpectro = function (sound){
     output$spectrogram <- renderPlot({
@@ -746,6 +746,101 @@ shinyServer(function(input, output, session) {
     create_directory_tree(depPath)
     load("www/dir_tree.Rdata")
     output$tree <- renderTree(tree, quoted = FALSE)
+    observeEvent(unlist(get_selected(input$tree)), {
+      # Plot main spectrogram
+      shinyjs::show("loadingContainer1")
+      if (is.null(unlist(get_selected(input$tree))))
+      {
+        return()
+      }
+      else {
+        spectroFromTime <<- 0
+        # Root path of the selected file
+        path <- getPath(get_selected(input$tree, "names"))
+        # Full file path
+        currDir <- paste0(depPath, "/", path, unlist(get_selected(input$tree)))
+        fileType <- substrRight(currDir,4)
+        if (fileType != ".wav") {
+          return()
+        } else {
+          # Reading the sound file
+          sound <- readWave(currDir)
+          # Duration of the sound file
+          durationMain <<- seewave::duration(sound)
+          # Storing the start and end time of the wave file in seconds
+          l <- length(sound)
+          sr <- sound@samp.rate
+          soundDuration <- round(l/sr,2)
+          # TODO Maybe make a function out of this? Might make the code cleaner
+          newSequenceBool <<- TRUE
+          if (soundDuration > 59) {
+            minuteDuration <- round(soundDuration/60)
+            shinyjs::html("time-box-label", paste0("This file is ", minuteDuration, " minutes long. <br> Would you like to increment the display?"))
+            shinyjs::show("time-box-container", anim = TRUE)
+            
+            # Listener for "Select a Sequence"
+            observeEvent(input$spectroTimeSubmit, {
+              # Getting the increment amount
+              incrementAmount <<- as.numeric(input$spectroEndTime) * 60
+              spectroToTime <<- incrementAmount
+              if (file.exists(depFilePath)) {
+                shinyjs::addClass("loadingContainer1", "loader")
+                readSequenceCSV(unlist(get_selected(input$tree)))
+                df <- species()
+                itemsType <<- c('Select Species',as.character(df[[1]]))
+                itemsSpecies <<- c('Select Type',as.character(df[[3]]))
+                updateSelectizeInput(session, "typeDropdown", label = "Type*", choices =  itemsSpecies)
+                updateSelectizeInput(session, "speciesDropdown", label = "Species*", choices =  itemsType)
+              }
+              file.copy(currDir, paste0(getwd(), "/www"))
+              shinyjs::html(id = "playButton", paste0(html = '<audio controls preload="auto"><source src="', unlist(get_selected(input$tree)), '" type="audio/wav"></audio>'))
+              renderSpectro(sound)
+              if (soundDuration > incrementAmount) {
+                shinyjs::show("spectro-increment-container")
+                shinyjs::show("next-spectro-increment")
+              }
+              shinyjs::show("playButton",anim = FALSE)
+            })
+            observeEvent(input$noTimeSubmission,{
+              if (file.exists(depFilePath)) {
+                sound <- readWave(paste0(depPath, "/", unlist(get_selected(input$tree))))
+                soundLength <- seewave::duration(sound)
+                spectroToTime <<- soundLength
+                shinyjs::addClass("loadingContainer1", "loader")
+                df <- species()
+                itemsType <<- c('Select Species',as.character(df[[1]]))
+                itemsSpecies <<- c('Select Type',as.character(df[[3]]))
+                updateSelectizeInput(session, "typeDropdown", label = "Type*", choices =  itemsSpecies)
+                updateSelectizeInput(session, "speciesDropdown", label = "Species*", choices =  itemsType)
+                readSequenceCSV(unlist(get_selected(input$tree)))  
+              }
+              spectroToTime <<- soundDuration
+              renderSpectro(sound)
+              shinyjs::show("playButton",anim = FALSE)
+              file.copy(currDir, paste0(getwd(), "/www"))
+              shinyjs::html(id = "playButton", paste0(html = '<audio controls preload="auto"><source src="', unlist(get_selected(input$tree)), '" type="audio/wav"></audio>'))
+              shinyjs::removeClass("loadingContainer1", "loader")
+            })
+          } 
+          else {
+            spectroToTime <<- soundDuration
+            renderSpectro(sound)
+            shinyjs::show("playButton",anim = FALSE)
+          }
+          shinyjs::show("content-id")
+          if(!is.null(newName)) {
+            shinyjs::html("titleHeader",newName)
+          }
+          else {
+            shinyjs::html("titleHeader",unlist(get_selected(input$tree)))
+          }
+        }
+      }
+    }, autoDestroy = FALSE)
+    if (!is.null(input$tree)){
+      # Sys.sleep(2)
+      js$fixTree()
+    }
     if (data[[1]] != input$deployment[[1]][2][[1]]) {
       newDepPath <- gsub(input$deployment[[1]][2][[1]],data[[1]],depPath)
       file.rename(depPath,newDepPath)
@@ -1214,6 +1309,113 @@ shinyServer(function(input, output, session) {
     create_directory_tree(depPath)
     load("www/dir_tree.Rdata")
     output$tree <- renderTree(tree, quoted = FALSE)
+    observeEvent(unlist(get_selected(input$tree)), {
+      # Plot main spectrogram
+      shinyjs::show("loadingContainer1")
+      if (is.null(unlist(get_selected(input$tree))))
+      {
+        return()
+      }
+      else {
+        spectroFromTime <<- 0
+        # Root path of the selected file
+        path <- getPath(get_selected(input$tree, "names"))
+        # Full file path
+        currDir <- paste0(depPath, "/", path, unlist(get_selected(input$tree)))
+        fileType <- substrRight(currDir,4)
+        if (fileType != ".wav") {
+          return()
+        } else {
+          # Reading the sound file
+          sound <- readWave(currDir)
+          # Duration of the sound file
+          durationMain <<- seewave::duration(sound)
+          # Storing the start and end time of the wave file in seconds
+          l <- length(sound)
+          sr <- sound@samp.rate
+          soundDuration <- round(l/sr,2)
+          # TODO Maybe make a function out of this? Might make the code cleaner
+          newSequenceBool <<- TRUE
+          if (soundDuration > 59) {
+            minuteDuration <- round(soundDuration/60)
+            shinyjs::html("time-box-label", paste0("This file is ", minuteDuration, " minutes long. <br> Would you like to increment the display?"))
+            shinyjs::show("time-box-container", anim = TRUE)
+
+            # Listener for "Select a Sequence"
+            observeEvent(input$spectroTimeSubmit, {
+              # Getting the increment amount
+              incrementAmount <<- as.numeric(input$spectroEndTime) * 60
+              spectroToTime <<- incrementAmount
+              if (file.exists(depFilePath)) {
+                shinyjs::addClass("loadingContainer1", "loader")
+                readSequenceCSV(unlist(get_selected(input$tree)))
+                df <- species()
+                itemsType <<- c('Select Species',as.character(df[[1]]))
+                itemsSpecies <<- c('Select Type',as.character(df[[3]]))
+                updateSelectizeInput(session, "typeDropdown", label = "Type*", choices =  itemsSpecies)
+                updateSelectizeInput(session, "speciesDropdown", label = "Species*", choices =  itemsType)
+              }
+              file.copy(currDir, paste0(getwd(), "/www"))
+              shinyjs::html(id = "playButton", paste0(html = '<audio controls preload="auto"><source src="', unlist(get_selected(input$tree)), '" type="audio/wav"></audio>'))
+              renderSpectro(sound)
+              if (soundDuration > incrementAmount) {
+                shinyjs::show("spectro-increment-container")
+                shinyjs::show("next-spectro-increment")
+              }
+              shinyjs::show("playButton",anim = FALSE)
+            })
+            observeEvent(input$noTimeSubmission,{
+              if (file.exists(depFilePath)) {
+                sound <- readWave(paste0(depPath, "/", unlist(get_selected(input$tree))))
+                soundLength <- seewave::duration(sound)
+                spectroToTime <<- soundLength
+                shinyjs::addClass("loadingContainer1", "loader")
+                df <- species()
+                itemsType <<- c('Select Species',as.character(df[[1]]))
+                itemsSpecies <<- c('Select Type',as.character(df[[3]]))
+                updateSelectizeInput(session, "typeDropdown", label = "Type*", choices =  itemsSpecies)
+                updateSelectizeInput(session, "speciesDropdown", label = "Species*", choices =  itemsType)
+                readSequenceCSV(unlist(get_selected(input$tree)))
+              }
+              spectroToTime <<- soundDuration
+              renderSpectro(sound)
+              shinyjs::show("playButton",anim = FALSE)
+              file.copy(currDir, paste0(getwd(), "/www"))
+              shinyjs::html(id = "playButton", paste0(html = '<audio controls preload="auto"><source src="', unlist(get_selected(input$tree)), '" type="audio/wav"></audio>'))
+              shinyjs::removeClass("loadingContainer1", "loader")
+            })
+          }
+          else {
+            spectroToTime <<- soundDuration
+            renderSpectro(sound)
+            shinyjs::show("playButton",anim = FALSE)
+          }
+          shinyjs::show("content-id")
+          if(!is.null(newName)) {
+            shinyjs::html("titleHeader",newName)
+          }
+          else {
+            shinyjs::html("titleHeader",unlist(get_selected(input$tree)))
+          }
+        }
+      }
+    }, autoDestroy = FALSE)
+    if (!is.null(input$tree)){
+      # Sys.sleep(2)
+      js$fixTree()
+    }
+  #   load("www/dir_tree.Rdata")
+  #   output$tree <- renderTree(tree, quoted = FALSE)
+  # }
+    # load("www/dir_tree.Rdata")
+    # output$tree <- renderTree(tree, quoted = FALSE)
+    # observeEvent(input$tree[1], {
+    #   print('stop me')
+    # }, autoDestroy = FALSE)
+    # if (!is.null(input$tree)){
+    #   # Sys.sleep(2)
+    #   js$fixTree()
+    # }
   }
   
   writeDeploymentCSV <- function(siteDataTable) {

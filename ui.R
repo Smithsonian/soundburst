@@ -4,23 +4,14 @@ library(shinyTree)
 library(shinyjs)
 library(shinyFiles)
 library(shinyBS)
+library(V8)
 # source("customHeader.r")
 
 # species <- read.csv("www/species-short.csv", header = TRUE)
 # itemsSpecies <<- c('Select Type',as.character(species$CommonName))
 # speciesType <<- c('Select Type',as.character(species$Type))
 
-jscode <- "
-shinyjs.addClickListener = function(params) {
-var defaultParams = {
-id : null
-};
-params = shinyjs.getParams(params, defaultParams);
-$('#params.id').click(function() {
-$('#spectrogram_brush').clone(true).prop('id', count + 1).prop('class', 'completedBrush').css({'background-color':'green'}).appendTo('#spectrogram')
-});
-}
-"
+jsCode <- "shinyjs.fixTree = function(){setTimeout(function(){ Shiny.unbindAll();Shiny.bindAll();console.log('bind & unbind');}, 3000)}"
 
 dashboardPage(
   dashboardHeader(title = "SoundBurst App"),
@@ -38,6 +29,7 @@ dashboardPage(
                shinyDirButton('directory', class = 'inactive-button', 'Folder select', 'Please select a folder')
            ),
            useShinyjs(),
+           extendShinyjs(text = jsCode),
            div(id = "full-project-info-container",
                div(id = "enter-project-info-label", class = "closed-accordian unfinished-step", "Enter Project Info"),
                hidden(div(id = "project-info-container",
@@ -139,6 +131,7 @@ dashboardPage(
                     hidden(div(id = "next-spectro-increment"))
                 ),
                 useShinyjs(),
+                extendShinyjs(text = jsCode),
                 fluidRow(
                   column(width = 8, id = "oscillo-clip-container",
                          hidden(div(id = "playButtonClip")),
