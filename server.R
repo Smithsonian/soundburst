@@ -1043,6 +1043,7 @@ shinyServer(function(input, output, session) {
         meanFreqLast <- tail(annData[[9]], 1)
         bandwidthLast <- tail(annData[[10]], 1)
         slopeLast <- tail(annData[[11]], 1)
+        annLast <- tail(annData[[12]], 1)
         csvYMin <- tail(annData[[13]], 1)
         csvYMax <- tail(annData[[14]], 1)
         
@@ -1057,6 +1058,7 @@ shinyServer(function(input, output, session) {
         updateSelectizeInput(session, "typeDropdown", label = "Type*", choices =  itemsSpecies, selected = as.character(tail(annData[[5]], 1)))
         filteredSpecies <- filterSpecies(as.character(tail(annData[[5]], 1)), annCount)
         updateSelectizeInput(session, "speciesDropdown", label = "Species*", choices =  filteredSpecies$Common.Name, selected = as.character(tail(annData[[6]], 1)))
+        updateTextAreaInput(session, 'annotNotes', value = annLast)
         
         # Creating a temp wav sound from xmin to xmax
         temp <- extractWave(sound, from = minLast, to = maxLast, xunit = "time")
@@ -1082,6 +1084,7 @@ shinyServer(function(input, output, session) {
         lineSlopeCurr <- selectedAnn$Annotation.Slope
         typeCurr <- selectedAnn$Type
         speciesCurr <<- selectedAnn$Species
+        annNotes <- selectedAnn$Annotation.Notes
         csvYMin <- selectedAnn$yMin
         csvYMax <- selectedAnn$yMax
         renderSpectroClip(sound, minCurr, maxCurr, csvYMin, csvYMax, TRUE)
@@ -1097,6 +1100,8 @@ shinyServer(function(input, output, session) {
         updateSelectizeInput(session, "typeDropdown", label = "Type*", choices =  itemsSpecies, selected = as.character(typeCurr))
         filteredSpecies <- filterSpecies(as.character(typeCurr), annCount)
         updateSelectizeInput(session, "speciesDropdown", label = "Species*", choices = filteredSpecies$Common.Name, selected = as.character(speciesCurr))
+        updateTextAreaInput(session, 'annotNotes', value = annNotes)
+        
         # Creating a temp wav sound from xmin to xmax
         temp <- extractWave(sound, from = minCurr, to = maxCurr, xunit = "time")
         # Writing it to a .wav file
@@ -1110,7 +1115,7 @@ shinyServer(function(input, output, session) {
   })
   
   filterSpecies = function(typeCurr, count) {
-    if(is.null(typeCurr) || typeCurr != "Select Type")
+    if(is.null(typeCurr) || length(typeCurr) == 0 || typeCurr != "Select Type")
     {
       speciesList <- species()
       speciesDF <- as.data.frame(speciesList)
@@ -1295,14 +1300,22 @@ shinyServer(function(input, output, session) {
           dataMatrix <- matrix(dataArray,ncol = 23, byrow = TRUE)
           colnames(dataMatrix) <- c("Name", "Lat", "Lon", "Record ID", "Site Notes", "Start", "End", "Google Maps", "File Name", "Annotation#","Time Min (s)", "Time Max (s)", "Duration", "Type", "Species", "Max Freq", "Min Freq", "Mean Freq", "Bandwidth", "Annotation Slope","Annotation Notes", "yMin", "yMax")
           dataTable <- as.table(dataMatrix)
-          deploymentCSVDataTable <<- rbind(dataTable)
+          if(is.null(deploymentCSVDataTable)) {
+            deploymentCSVDataTable <<- rbind(dataTable)
+          } else {
+            deploymentCSVDataTable <<- rbind(deploymentCSVDataTable, dataArray)
+          }
           clipCount <<- clipCount + 1
         } else {
           dataArray <- c(as.character(deploymentCSV$Name[[i]]),as.character(deploymentCSV$Lat[[i]]),as.character(deploymentCSV$Lon[[i]]),as.character(deploymentCSV$Record.ID[[i]]), as.character(deploymentCSV$Site.Notes[[i]]), as.character(deploymentCSV$Start[[i]]),as.character(deploymentCSV$End[[i]]),as.character(deploymentCSV$Google.Maps[[i]]))
           dataMatrix <- matrix(dataArray,ncol = 8, byrow = TRUE)
           colnames(dataMatrix) <- c("Name", "Lat", "Lon", "Record ID", "Site Notes", "Start", "End", "Google Maps")
           dataTable <- as.table(dataMatrix)
-          deploymentCSVDataTable <<- rbind(dataTable)
+          if(is.null(deploymentCSVDataTable)) {
+            deploymentCSVDataTable <<- rbind(dataTable)
+          } else {
+            deploymentCSVDataTable <<- rbind(deploymentCSVDataTable, dataArray)
+          }
         }
       }
     }
