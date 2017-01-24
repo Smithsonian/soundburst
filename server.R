@@ -749,6 +749,8 @@ shinyServer(function(input, output, session) {
     load("www/dir_tree.Rdata")
     output$tree <- renderTree(tree, quoted = FALSE)
     observeEvent(unlist(get_selected(input$tree)), {
+      shinyjs::hide("next-spectro-increment")
+      shinyjs::hide("spectro-increment-container")
       # Plot main spectrogram
       shinyjs::show("loadingContainer1")
       if (is.null(unlist(get_selected(input$tree))))
@@ -816,6 +818,8 @@ shinyServer(function(input, output, session) {
                 updateSelectizeInput(session, "speciesDropdown", label = "Species*", choices =  itemsType)
                 readSequenceCSV(unlist(get_selected(input$tree)))  
               }
+              shinyjs::hide("spectro-increment-container")
+              shinyjs::hide("next-spectro-increment")
               spectroToTime <<- soundDuration
               renderSpectro(sound)
               shinyjs::show("playButton",anim = FALSE)
@@ -1131,7 +1135,8 @@ shinyServer(function(input, output, session) {
     if(alreadyAnnotated || alreadyAnnotatedCount < 2) {
       alreadyAnnotated <<- FALSE
       alreadyAnnotatedCount <<- alreadyAnnotatedCount + 1
-    } else{
+    } else if (!alreadyAnnotated || alreadyAnnotatedCount >= 2){
+      alreadyAnnotated <<- FALSE
       alreadyAnnotatedCount <<- alreadyAnnotatedCount + 1
       filteredSpecies <- filterSpecies(input$typeDropdown, annCount)
       currentSelectedSpecies <- trimws(head(strsplit(input$annotationDrop,split = " at ")[[1]],2)[1], which = "both")
@@ -1386,6 +1391,8 @@ shinyServer(function(input, output, session) {
               shinyjs::show("playButton",anim = FALSE)
             })
             observeEvent(input$noTimeSubmission,{
+              shinyjs::hide("spectro-increment-container")
+              shinyjs::hide("next-spectro-increment")
               if (file.exists(depFilePath)) {
                 sound <- readWave(paste0(depPath, "/", unlist(get_selected(input$tree))))
                 soundLength <- seewave::duration(sound)
