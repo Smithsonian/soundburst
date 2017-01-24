@@ -38,6 +38,8 @@ annotationListCsvProject <<- vector()
 progressValue <<- reactiveValues()
 progressValue$one <<- 0
 projectFileCountGlobal <<- 0
+alreadyAnnotated <<- FALSE
+alreadyAnnotatedCount <<- 0
 
 
 # This is used to connect correctly with AWS
@@ -1054,12 +1056,12 @@ shinyServer(function(input, output, session) {
         shinyjs::html("meanFreq", paste0("Mean ",meanFreqLast))
         shinyjs::html("bandwidth", paste0("Bandwidth ",bandwidthLast))
         shinyjs::html("slope", paste0("Slope ",slopeLast))
-        
+        alreadyAnnotated <<- TRUE
         updateSelectizeInput(session, "typeDropdown", label = "Type*", choices =  itemsSpecies, selected = as.character(tail(annData[[5]], 1)))
         filteredSpecies <- filterSpecies(as.character(tail(annData[[5]], 1)), annCount)
-        updateSelectizeInput(session, "speciesDropdown", label = "Species*", choices =  filteredSpecies$Common.Name, selected = as.character(tail(annData[[6]], 1)))
+        updateSelectizeInput(session, "speciesDropdown", label = "Species*", choices =  as.character(filteredSpecies$Common.Name), selected = as.character(tail(annData[[6]], 1)))
         updateTextAreaInput(session, 'annotNotes', value = annLast)
-        
+
         # Creating a temp wav sound from xmin to xmax
         temp <- extractWave(sound, from = minLast, to = maxLast, xunit = "time")
         writeWave(temp, paste0(getwd(), "/www/temp.wav"))
@@ -1096,10 +1098,10 @@ shinyServer(function(input, output, session) {
         shinyjs::html("meanFreq", paste0("Mean ", meanFreqCurr))
         shinyjs::html("bandwidth", paste0("Bandwidth ", bandwidthCurr))
         shinyjs::html("slope", paste0("Slope ", lineSlopeCurr))
-        
+        alreadyAnnotated <<- TRUE
         updateSelectizeInput(session, "typeDropdown", label = "Type*", choices =  itemsSpecies, selected = as.character(typeCurr))
         filteredSpecies <- filterSpecies(as.character(typeCurr), annCount)
-        updateSelectizeInput(session, "speciesDropdown", label = "Species*", choices = filteredSpecies$Common.Name, selected = as.character(speciesCurr))
+        updateSelectizeInput(session, "speciesDropdown", label = "Species*", choices = as.character(filteredSpecies$Common.Name), selected = as.character(currentSelectedSpecies))
         updateTextAreaInput(session, 'annotNotes', value = annNotes)
         
         # Creating a temp wav sound from xmin to xmax
@@ -1126,9 +1128,15 @@ shinyServer(function(input, output, session) {
   # Listener for animal Type selection dropdown
   # On change, it refreshes the species list to the its type
   observeEvent(input$typeDropdown, {
-    filteredSpecies <- filterSpecies(input$typeDropdown, annCount)
-    currentSelectedSpecies <- trimws(head(strsplit(input$annotationDrop,split = " at ")[[1]],2)[1], which = "both")
-    updateSelectizeInput(session, "speciesDropdown", label = "Species*", choices =  filteredSpecies$Common.Name)
+    if(alreadyAnnotated || alreadyAnnotatedCount < 2) {
+      alreadyAnnotated <<- FALSE
+      alreadyAnnotatedCount <<- alreadyAnnotatedCount + 1
+    } else{
+      alreadyAnnotatedCount <<- alreadyAnnotatedCount + 1
+      filteredSpecies <- filterSpecies(input$typeDropdown, annCount)
+      currentSelectedSpecies <- trimws(head(strsplit(input$annotationDrop,split = " at ")[[1]],2)[1], which = "both")
+      updateSelectizeInput(session, "speciesDropdown", label = "Species*", choices =  filteredSpecies$Common.Name)
+    }
   })
   
   ################################
