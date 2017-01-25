@@ -10,7 +10,7 @@ library(shinyBS)
 # itemsSpecies <<- c('Select Type',as.character(species$CommonName))
 # speciesType <<- c('Select Type',as.character(species$Type))
 
-jsCode <- "shinyjs.fixTree = function(){setTimeout(function(){ Shiny.unbindAll();Shiny.bindAll();console.log('bind & unbind');}, 3000)}"
+jsCode <- "shinyjs.fixTree = function(){setTimeout(function(){ Shiny.unbindAll();Shiny.bindAll();console.log('bind & unbind');}, 1000)}"
 
 dashboardPage(
   dashboardHeader(title = "SoundBurst App"),
