@@ -41,6 +41,7 @@ projectFileCountGlobal <<- 0
 alreadyAnnotated <<- FALSE
 alreadyAnnotatedCount <<- 0
 dropSubmitClicked <<- FALSE
+firstLoaded <<- TRUE
 
 
 # This is used to connect correctly with AWS
@@ -1137,6 +1138,20 @@ shinyServer(function(input, output, session) {
   # On change, it refreshes the species list to the its type
   observeEvent(input$typeDropdown, {
     if(alreadyAnnotated || alreadyAnnotatedCount < 2) {
+      skipDropdownRefresh <<- TRUE
+      if (nrow(deploymentCSVDataTable) > 0) {
+        for (i in 1:nrow(deploymentCSVDataTable)) {
+          if (deploymentCSVDataTable[i,9] == unlist(get_selected(input$tree))){
+            skipDropdownRefresh <<- FALSE
+          }
+        }
+      }
+      
+      if (!alreadyAnnotated && alreadyAnnotatedCount == 1 && skipDropdownRefresh) {
+        filteredSpecies <- filterSpecies(input$typeDropdown, annCount)
+        currentSelectedSpecies <- trimws(head(strsplit(input$annotationDrop,split = " at ")[[1]],2)[1], which = "both")
+        updateSelectizeInput(session, "speciesDropdown", label = "Species*", choices =  filteredSpecies$Common.Name)
+      }
       alreadyAnnotated <<- FALSE
       alreadyAnnotatedCount <<- alreadyAnnotatedCount + 1
       dropSubmitClicked <<- FALSE
