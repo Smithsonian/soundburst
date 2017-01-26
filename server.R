@@ -272,6 +272,9 @@ shinyServer(function(input, output, session) {
   }
   
   observeEvent(input$deployment, {
+    currAnnList <- list()
+    currAnnListGlobal <<- currAnnList
+    updateSelectizeInput(session, "annotationDrop", label = "Select an annotation", choices =  currAnnList)
     depPath <<- parseDirPath(root=c(home=normalizePath(dirPath)), input$deployment)
     firstTime <<- FALSE
     if(!is.null(depPath)) {
