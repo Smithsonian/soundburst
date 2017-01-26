@@ -1141,7 +1141,7 @@ shinyServer(function(input, output, session) {
       skipDropdownRefresh <<- TRUE
       if (nrow(deploymentCSVDataTable) > 0) {
         for (i in 1:nrow(deploymentCSVDataTable)) {
-          if (deploymentCSVDataTable[i,9] == unlist(get_selected(input$tree))){
+          if (ncol(deploymentCSVDataTable) > 8 && deploymentCSVDataTable[i,9] == unlist(get_selected(input$tree))){
             skipDropdownRefresh <<- FALSE
           }
         }
