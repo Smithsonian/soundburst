@@ -1,0 +1,9 @@
+{
+    "path" : "~/Sites/zooniverse",
+    "sortOrder" : [
+        {
+            "ascending" : true,
+            "columnIndex" : 2
+        }
+    ]
+}

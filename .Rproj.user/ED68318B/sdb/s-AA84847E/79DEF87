@@ -1,0 +1,20 @@
+{
+    "collab_server" : "",
+    "contents" : "install.packages(\"devtools\")\nlibrary(devtools)\ninstall.packages(\"shiny\")\ninstall.packages('shinyFiles')\ninstall.packages('curl')\nlibrary(curl)\ninstall.packages(\"sound\")\ninstall.packages(\"audio\")\ninstall.packages(\"httr\")\ninstall.packages(\"shinyBS\")\ninstall.packages(c(\"fftw\",\"tuneR\",\"rgl\",\"rpanel\"), repos=\"http://cran.at.r-project.org/\")\ninstall.packages(\"seewave\")\ninstall.packages(\"stringr\")\ninstall.packages(\"shinydashboard\")\ninstall_github(\"trestletech/shinyTree\")\ninstall.packages(\"shinyjs\")\ninstall.packages(\"lubridate\")\n# Installing the same package twice, this is apparently normal\ninstall_github(\"cloudyr/aws.s3\")\ninstall.packages(\"aws.s3\", repos = c(\"cloudyr\" = \"http://cloudyr.github.io/drat\"), INSTALL_opts = \"--no-multiarch\")",
+    "created" : 1482258706072.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1754123825",
+    "id" : "79DEF87",
+    "lastKnownWriteTime" : 1483636936,
+    "last_content_update" : 1483636936,
+    "path" : "~/Sites/zooniverse/installPackagesWin.r",
+    "project_path" : "installPackagesWin.r",
+    "properties" : {
+    },
+    "relative_order" : 4,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

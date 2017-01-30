@@ -40,6 +40,8 @@ progressValue$one <<- 0
 projectFileCountGlobal <<- 0
 alreadyAnnotated <<- FALSE
 alreadyAnnotatedCount <<- 0
+dropSubmitClicked <<- FALSE
+firstLoaded <<- TRUE
 
 
 # This is used to connect correctly with AWS
@@ -270,6 +272,9 @@ shinyServer(function(input, output, session) {
   }
   
   observeEvent(input$deployment, {
+    currAnnList <- list()
+    currAnnListGlobal <<- currAnnList
+    updateSelectizeInput(session, "annotationDrop", label = "Select an annotation", choices =  currAnnList)
     depPath <<- parseDirPath(root=c(home=normalizePath(dirPath)), input$deployment)
     firstTime <<- FALSE
     if(!is.null(depPath)) {
@@ -958,6 +963,7 @@ shinyServer(function(input, output, session) {
   
   # Adding the clip metadata to the spectrogram metadata
   observeEvent(input$speciesDropSubmit, {
+    dropSubmitClicked <<- TRUE
     fileFullName <- unlist(get_selected(input$tree))
     if (is.null(deploymentCSVDataTable) ) { #### WHY IS THIS NULL?
       if(!autoDepCSVLoad) {
@@ -1060,7 +1066,9 @@ shinyServer(function(input, output, session) {
         shinyjs::html("meanFreq", paste0("Mean ",meanFreqLast))
         shinyjs::html("bandwidth", paste0("Bandwidth ",bandwidthLast))
         shinyjs::html("slope", paste0("Slope ",slopeLast))
-        alreadyAnnotated <<- TRUE
+        if (!dropSubmitClicked) {
+          alreadyAnnotated <<- TRUE
+        }
         updateSelectizeInput(session, "typeDropdown", label = "Type*", choices =  itemsSpecies, selected = as.character(tail(annData[[5]], 1)))
         filteredSpecies <- filterSpecies(as.character(tail(annData[[5]], 1)), annCount)
         updateSelectizeInput(session, "speciesDropdown", label = "Species*", choices =  as.character(filteredSpecies$Common.Name), selected = as.character(tail(annData[[6]], 1)))
@@ -1133,14 +1141,30 @@ shinyServer(function(input, output, session) {
   # On change, it refreshes the species list to the its type
   observeEvent(input$typeDropdown, {
     if(alreadyAnnotated || alreadyAnnotatedCount < 2) {
+      skipDropdownRefresh <<- TRUE
+      if (nrow(deploymentCSVDataTable) > 0) {
+        for (i in 1:nrow(deploymentCSVDataTable)) {
+          if (ncol(deploymentCSVDataTable) > 8 && deploymentCSVDataTable[i,9] == unlist(get_selected(input$tree))){
+            skipDropdownRefresh <<- FALSE
+          }
+        }
+      }
+      
+      if (!alreadyAnnotated && alreadyAnnotatedCount == 1 && skipDropdownRefresh) {
+        filteredSpecies <- filterSpecies(input$typeDropdown, annCount)
+        currentSelectedSpecies <- trimws(head(strsplit(input$annotationDrop,split = " at ")[[1]],2)[1], which = "both")
+        updateSelectizeInput(session, "speciesDropdown", label = "Species*", choices =  filteredSpecies$Common.Name)
+      }
       alreadyAnnotated <<- FALSE
       alreadyAnnotatedCount <<- alreadyAnnotatedCount + 1
+      dropSubmitClicked <<- FALSE
     } else if (!alreadyAnnotated || alreadyAnnotatedCount >= 2){
       alreadyAnnotated <<- FALSE
       alreadyAnnotatedCount <<- alreadyAnnotatedCount + 1
       filteredSpecies <- filterSpecies(input$typeDropdown, annCount)
       currentSelectedSpecies <- trimws(head(strsplit(input$annotationDrop,split = " at ")[[1]],2)[1], which = "both")
       updateSelectizeInput(session, "speciesDropdown", label = "Species*", choices =  filteredSpecies$Common.Name)
+      dropSubmitClicked <<- FALSE
     }
   })
   
