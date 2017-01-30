@@ -1,4 +1,4 @@
-Common Name,Scientific Name,Type
+CommonName,ScientificName,Type
 American Bullfrog,Lithobates catesbeianus,Frog
 Atlantic Coast Leopard Frog,Lithobates kauffeldi,Frog
 Green Frog,Lithobates clamitans,Frog
@@ -39,7 +39,7 @@ Southeastern Big-eared Bat ,Corynorhinus rafinesquii macrotis,Bat
 Silver-haired Bat,Lasionycteris noctivagans,Bat
 Eastern Red Bat,Lasiurus borealis,Bat
 Hoary Bat,Lasiurus cinereus,Bat
-Seminole Bat,Lasiurus seminolusÊ,Bat
+Seminole Bat,Lasiurus seminolusæ,Bat
 Southeastern Bat,Myotis austroriparius,Bat
 Evening Bat,Nycticeius humeralis,Bat
 Acadian Flycatcher,Empidonax virescens,Bird

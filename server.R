@@ -1078,7 +1078,7 @@ shinyServer(function(input, output, session) {
         }
         updateSelectizeInput(session, "typeDropdown", label = "Type*", choices =  itemsSpecies, selected = as.character(tail(annData[[5]], 1)))
         filteredSpecies <- filterSpecies(as.character(tail(annData[[5]], 1)), annCount)
-        updateSelectizeInput(session, "speciesDropdown", label = "Species*", choices =  as.character(filteredSpecies$Common.Name), selected = as.character(tail(annData[[6]], 1)))
+        updateSelectizeInput(session, "speciesDropdown", label = "Species*", choices =  as.character(filteredSpecies$CommonName), selected = as.character(tail(annData[[6]], 1)))
         updateTextAreaInput(session, 'annotNotes', value = annLast)
 
         # Creating a temp wav sound from xmin to xmax
@@ -1120,7 +1120,7 @@ shinyServer(function(input, output, session) {
         alreadyAnnotated <<- TRUE
         updateSelectizeInput(session, "typeDropdown", label = "Type*", choices =  itemsSpecies, selected = as.character(typeCurr))
         filteredSpecies <- filterSpecies(as.character(typeCurr), annCount)
-        updateSelectizeInput(session, "speciesDropdown", label = "Species*", choices = as.character(filteredSpecies$Common.Name), selected = as.character(currentSelectedSpecies))
+        updateSelectizeInput(session, "speciesDropdown", label = "Species*", choices = as.character(filteredSpecies$CommonName), selected = as.character(currentSelectedSpecies))
         updateTextAreaInput(session, 'annotNotes', value = annNotes)
         
         # Creating a temp wav sound from xmin to xmax
@@ -1135,6 +1135,7 @@ shinyServer(function(input, output, session) {
     }
   })
   
+  # Filter species in dropdown depending on the species' family
   filterSpecies = function(typeCurr, count) {
     if(is.null(typeCurr) || length(typeCurr) == 0 || typeCurr != "Select Type")
     {
@@ -1160,7 +1161,7 @@ shinyServer(function(input, output, session) {
       if (!alreadyAnnotated && alreadyAnnotatedCount == 1 && skipDropdownRefresh) {
         filteredSpecies <- filterSpecies(input$typeDropdown, annCount)
         currentSelectedSpecies <- trimws(head(strsplit(input$annotationDrop,split = " at ")[[1]],2)[1], which = "both")
-        updateSelectizeInput(session, "speciesDropdown", label = "Species*", choices =  filteredSpecies$Common.Name)
+        updateSelectizeInput(session, "speciesDropdown", label = "Species*", choices =  filteredSpecies$CommonName)
       }
       alreadyAnnotated <<- FALSE
       alreadyAnnotatedCount <<- alreadyAnnotatedCount + 1
@@ -1170,7 +1171,7 @@ shinyServer(function(input, output, session) {
       alreadyAnnotatedCount <<- alreadyAnnotatedCount + 1
       filteredSpecies <- filterSpecies(input$typeDropdown, annCount)
       currentSelectedSpecies <- trimws(head(strsplit(input$annotationDrop,split = " at ")[[1]],2)[1], which = "both")
-      updateSelectizeInput(session, "speciesDropdown", label = "Species*", choices =  filteredSpecies$Common.Name)
+      updateSelectizeInput(session, "speciesDropdown", label = "Species*", choices =  filteredSpecies$CommonName)
       dropSubmitClicked <<- FALSE
     }
   })
