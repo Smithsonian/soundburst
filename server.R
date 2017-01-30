@@ -44,7 +44,6 @@ dropSubmitClicked <<- FALSE
 firstLoaded <<- TRUE
 progressBarExists <<- FALSE
 
-
 # This is used to connect correctly with AWS
 set_config( config( ssl_verifypeer = 0L ) )
 
@@ -1021,11 +1020,10 @@ shinyServer(function(input, output, session) {
         # Updating the global annotations list
         currAnnListGlobal <<- c(currAnnListGlobal, annotationList)
         updateSelectizeInput(session, "annotationDrop", label = "Select an annotation", choices =  currAnnListGlobal, selected = tail(currAnnListGlobal, 1))
-        
+        # Create some REACTIVE VALUES
+        awsProgressValue <<- reactiveValues()
         if(progressBarExists) {
           progressBarExists <<- TRUE
-          # Create some REACTIVE VALUES
-          awsProgressValue <<- reactiveValues()
           awsProgressValue$one <<- 0
           # Creating the progress bar for AWS upload
           output$awsProgress <- renderUI({
