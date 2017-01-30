@@ -231,6 +231,10 @@ label {
   padding-right: 4%;
 }
 
+#left-column-title, #enter-project-info-label, #select-dep-container, #right-column-title, #show-tree, #completedDepContainer {
+  text-align: left;
+}
+
 #tree {
   padding-top: 0;
 }
@@ -246,7 +250,11 @@ padding-bottom: 0;
   float: left;
 }
 
-#project-container, #full-project-info-container, #full-tree-container, #full-project-info-container, #completedDepContainer, #deployment-select-container {
+#completedDepContainer {
+  border: 1px solid #222D32;
+}
+
+#project-container, #full-project-info-container, #full-tree-container, #full-project-info-container, #deployment-select-container {
   text-align: center;
   border: 1px solid #222D32;
 }

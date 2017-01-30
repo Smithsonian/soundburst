@@ -24,13 +24,15 @@ dashboardPage(
            div(id = "aws-upload-container",
                hidden(actionButton("aws-upload-button", class="inactive-aws-button", "Upload to AWS"))),
            div(id = "project-container",
-               div(id = "left-column-title", class = "open-accordian unfinished-step", "Select Project"),
+               div(id = "left-column-title", class = "open-accordian unfinished-step", 
+                   span(class="dropdown-span", "Select Project")),
                shinyDirButton('directory', class = 'inactive-button', 'Folder select', 'Please select a folder')
            ),
            useShinyjs(),
            extendShinyjs(text = jsCode),
            div(id = "full-project-info-container",
-               div(id = "enter-project-info-label", class = "closed-accordian unfinished-step", "Enter Project Info"),
+               div(id = "enter-project-info-label", class = "closed-accordian unfinished-step", 
+                   span(class="dropdown-span", "Enter Project Info")),
                hidden(div(id = "project-info-container",
                           div(id = "species-file-upload", "Load New Species CSV?"),
                           shinyFilesButton('csvFile', 'File select', 'Please select a file', FALSE),
@@ -49,11 +51,13 @@ dashboardPage(
                ))
            ),
            div(id = "deployment-select-container",
-               div(id = "select-dep-container", class = "closed-accordian unfinished-step", "Select a Deployment"),
+               div(id = "select-dep-container", class = "closed-accordian unfinished-step", 
+                   span(class="dropdown-span", "Select a Deployment")),
                shinyDirButton('deployment', class = 'inactive-button', 'Folder select', 'Please select a folder')
            ),
            div(id = "full-project-info-container",
-               div(id = "right-column-title", class = "closed-accordian unfinished-step", "Enter Deployment Info"),
+               div(id = "right-column-title", class = "closed-accordian unfinished-step", 
+                   span(class="dropdown-span", "Enter Deployment Info")),
                hidden(div(id = "species-sidebox-container",
                           div(id = "species-sidebox",
                               div(id = "site-info-container",
@@ -80,7 +84,8 @@ dashboardPage(
                           )))
            ),
            div(id = "full-tree-container",
-               div(id = "show-tree", class = "closed-accordian unfinished-step", "Select a Sequence"),
+               div(id = "show-tree", class = "closed-accordian unfinished-step", 
+                   span(class="dropdown-span", "Select a Sequence")),
                shinyTree("tree"),
                hidden(div(id = "time-box-container",
                           div(id = "secondary-time-box-container",
@@ -93,7 +98,8 @@ dashboardPage(
                ))
            ),
            div(id = "completed-container",
-               div(id = "completedDepContainer", class = "closed-accordian unfinished-step", "View Annotations"),
+               div(id = "completedDepContainer", class = "closed-accordian unfinished-step", 
+                   span(class="dropdown-span", "View Annotations")),
                hidden(selectizeInput("annotationDrop", "Select an annotation", choices = NULL))
                # div(id = "listCompleted")
            ),
