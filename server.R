@@ -42,7 +42,7 @@ alreadyAnnotated <<- FALSE
 alreadyAnnotatedCount <<- 0
 dropSubmitClicked <<- FALSE
 firstLoaded <<- TRUE
-progressBarExists <<- FALSE
+progressBarDoesNotExists <<- TRUE
 
 # This is used to connect correctly with AWS
 set_config( config( ssl_verifypeer = 0L ) )
@@ -793,6 +793,13 @@ shinyServer(function(input, output, session) {
               incrementAmount <<- as.numeric(input$spectroEndTime) * 60
               spectroToTime <<- incrementAmount
               if (file.exists(depFilePath)) {
+                # Create some REACTIVE VALUES
+                awsProgressValue <<- reactiveValues()
+                awsProgressValue$one <<- 0
+                # Creating the progress bar for AWS upload
+                output$awsProgress <- renderUI({
+                  progressGroup(text = "Status",  value = awsProgressValue$one,   min = 0, max = getStatusBarCount(), color = "green")
+                })
                 shinyjs::addClass("loadingContainer1", "loader")
                 readSequenceCSV(unlist(get_selected(input$tree)))
                 df <- species()
@@ -812,6 +819,13 @@ shinyServer(function(input, output, session) {
             })
             observeEvent(input$noTimeSubmission,{
               if (file.exists(depFilePath)) {
+                # Create some REACTIVE VALUES
+                awsProgressValue <<- reactiveValues()
+                awsProgressValue$one <<- 0
+                # Creating the progress bar for AWS upload
+                output$awsProgress <- renderUI({
+                  progressGroup(text = "Status",  value = awsProgressValue$one,   min = 0, max = getStatusBarCount(), color = "green")
+                })
                 sound <- readWave(paste0(depPath, "/", unlist(get_selected(input$tree))))
                 soundLength <- seewave::duration(sound)
                 spectroToTime <<- soundLength
@@ -1020,15 +1034,10 @@ shinyServer(function(input, output, session) {
         # Updating the global annotations list
         currAnnListGlobal <<- c(currAnnListGlobal, annotationList)
         updateSelectizeInput(session, "annotationDrop", label = "Select an annotation", choices =  currAnnListGlobal, selected = tail(currAnnListGlobal, 1))
-        # Create some REACTIVE VALUES
-        awsProgressValue <<- reactiveValues()
-        if(progressBarExists) {
-          progressBarExists <<- TRUE
-          awsProgressValue$one <<- 0
-          # Creating the progress bar for AWS upload
-          output$awsProgress <- renderUI({
-            progressGroup(text = "Status",  value = awsProgressValue$one,   min = 0, max = 3, color = "green")
-          })
+
+        if(progressBarDoesNotExists) {
+          progressBarDoesNotExists <<- FALSE
+
         } else {
           updateProgressBar(getProgressBarValue() + 1)
         }
