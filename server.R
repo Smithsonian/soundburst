@@ -42,6 +42,7 @@ alreadyAnnotated <<- FALSE
 alreadyAnnotatedCount <<- 0
 dropSubmitClicked <<- FALSE
 firstLoaded <<- TRUE
+progressBarExists <<- FALSE
 
 
 # This is used to connect correctly with AWS
@@ -965,7 +966,7 @@ shinyServer(function(input, output, session) {
   observeEvent(input$speciesDropSubmit, {
     dropSubmitClicked <<- TRUE
     fileFullName <- unlist(get_selected(input$tree))
-    if (is.null(deploymentCSVDataTable) ) { #### WHY IS THIS NULL?
+    if (is.null(deploymentCSVDataTable) ) {
       if(!autoDepCSVLoad) {
         shinyjs::show("site-info-warning-container") 
       }
@@ -1002,6 +1003,7 @@ shinyServer(function(input, output, session) {
         filePathFull <- paste0(depPath,"/",fileFullName)
         # Adding the file to the list of annotated files for later zipping and S3 upload
         annotationListWav <<- c(annotationListWav, normalizePath(filePathFull))
+        # If the deployment csv already exists, add metadata to the existing csv
         if (autoDepCSVLoad) {
           write.csv(deploymentCSVDataTable,depFilePath, row.names = FALSE)
           annotationListCsv <<- normalizePath(depFilePath)
@@ -1020,13 +1022,18 @@ shinyServer(function(input, output, session) {
         currAnnListGlobal <<- c(currAnnListGlobal, annotationList)
         updateSelectizeInput(session, "annotationDrop", label = "Select an annotation", choices =  currAnnListGlobal, selected = tail(currAnnListGlobal, 1))
         
-        # Create some REACTIVE VALUES
-        awsProgressValue <<- reactiveValues()
-        awsProgressValue$one <<- 0
-        # Creating the progress bar for AWS upload
-        output$awsProgress <- renderUI({
-          progressGroup(text = "Status",  value = awsProgressValue$one,   min = 0, max = 3, color = "green")
-        })
+        if(progressBarExists) {
+          progressBarExists <<- TRUE
+          # Create some REACTIVE VALUES
+          awsProgressValue <<- reactiveValues()
+          awsProgressValue$one <<- 0
+          # Creating the progress bar for AWS upload
+          output$awsProgress <- renderUI({
+            progressGroup(text = "Status",  value = awsProgressValue$one,   min = 0, max = 3, color = "green")
+          })
+        } else {
+          updateProgressBar(getProgressBarValue() + 1)
+        }
       }
     }
   })
@@ -1318,14 +1325,24 @@ shinyServer(function(input, output, session) {
       updateTextInput(session, inputId = "recId", label = NULL, value = as.character(deploymentCSV$Record.ID[[1]]))
       shinyjs::html("siteNotes", deploymentCSV$Site.Notes[[1]])
       countAnnDone <- getStatusBarCount()
-      updateProgressBar(countAnnDone)
+      updateProgressBar(countAnnDone, TRUE)
       toggleAfterDeploymentCsvLoaded()
       autoDepCSVLoad <<- TRUE
     }
   }
   
-  updateProgressBar <- function(countAnnDone) {
-    progressValue$one <- as.numeric(countAnnDone)
+  # Update the progress bar with the passed argument (should be a number)
+  updateProgressBar <- function(countAnnDone, deploymentMeta = FALSE) {
+    # Only update the progress bar if we have an empty sequence
+    # The progress bar should only update once for each sequence.
+    if(length(input$annotationDrop) == 0 || deploymentMeta || input$annotationDrop == "") {
+      progressValue$one <- as.numeric(countAnnDone)
+    } 
+  }
+  
+  # Returns the current progress bar status/value
+  getProgressBarValue <- function() {
+    progressValue$one
   }
   
   createDataVarFromCSV = function (deploymentCSV) {
