@@ -3,6 +3,16 @@
   /*margin-left: 29%;*/
 }
 
+#header-span {
+  color: 'white' !important;
+}
+
+#header-image {
+  position: absolute;
+  right: 10px;
+  z-index: 10000;
+}
+
 #playButtonClip audio {
   width: 100%;
   /*margin-left: 23%;*/
@@ -463,6 +473,6 @@ textarea {
   font-weight: bold;
 }
 
-#site-info-warning-container {
+#site-info-warning-container, #increment-value-warning {
   color: #d62d34;
 }
