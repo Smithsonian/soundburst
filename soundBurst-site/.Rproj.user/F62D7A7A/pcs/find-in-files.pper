@@ -1,0 +1,10 @@
+{
+    "dialog-state" : {
+        "caseSensitive" : false,
+        "filePatterns" : [
+        ],
+        "path" : "~/dev/emammal-soundBurst/soundBurst-site",
+        "query" : "annotationDrop",
+        "regex" : false
+    }
+}

@@ -1,0 +1,20 @@
+{
+    "collab_server" : "",
+    "contents" : "(function() {\n  setTimeout(function() {\n    $(\".main-header\").prepend(\"<span id='titleHeader'>Welcome to the SoundBurst Application</span>\");\n    $(\".main-header\").prepend('<img id=\"header-image\" src=\"emmamal_logo.png\" alt=\"emmamal logo\" />');\n  }, 100);\n\n  //jQuery(\"#speciesDropSubmit\").click(function() {\n  jQuery(document).on('click', '#speciesDropSubmit', function(e) {\n    var count = jQuery(\".completedBrush\").length;\n    jQuery(\"#spectrogram_brush\").clone(true).prop(\"id\", count + 1).prop(\"class\", \"completedBrush\").css({'background-color':'green'}).appendTo(\"#spectrogram\");\n  });\n    \n    \n  jQuery(document).on('click', '.removeAnn', function(e) {\n    var id = jQuery(this).parent()[0].id;\n    jQuery(\"#spectrogram #\" + id).remove();\n    jQuery(\"#listCompleted #\" + id).remove();\n    var annotationNumber = id.substr(id.length - 1);\n    //var out = console.r.call('removeAnnotationFromCSV', {annotationNumber: annotationNumber});\n    //perform the request\n    var req = ocpu.rpc(\"removeAnnotationFromCSV\", {\n      annotationNumber : annotationNumber\n    }, function(output){\n      console.log(\"it works!\");\n    });\n\n    req.fail(function(){\n      alert(\"Server error: \" + req.responseText);\n    });\n\n    //after request complete, re-enable the button\n    req.always(function(){\n      alert(\"works: \" + req.responseText);\n    });\n  });\n})(jQuery);\n",
+    "created" : 1485791282826.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "3690324258",
+    "id" : "C8C238F6",
+    "lastKnownWriteTime" : 1485792174,
+    "last_content_update" : 1485792174651,
+    "path" : "~/dev/emammal-soundBurst/www/multiClip.js",
+    "project_path" : "www/multiClip.js",
+    "properties" : {
+    },
+    "relative_order" : 3,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "js"
+}
