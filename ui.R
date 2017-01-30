@@ -85,6 +85,7 @@ dashboardPage(
                hidden(div(id = "time-box-container",
                           div(id = "secondary-time-box-container",
                               HTML('<label id="time-box-label"> </label>'),
+                              hidden(div(id = "increment-value-warning", "Attention: Please make sure this field contains a value between 0 and 1.")),
                               textInput("spectroEndTime", label = NULL, placeholder = "Please enter a number between 0 and 1 if Increment"),
                               actionButton("spectroTimeSubmit", "Increment"),
                               actionButton("noTimeSubmission", "Do not Increment")
