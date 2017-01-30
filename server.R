@@ -315,6 +315,8 @@ shinyServer(function(input, output, session) {
         readDeploymentCSV(depPath, depFilePath)
         findFileCount()
         return()
+      } else {
+        
       }
     }
   })
@@ -797,9 +799,7 @@ shinyServer(function(input, output, session) {
                 awsProgressValue <<- reactiveValues()
                 awsProgressValue$one <<- 0
                 # Creating the progress bar for AWS upload
-                output$awsProgress <- renderUI({
-                  progressGroup(text = "Status",  value = awsProgressValue$one,   min = 0, max = getStatusBarCount(), color = "green")
-                })
+                findFileCount()
                 shinyjs::addClass("loadingContainer1", "loader")
                 readSequenceCSV(unlist(get_selected(input$tree)))
                 df <- species()
@@ -823,9 +823,7 @@ shinyServer(function(input, output, session) {
                 awsProgressValue <<- reactiveValues()
                 awsProgressValue$one <<- 0
                 # Creating the progress bar for AWS upload
-                output$awsProgress <- renderUI({
-                  progressGroup(text = "Status",  value = awsProgressValue$one,   min = 0, max = getStatusBarCount(), color = "green")
-                })
+                findFileCount()
                 sound <- readWave(paste0(depPath, "/", unlist(get_selected(input$tree))))
                 soundLength <- seewave::duration(sound)
                 spectroToTime <<- soundLength
@@ -1034,10 +1032,10 @@ shinyServer(function(input, output, session) {
         # Updating the global annotations list
         currAnnListGlobal <<- c(currAnnListGlobal, annotationList)
         updateSelectizeInput(session, "annotationDrop", label = "Select an annotation", choices =  currAnnListGlobal, selected = tail(currAnnListGlobal, 1))
-
+        
         if(progressBarDoesNotExists) {
           progressBarDoesNotExists <<- FALSE
-
+          
         } else {
           updateProgressBar(getProgressBarValue() + 1)
         }
@@ -1087,7 +1085,7 @@ shinyServer(function(input, output, session) {
         filteredSpecies <- filterSpecies(as.character(tail(annData[[5]], 1)), annCount)
         updateSelectizeInput(session, "speciesDropdown", label = "Species*", choices =  as.character(filteredSpecies$CommonName), selected = as.character(tail(annData[[6]], 1)))
         updateTextAreaInput(session, 'annotNotes', value = annLast)
-
+        
         # Creating a temp wav sound from xmin to xmax
         temp <- extractWave(sound, from = minLast, to = maxLast, xunit = "time")
         writeWave(temp, paste0(getwd(), "/www/temp.wav"))
@@ -1284,8 +1282,6 @@ shinyServer(function(input, output, session) {
       shinyjs::addClass("show-tree", "closed-accordian")
       shinyjs::addClass("show-tree", "completed-step")
       shinyjs::removeClass("show-tree", "open-accordian")
-    } else {
-      
     }
   }
   
@@ -1415,7 +1411,7 @@ shinyServer(function(input, output, session) {
             minuteDuration <- round(soundDuration/60)
             shinyjs::html("time-box-label", paste0("This file is ", minuteDuration, " minutes long. <br> Would you like to increment the display?"))
             shinyjs::show("time-box-container", anim = TRUE)
-
+            
             # Listener for "Select a Sequence"
             observeEvent(input$spectroTimeSubmit, {
               if (as.numeric(input$spectroEndTime) <= 0 || as.numeric(input$spectroEndTime) >= 1 || is.na(as.numeric(input$spectroEndTime))) {
@@ -1486,9 +1482,9 @@ shinyServer(function(input, output, session) {
       # Sys.sleep(2)
       js$fixTree()
     }
-  #   load("www/dir_tree.Rdata")
-  #   output$tree <- renderTree(tree, quoted = FALSE)
-  # }
+    #   load("www/dir_tree.Rdata")
+    #   output$tree <- renderTree(tree, quoted = FALSE)
+    # }
     # load("www/dir_tree.Rdata")
     # output$tree <- renderTree(tree, quoted = FALSE)
     # observeEvent(input$tree[1], {
