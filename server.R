@@ -1411,26 +1411,31 @@ shinyServer(function(input, output, session) {
 
             # Listener for "Select a Sequence"
             observeEvent(input$spectroTimeSubmit, {
-              # Getting the increment amount
-              incrementAmount <<- as.numeric(input$spectroEndTime) * 60
-              spectroToTime <<- incrementAmount
-              if (file.exists(depFilePath)) {
-                shinyjs::addClass("loadingContainer1", "loader")
-                readSequenceCSV(unlist(get_selected(input$tree)))
-                df <- species()
-                itemsType <<- c('Select Species',as.character(df[[1]]))
-                itemsSpecies <<- c('Select Type',as.character(df[[3]]))
-                updateSelectizeInput(session, "typeDropdown", label = "Type*", choices =  itemsSpecies)
-                updateSelectizeInput(session, "speciesDropdown", label = "Species*", choices =  itemsType)
+              if (as.numeric(input$spectroEndTime) <= 0 || as.numeric(input$spectroEndTime) >= 1 || is.na(as.numeric(input$spectroEndTime))) {
+                shinyjs::show("increment-value-warning")
+              } else {
+                shinyjs::hide("increment-value-warning")
+                # Getting the increment amount
+                incrementAmount <<- as.numeric(input$spectroEndTime) * 60
+                spectroToTime <<- incrementAmount
+                if (file.exists(depFilePath)) {
+                  shinyjs::addClass("loadingContainer1", "loader")
+                  readSequenceCSV(unlist(get_selected(input$tree)))
+                  df <- species()
+                  itemsType <<- c('Select Species',as.character(df[[1]]))
+                  itemsSpecies <<- c('Select Type',as.character(df[[3]]))
+                  updateSelectizeInput(session, "typeDropdown", label = "Type*", choices =  itemsSpecies)
+                  updateSelectizeInput(session, "speciesDropdown", label = "Species*", choices =  itemsType)
+                }
+                file.copy(currDir, paste0(getwd(), "/www"))
+                shinyjs::html(id = "playButton", paste0(html = '<audio controls preload="auto"><source src="', unlist(get_selected(input$tree)), '" type="audio/wav"></audio>'))
+                renderSpectro(sound)
+                if (soundDuration > incrementAmount) {
+                  shinyjs::show("spectro-increment-container")
+                  shinyjs::show("next-spectro-increment")
+                }
+                shinyjs::show("playButton",anim = FALSE)
               }
-              file.copy(currDir, paste0(getwd(), "/www"))
-              shinyjs::html(id = "playButton", paste0(html = '<audio controls preload="auto"><source src="', unlist(get_selected(input$tree)), '" type="audio/wav"></audio>'))
-              renderSpectro(sound)
-              if (soundDuration > incrementAmount) {
-                shinyjs::show("spectro-increment-container")
-                shinyjs::show("next-spectro-increment")
-              }
-              shinyjs::show("playButton",anim = FALSE)
             })
             observeEvent(input$noTimeSubmission,{
               shinyjs::hide("spectro-increment-container")

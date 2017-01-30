@@ -6,6 +6,10 @@
   width: 360px !important;
 }
 
+.dropdown-span {
+  margin-left: 10px;
+}
+
 .main-sidebar {
   max-height: 500px !important;
   overflow: scroll !important;

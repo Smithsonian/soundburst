@@ -1,6 +1,7 @@
 (function() {
   setTimeout(function() {
     $(".main-header").prepend("<span id='titleHeader'>Welcome to the SoundBurst Application</span>");
+    $(".main-header").prepend('<img id="header-image" src="emmamal_logo.png" alt="emmamal logo" />');
   }, 100);
 
   //jQuery("#speciesDropSubmit").click(function() {
