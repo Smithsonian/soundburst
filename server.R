@@ -315,8 +315,6 @@ shinyServer(function(input, output, session) {
         readDeploymentCSV(depPath, depFilePath)
         findFileCount()
         return()
-      } else {
-        
       }
     }
   })
@@ -1001,8 +999,13 @@ shinyServer(function(input, output, session) {
           deploymentCSVDataTable <<- cbind(deploymentCSVDataTable, dataTable)
         } 
         else {
+          # Reading the deployment CSV
+          csvData <- read.csv(depFilePath, stringsAsFactors=FALSE)
+          # Updating the number of annotated species
+          clipCount <<- nrow(csvData)
+          csvDataDF <- as.data.frame(csvData)
           dataArray <- c(deploymentCSVDataTable[1,1], deploymentCSVDataTable[1,2], deploymentCSVDataTable[1,3], deploymentCSVDataTable[1,4], deploymentCSVDataTable[1,5], deploymentCSVDataTable[1,6], deploymentCSVDataTable[1,7], deploymentCSVDataTable[1,8], fileFullName, clipCount, spectroClipMin, spectroClipMax, durationSmall, dataSet[[2]], dataSet[[1]], maxFreq, minFreq, meanFreq, bandwidth, lineSlope, dataSet[[3]], spectroClipYMin, spectroClipYMax)
-          deploymentCSVDataTable <<- rbind(deploymentCSVDataTable, dataArray)
+          deploymentCSVDataTable <<- rbind(csvDataDF, dataArray)
         }
         if(newSequenceBool)
         {
@@ -1033,12 +1036,12 @@ shinyServer(function(input, output, session) {
         currAnnListGlobal <<- c(currAnnListGlobal, annotationList)
         updateSelectizeInput(session, "annotationDrop", label = "Select an annotation", choices =  currAnnListGlobal, selected = tail(currAnnListGlobal, 1))
         
-        if(progressBarDoesNotExists) {
-          progressBarDoesNotExists <<- FALSE
-          
-        } else {
+        # if(progressBarDoesNotExists) {
+        #   progressBarDoesNotExists <<- FALSE
+        #   
+        # } else {
           updateProgressBar(getProgressBarValue() + 1)
-        }
+        # }
       }
     }
   })
@@ -1268,7 +1271,12 @@ shinyServer(function(input, output, session) {
     
     # Render UI output
     output$progressOne <- renderUI({
-      progressGroup(text = "Status", value = progressValue$one, min = 0, max = projectFileCount, color = "aqua")
+      if(is.numeric(getStatusBarCount())){
+        progressGroup(text = "Status", value = getStatusBarCount(), min = 0, max = projectFileCount, color = "aqua")
+      } else {
+        progressGroup(text = "Status", value = 0, min = 0, max = projectFileCount, color = "aqua")
+      }
+      
     })
   }
   
@@ -1339,8 +1347,9 @@ shinyServer(function(input, output, session) {
   updateProgressBar <- function(countAnnDone, deploymentMeta = FALSE) {
     # Only update the progress bar if we have an empty sequence
     # The progress bar should only update once for each sequence.
-    if(length(input$annotationDrop) == 0 || deploymentMeta || input$annotationDrop == "") {
+    if(length(input$annotationDrop) != 0 || deploymentMeta || input$annotationDrop == "") {
       progressValue$one <- as.numeric(countAnnDone)
+      findFileCount()
     } 
   }
   
@@ -1361,7 +1370,12 @@ shinyServer(function(input, output, session) {
           if(is.null(deploymentCSVDataTable)) {
             deploymentCSVDataTable <<- rbind(dataTable)
           } else {
-            deploymentCSVDataTable <<- rbind(deploymentCSVDataTable, dataArray)
+            # Reading the deployment CSV
+            csvData <- read.csv(depFilePath, stringsAsFactors=FALSE)
+            # Updating the number of annotated species
+            clipCount <<- nrow(csvData)
+            csvDataDF <- as.data.frame(csvData)
+            deploymentCSVDataTable <<- rbind(csvDataDF, dataArray)
           }
           clipCount <<- clipCount + 1
         } else {
@@ -1372,7 +1386,12 @@ shinyServer(function(input, output, session) {
           if(is.null(deploymentCSVDataTable)) {
             deploymentCSVDataTable <<- rbind(dataTable)
           } else {
-            deploymentCSVDataTable <<- rbind(deploymentCSVDataTable, dataArray)
+            # Reading the deployment CSV
+            csvData <- read.csv(depFilePath, stringsAsFactors=FALSE)
+            # Updating the number of annotated species
+            clipCount <<- nrow(csvData)
+            csvDataDF <- as.data.frame(csvData)
+            deploymentCSVDataTable <<- rbind(csvDataDF, dataArray)
           }
         }
       }
