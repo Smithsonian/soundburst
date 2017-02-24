@@ -3,3 +3,6 @@
 .RData
 .Ruserdata
 www/*.wav
+.Rbuildignore
+DESCRIPTION
+soundBurst-site/.DS_Store
