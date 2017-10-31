@@ -1,4 +1,10 @@
-# Install Instructions
+# Soundburst README
+
+Remote monitoring devices are evolving into an essential tool for biodiversity monitoring. In conjunction with Blue Raster, LLC, scientists at the Smithsonian Conservation Biology Institute created Soundburst, an acoustic application to rapidly process and identify species calls in sound files produced by remote sensors. Through Soundburst, we can pair acoustic recorders with eMammal cameras to monitor birds, frogs, and bats along with land-dwelling mammals. 
+
+The application was created using R and RShiny, with functions from R packages Seewave, Tuner, and Monitor. The app allows users to rename sound files, clip sound files to create files of a shorter duration, and generate spectrograms. Users can also annotate spectrograms with species identifications, and generate a csv of metadata and identifications. Finally, the user can choose to load these files to a cloud account.
+
+## Install Instructions
 
 ### Windows
 
